@@ -1,8 +1,13 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, render_template
 
-auth_bp = Blueprint("auth", __name__)
+from . import auth_bp
 
 
-@auth_bp.route("/hello", methods=["GET"])
-def hello_auth():
-    return jsonify({"message": "Hello from the Auth Blueprint!"})
+@auth_bp.get("/login")
+def login():
+    return render_template("auth/login.html")
+
+
+@auth_bp.get("/signup")
+def signup():
+    return render_template("auth/signup.html")
