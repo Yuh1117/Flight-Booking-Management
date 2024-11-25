@@ -15,15 +15,26 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/main.css') }}"
     />
+        <!-- Thêm CSS cho Swiper -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9.0.0/swiper-bundle.min.css" />
+
+    <!-- Thêm JS cho Swiper -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9.0.0/swiper-bundle.min.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <title>Pay</title>
   </head>
   <body>
     {% include 'layouts/navbar.html' %}
-    <main class="container">
+    <main class="">
       {% block content %}
       <!--  -->
       {% endblock content %}
     </main>
+    {% include 'layouts/footer.html' %}
   </body>
+
   <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </html>

@@ -1,3 +1,144 @@
-{% extends "layouts/base.html" %} {% block content %}
-<h1>This is home page</h1>
-{%endblock content %}
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="slider-layout">
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+            <!-- Slide 1 -->
+            <div class="swiper-slide">
+                <div class="slider-content-container">
+                    <img src="{{ url_for('static', filename='images/slider1.png') }}" alt="Slider Image" class="img-fluid">
+                    <div class="content">
+                        <h1>Embark on your journey to secure the ideal getaway.</h1>
+                        <p>Tempora facere doloribus id aut. Ea maiores esse accusantium laboriosam. Quos commodi non assumenda quam illum. Id omnis saepe corrupti incidunt qui sed delectus. Eaque minus ducimus ut ratione iste quod commodi et.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="swiper-slide">
+                <div class="slider-content-container">
+                    <img src="{{ url_for('static', filename='images/slider2.png') }}" alt="Slider Image" class="img-fluid">
+                    <div class="content">
+                        <h1>Effortless Booking at Your Fingertips.</h1>
+                        <p>London to Paris are 6 hours drive but we do it in 1 and a half.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-find">
+        <div class="logo-find">
+            <button class="btn btn-primary d-flex align-items-center">
+                <img src="{{ url_for('static', filename='images/vector.png') }}" alt="Icon" style="width: 30px; margin-right: 8px;">
+                Buy Tickets
+            </button>
+            
+
+        </div>
+        <div class="find">
+            <div class="form-container">
+    
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tripType" id="oneway" value="oneway">
+                            <label class="form-check-label" for="oneway">One Way</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tripType" id="roundtrip" value="roundtrip">
+                            <label class="form-check-label" for="roundtrip">Round Trip</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tripType" id="multi" value="multi">
+                            <label class="form-check-label" for="multi">Multi Destination</label>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="row g-3 align-items-end justify-content-center">
+                    <div class="col-md-2">
+                        <label for="from" class="form-label">From:</label>
+                        <select id="from" class="form-select">
+                            <option value="hcm">Hồ Chí Minh (Việt Nam)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="to" class="form-label">To:</label>
+                        <select id="to" class="form-select">
+                            <option value="hn">Hà Nội (Việt Nam)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="depart" class="form-label">Depart:</label>
+                        <input type="date" id="depart" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="return" class="form-label">Return:</label>
+                        <input type="date" id="return" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary d-flex align-items-center">
+                            Search Flights
+                            <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
+                        </button>
+                        
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<section class="why-choose-us py-5 m-5">
+    <div class="container">
+      <div class="row align-items-center">
+        <!-- Image and Card -->
+        <div class="col-md-6">
+          <div class="card">
+            <img src="path_to_image.jpg" alt="Hotel" class="card-img-top rounded-3">
+            <div class="card-body">
+              <h5 class="card-title">Culpa Est Similique</h5>
+              <p class="card-text">Rating: 4.92</p>
+              <p class="card-text"><strong>$139.00 Night</strong></p>
+              <p class="card-text"><small class="text-muted">India</small></p>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Text Section -->
+        <div class="col-md-6">
+          <h2 class="text-primary">Why Choose Us</h2>
+          <p class="lead">Tempora facere doloribus id aut. Ea maiores esse accusantium laboriosam. Quos commodi non assumenda quam illum.</p>
+          <ul>
+            <li>
+                <i class="fa-solid fa-diamond"></i>
+                Assumenda nobis sit deserunt dolorem repudiandae occaecati quisquam.
+            </li>
+            <li>
+                <i class="fa-solid fa-diamond"></i>
+                Beatae aut beatae sed aliquid et accusamus vel.
+            </li>
+            <li>
+                <i class="fa-solid fa-diamond"></i>
+                Dolores qui nihil quaerat ducimus fugit aut praesentium.
+            </li>
+            <li>
+                <i class="fa-solid fa-diamond"></i>
+                Necessitatibus ut culpa molestias deleniti porro maxime enim sed vel.
+            </li>
+
+          </ul>
+          <p class="mt-4">Earum repellendus animi asperiores mollitia harum illo quia dicta. Praesentium aperiam amet. Dolorem praesentium aspernatur ipsum dignissimos saepe tempora est.</p>
+          <div class="rating">
+            <span>⭐ 4.92</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+
+
+{% endblock content %}
+

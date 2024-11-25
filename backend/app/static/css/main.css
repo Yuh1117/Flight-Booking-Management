@@ -1,7 +1,219 @@
+/* Apply Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden; 
+}
+
 .header_brand {
   height: 47px;
 }
 
 main {
   height: 1000px;
+}
+/* footer */
+footer {
+  background-color: #121212; /* Màu nền tối */
+}
+
+footer h6 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+footer ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+footer ul li a {
+  font-size: 14px;
+  color: #ffffff; /* Màu mặc định */
+  transition: color 0.3s, background-color 0.3s; /* Thêm hiệu ứng cho nền */
+}
+
+footer ul li a:hover {
+  color: red;
+  background-color: rgba(255, 0, 0, 0.1); /* Thêm nền khi hover */
+  border-radius: 4px; /* Thêm bo góc cho liên kết khi hover */
+}
+
+footer img {
+  border-radius: 5px; /* Bo góc cho ảnh */
+}
+
+footer hr {
+  border-top: 1px solid #444;
+}
+.social {
+  padding: 8px;
+  border-radius: 50%;
+  background-color: transparent; 
+  border: 1px solid #fff; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  width: 40px; 
+  height: 40px; 
+  transition: all 0.3s ease; 
+}
+
+.social a {
+  font-size: 18px; 
+  color: #fff; 
+  text-decoration: none;
+}
+
+.social:hover {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+.custom-hr {
+  border: 0; 
+  height: 1px;
+  background-color: gray; 
+  opacity: 1; 
+}
+
+
+
+
+
+
+/* end footer */
+.btn-primary {
+  background-color: #223A60;
+  transition: background-color 0.3s ease; /* Smooth transition for the color change */
+}
+
+.btn-primary:hover {
+  background-color: #4C6E92; /* Lighter shade */
+}
+.btn:hover {
+  border: 1px solid gray; /* Adds a gray border on hover */
+}
+
+.nav-link {
+  color: #283841;
+  font-weight: 400; /* Adjusted to a valid weight */
+}
+  
+.active{
+  color: #223A60; /* Changes the active link color */
+  font-weight: 600; /* Changes the active link weight */
+}
+
+
+/* Navbar trong suốt khi không cuộn */
+.navbar-transparent {
+  background-color: transparent !important;
+  transition: background-color 0.3s ease;
+}
+
+/* Khi cuộn trang, navbar sẽ trở nên sticky và có nền màu */
+.navbar.sticky {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Thêm hiệu ứng shadow khi navbar trở thành sticky */
+.navbar.sticky {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+
+.navbar-home {
+  background-color: rgb(209, 213, 219);
+  position: absolute;
+  top: 30px;
+  left: 20px;
+  right: 20px;
+  transition: all 0.5s ease; /* Thêm hiệu ứng chuyển tiếp */
+  z-index: 9999;
+
+}
+/* .slider{
+  position: relative;
+
+}
+.content{
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  color: black;
+} */
+
+
+
+.slider-layout{
+  position: relative;
+}
+
+/* Định dạng container tổng */
+.slider-content-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Hình ảnh full-width */
+.slider-content-container img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Căn chỉnh content ở giữa */
+.slider-content-container .content {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white; /* Chữ trắng để nổi bật trên nền ảnh */
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Nền đen mờ */
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+.slider-content-container img {
+  width: 100%;
+  height: 600px; /* Hoặc bất kỳ giá trị cố định nào bạn muốn */
+  object-fit: cover; /* Giữ tỷ lệ ảnh nhưng cắt phần dư nếu không khớp */
+}
+
+
+
+.form-find {
+  width: 90%;
+  position: absolute;
+  bottom: 5%; /* Điều chỉnh để đưa lên trên */
+  left: 50%; /* Để căn giữa */
+  transform: translateX(-50%); /* Căn giữa tuyệt đối */
+  z-index: 999; 
+  
+}
+.find{
+  background-color: #ffff;
+  padding: 20px;
+  border-bottom-left-radius: 30px; /* Làm tròn góc trên bên trái */
+  border-top-right-radius: 30px; /* Làm tròn góc trên bên trái */
+  border-bottom-right-radius: 30px; /* Làm tròn góc trên bên trái */
+
+}
+
+.logo-find {
+  background-color: #ffff;
+  padding: 20px;
+
+  width: auto; /* Chiều rộng tự động theo kích thước của nội dung */
+  display: inline-block; /* Đảm bảo rằng chiều rộng phù hợp với nội dung */
+  border-top-left-radius: 30px; /* Làm tròn góc trên bên trái */
+  border-top-right-radius: 30px; /* Làm tròn góc trên bên trái */
 }
