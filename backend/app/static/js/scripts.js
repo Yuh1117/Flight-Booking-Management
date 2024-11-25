@@ -1,21 +1,25 @@
 // JavaScript scripts
 window.addEventListener('scroll', function() {
-    const navbar = document.querySelector('.navbar-home');
-    
+  const navbar = document.querySelector('.navbar-home');
+  // Kiểm tra nếu đang ở trang chủ
+  if (window.location.pathname === '/') {
     if (window.scrollY > 50) {
-      navbar.style.position = 'fixed';
-      navbar.style.top = '0';
-      navbar.style.left = '0';
-      navbar.style.right = '0';
-      navbar.classList.remove('rounded-4'); // Bỏ class rounded
+      navbar.classList.add('fixed'); // Áp dụng class fixed
+      navbar.classList.remove('rounded-4');
+      navbar.classList.remove('not-fixed'); // Loại bỏ class not-fixed
     } else {
-      navbar.style.position = 'absolute';
-      navbar.style.top = '30px';
-      navbar.style.left = '20px';
-      navbar.style.right = '20px';
+      navbar.classList.add('not-fixed'); // Áp dụng class not-fixed
+      navbar.classList.remove('fixed'); // Loại bỏ class fixed
       navbar.classList.add('rounded-4'); 
+      
     }
-  });
+  } else {
+    navbar.classList.add('fixed'); // Navbar cố định cho các trang khác
+    navbar.classList.remove('fixed'); // Loại bỏ class fixed
+    navbar.classList.remove('not-fixed');
+  }
+});
+
 
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -34,4 +38,23 @@ window.addEventListener('scroll', function() {
             disableOnInteraction: false,
         },
     });
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const swiper = new Swiper('.swiper', {
+    loop: true,
+    pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+    },
+    navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+    },
+    autoplay: {
+        delay: 2000,
+        disableOnInteraction: false,
+    },
+  });
 });

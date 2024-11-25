@@ -11,8 +11,11 @@ body {
 }
 
 main {
-  height: 1000px;
 }
+ul li {
+  list-style: none;
+}
+
 /* footer */
 footer {
   background-color: #121212; /* Màu nền tối */
@@ -126,14 +129,30 @@ footer hr {
 
 .navbar-home {
   background-color: rgb(209, 213, 219);
-  position: absolute;
+  /* position: absolute;
   top: 30px;
   left: 20px;
-  right: 20px;
-  transition: all 0.5s ease; /* Thêm hiệu ứng chuyển tiếp */
+  right: 20px; */
+  transition: transform 0.5s ease, top 0.5s ease, left 0.5s ease, right 0.5s ease; /* Chuyển tiếp mượt mà */
   z-index: 9999;
-
 }
+
+.navbar-home.fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(0); /* Di chuyển navbar khi cuộn */
+}
+
+.navbar-home.not-fixed {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  right: 20px;
+  transform: translateY(10px); /* Di chuyển navbar khi không cố định */
+}
+
 /* .slider{
   position: relative;
 
@@ -217,3 +236,139 @@ footer hr {
   border-top-left-radius: 30px; /* Làm tròn góc trên bên trái */
   border-top-right-radius: 30px; /* Làm tròn góc trên bên trái */
 }
+
+
+/* why-choose-us */
+
+
+
+
+
+.text-pink{
+  color: #C08B7D;
+}
+.why-choose-us .card-main{
+  width: 400px;
+  height: 400px;
+}
+.image-background{
+  width: 100%;
+  height: 100%;
+}
+.card-main{
+  position: relative;
+
+}
+.card-sub{
+  width: 200px;
+  padding: 10px;
+  background-color: white;
+  position: absolute;
+  top: 10%;
+  right: -20%;
+  
+}
+.card-sub img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card-sub .text-sub{
+  font-size: 12px;
+}
+/* end why-choose-us */ 
+
+
+
+
+
+/* trending destination */
+.trending-destination .card{
+  border: none;
+}
+.trending-destination .card-body {
+  transform: translateY(100%); /* Đưa ra ngoài màn hình */
+  transition: transform 0.5s ease-in-out;
+}
+
+.trending-destination .card:hover .card-body {
+  transform: translateY(0); /* Trượt lên khi di chuột */
+}
+
+/* end trending destination */
+
+
+
+/* login */
+
+.input-group input {
+  width: 100%;
+  font-size: 16px;
+  outline: none;
+  padding: 10px 15px; 
+  border: 1px solid gray;
+  border-radius: 4px;
+}
+.input-group{
+  position: relative;
+  margin-bottom: 15px;
+  
+}
+.input-group input:focus{
+  border-color: aqua;
+} 
+
+.input-group label { 
+  position: absolute;
+  cursor: text;
+  top: 50%;
+  left: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  background: #fff;
+  padding: 0 10px; 
+  color: #999;
+  transition: all .3s ease;
+  transform: translateY(-50%); /* Để căn chỉnh chính xác label */
+}
+
+.input-group input:focus + label {
+  top: -5px;
+  color: aqua;
+  font-size: 11px;
+}
+.hr-or {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.hr-or hr {
+  flex: 1;
+  border: 0;
+  border-top: 2px solid gray;
+}
+.hr-or span {
+  padding: 0 10px;
+  color: #666;
+  font-weight: bold;
+}
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 30px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  width: 250px;
+  font-size: 16px; 
+  border: 1px solid black;
+  color: black;
+}
+
+
+
+
+/* end login */
