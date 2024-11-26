@@ -35,58 +35,7 @@
             
 
         </div>
-        <div class="find">
-            <div class="form-container">
-    
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="tripType" id="oneway" value="oneway">
-                            <label class="form-check-label" for="oneway">One Way</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="tripType" id="roundtrip" value="roundtrip">
-                            <label class="form-check-label" for="roundtrip">Round Trip</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="tripType" id="multi" value="multi">
-                            <label class="form-check-label" for="multi">Multi Destination</label>
-                        </div>
-                    </div>
-                </div>
-            
-                <div class="row g-3 align-items-end justify-content-center">
-                    <div class="col-md-2">
-                        <label for="from" class="form-label">From:</label>
-                        <select id="from" class="form-select">
-                            <option value="hcm">Hồ Chí Minh (Việt Nam)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="to" class="form-label">To:</label>
-                        <select id="to" class="form-select">
-                            <option value="hn">Hà Nội (Việt Nam)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="depart" class="form-label">Depart:</label>
-                        <input type="date" id="depart" class="form-control">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="return" class="form-label">Return:</label>
-                        <input type="date" id="return" class="form-control">
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary d-flex align-items-center">
-                            Search Flights
-                            <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
-                        </button>
-                        
-                    </div>
-                </div>
-            </div>
-            
-        </div>
+        {% include "layouts/find.html" %}
     </div>
 </div>
 

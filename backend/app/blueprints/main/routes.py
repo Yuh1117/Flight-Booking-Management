@@ -14,3 +14,7 @@ def home():
 def about():
     """Render the about page."""
     return render_template("main/about.html")
+@main_bp.route("/booking")
+def booking():
+    """Render the about page."""
+    return render_template("main/booking.html")

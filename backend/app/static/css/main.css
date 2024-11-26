@@ -372,3 +372,10 @@ footer hr {
 
 
 /* end login */
+
+
+.dotted-underline {
+  border-bottom: 1px dotted #000; /* Kiểu gạch chân chấm */
+  width: 100%; /* Kéo dài đường gạch chân */
+  margin-top: 4px; /* Tạo khoảng cách giữa nội dung và gạch chân */
+}
