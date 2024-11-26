@@ -16,7 +16,6 @@ class Config:
         self.MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
         self.MYSQL_HOST_PORT = os.getenv("MYSQL_HOST_PORT", "3306")
         self.MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "flight_booking_system")
-        self.MYSQL_ROOT_PASSWORD = os.getenv("MYSQL_ROOT_PASSWORD", "Admin@123")
-
+        self.MYSQL_ROOT_PASSWORD = os.getenv("MYSQL_ROOT_PASSWORD", "admin")
         self.SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://root:{quote(self.MYSQL_ROOT_PASSWORD)}@{self.MYSQL_HOST}:{self.MYSQL_HOST_PORT}/{self.MYSQL_DATABASE}?charset=utf8mb4"
         self.SQLALCHEMY_TRACK_MODIFICATIONS = True
