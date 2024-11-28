@@ -42,7 +42,7 @@ def add_user(
 ):
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
     user = User(
-        email=email,
+        email=email, 
         password=hashed_password,
         role=role,
         citizen_id=citizen_id,

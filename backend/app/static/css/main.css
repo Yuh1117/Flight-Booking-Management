@@ -400,3 +400,51 @@ footer hr {
   width: 100%; /* Kéo dài đường gạch chân */
   margin-top: 4px; /* Tạo khoảng cách giữa nội dung và gạch chân */
 }
+
+
+
+
+
+/* animation  */
+/* Trạng thái ban đầu */
+.fade-left,
+.fade-right,
+.fade-opacity,
+.fade-translate {
+    opacity: 0; /* Mờ hoàn toàn */
+    transform: translateX(0); /* Trạng thái gốc cho dịch chuyển ngang */
+    transition: all 1s ease-out;
+}
+
+/* Hiển thị khi vào viewport */
+.fade-left.visible {
+    opacity: 1;
+    transform: translateX(0); /* Về vị trí ban đầu */
+}
+
+.fade-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.fade-opacity.visible {
+    opacity: 1; /* Hiển thị rõ */
+}
+
+.fade-translate.visible {
+    opacity: 1;
+    transform: translateY(0); /* Về vị trí ban đầu */
+}
+
+/* Hiệu ứng dịch chuyển */
+.fade-left {
+    transform: translateX(-100px); /* Dịch chuyển từ trái */
+}
+
+.fade-right {
+    transform: translateX(100px); /* Dịch chuyển từ phải */
+}
+
+.fade-translate {
+    transform: translateY(100px); /* Dịch chuyển từ dưới */
+}

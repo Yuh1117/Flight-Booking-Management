@@ -88,3 +88,25 @@ counters.forEach((counter) => {
 
   const interval = setInterval(updateCounter, 50);
 });
+
+
+// animation
+document.addEventListener("DOMContentLoaded", () => {
+  const fadeElements = document.querySelectorAll(
+      ".fade-left, .fade-right, .fade-opacity, .fade-translate"
+  );
+
+  const handleScroll = () => {
+      fadeElements.forEach((el) => {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom > 0) {
+              el.classList.add("visible"); // Thêm class 'visible' khi phần tử vào viewport
+          }
+      });
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  handleScroll(); // Kích hoạt lần đầu khi load trang
+});
+
+// end animation

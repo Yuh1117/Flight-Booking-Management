@@ -1,1 +1,25 @@
-<!-- Admin dashboard -->
+{% extends 'admin/master.html' %}
+
+{% block body %}
+    <div class="container-fluid">
+        <h1 class="text-center">Welcome to the Admin Dashboard</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">User Statistics</h5>
+                        <p class="card-text">Total Users: {{ users_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Other Data</h5>
+                        <p class="card-text">Custom Data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
