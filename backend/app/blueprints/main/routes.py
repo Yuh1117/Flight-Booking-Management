@@ -23,7 +23,3 @@ def booking():
     return render_template("main/booking.html")
 
 
-@main_bp.route("/dashboard")
-def admin():
-    """Render the about page."""
-    return render_template("admin/dashboard.html")
