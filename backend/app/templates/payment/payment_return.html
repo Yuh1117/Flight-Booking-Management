@@ -1,0 +1,33 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container mb-5 vh-100" style="margin-top: 5%;">
+    <!-- <h3>{{ title }}</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">{{ title }}: {{ result }}</div>
+        <div class="panel-body">
+            <p>order_id:{{ order_id }}</p>
+            <p>amount:{{ amount }}</p>
+            <p>order_desc:{{ order_desc }}</p>
+            <p>vnp_TransactionNo:{{ vnp_TransactionNo }}</p>
+            {% if vnp_ResponseCode == '00' %}
+            <p>vnp_ResponseCode: {{ vnp_ResponseCode }} - Thành công</p>
+            {% else %}
+            <p>vnp_ResponseCode: {{ vnp_ResponseCode }} - Lỗi</p>
+            {% endif %}
+            {% if msg %}
+            <p class="alert-warning"> {{ msg }}</p>
+            {% endif %}
+        </div>
+    </div> -->
+    {% if vnp_ResponseCode == '00' %}
+    <div class="card ms-5 d-md-block ">
+        <div class="card-body">
+          <h2 class="card-title text-start mb-4">&#9989 THANH TOÁN THÀNH CÔNG</h2>
+          <p>Bạn đã thanh toán thành công hóa đơn  {{ order_id }}</p>
+          <a href="/" class="btn col-12 btn-primary-invert">Quay về trang chủ</a>
+        </div>
+    </div>
+    {% else %}
+    {% endif %}
+</div>
+{% endblock content %}
