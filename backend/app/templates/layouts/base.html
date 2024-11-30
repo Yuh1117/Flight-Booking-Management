@@ -15,15 +15,72 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/main.css') }}"
     />
+    <!-- Thêm CSS cho Swiper -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@9.0.0/swiper-bundle.min.css"
+    />
+
+    <!-- Thêm JS cho Swiper -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@9.0.0/swiper-bundle.min.js"></script>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.6.2/countUp.min.js"></script>
+
     <title>Pay</title>
   </head>
   <body>
     {% include 'layouts/navbar.html' %}
-    <main class="container">
+    <div aria-live="polite" aria-atomic="true" class="noti-panel sticky-top">
+      <!-- Position it: -->
+      <!-- - `.toast-container` for spacing between toasts -->
+      <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+      <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+      <div class="toast-container position-absolute top-0 end-0 p-3">
+        <!-- SHOW MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        <!-- if there is a message -->
+        {% if messages %}
+        <!-- Print all the messages -->
+        {% for category,message in messages %}
+        <div
+          class="toast show"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <div class="toast-header alert-{{ category }}">
+            <strong class="me-auto">Pay</strong>
+            <button
+              type="button"
+              class="btn-close fs-5"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="toast-body">{{message}}</div>
+        </div>
+        {% endfor %}
+        <!--  -->
+        {% endif %}
+        <!--  -->
+        {% endwith %}
+        <!--  -->
+      </div>
+    </div>
+    <main class="">
       {% block content %}
       <!--  -->
       {% endblock content %}
     </main>
+    {% include 'layouts/footer.html' %}
   </body>
+
   <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </html>
