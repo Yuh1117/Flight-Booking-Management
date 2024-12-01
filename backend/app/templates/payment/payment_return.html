@@ -22,12 +22,19 @@
     {% if vnp_ResponseCode == '00' %}
     <div class="card ms-5 d-md-block ">
         <div class="card-body">
-          <h2 class="card-title text-start mb-4">&#9989 THANH TOÁN THÀNH CÔNG</h2>
+          <h2 class="card-title text-start mb-4">&#9989; THANH TOÁN THÀNH CÔNG</h2>
           <p>Bạn đã thanh toán thành công hóa đơn  {{ order_id }}</p>
           <a href="/" class="btn col-12 btn-primary-invert">Quay về trang chủ</a>
         </div>
     </div>
-    {% else %}
+    {% elif vnp_ResponseCode == '24' %}
+    <div class="card ms-5 d-md-block ">
+        <div class="card-body">
+          <h2 class="card-title text-start mb-4"><i class="fas fa-info-circle" style="color: #058df5;"></i> HỦY GIAO DỊCH</h2>
+          <p>Bạn đã hủy giao dịch hóa đơn {{ order_id }}</p>
+          <a href="/" class="btn col-12 btn-primary-invert">Quay về trang chủ</a>
+        </div>
+    </div>
     {% endif %}
 </div>
 {% endblock content %}

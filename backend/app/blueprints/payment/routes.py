@@ -21,7 +21,8 @@ def get_client_ip(request):
 def payment():
     if request.method == 'GET':
         # ...
-        return render_template('payment/payment.html')
+        order_id = '1' + re.sub(r'[-:. ]', '', str(datetime.now()))
+        return render_template('payment/payment.html', order_id=order_id)
     else:
         order_id = request.form.get('order_id')
         order_type = request.form.get('order_type')
@@ -37,7 +38,7 @@ def payment():
         vnp.requestData['vnp_TmnCode'] = app.config['VNPAY_TMN_CODE']
         vnp.requestData['vnp_Amount'] = int(amount * 100)
         vnp.requestData['vnp_CurrCode'] = 'VND'
-        vnp.requestData['vnp_TxnRef'] = order_id + re.sub(r'[-:. ]', '', str(datetime.now()))
+        vnp.requestData['vnp_TxnRef'] = order_id
         vnp.requestData['vnp_OrderInfo'] = order_desc
         vnp.requestData['vnp_OrderType'] = order_type
         # Check language, default: vn
