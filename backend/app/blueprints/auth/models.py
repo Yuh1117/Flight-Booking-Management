@@ -25,6 +25,7 @@ class User(db.Model, UserMixin):
     phone = Column(String(15), nullable=False)
     role = Column(Enum(UserRole), default=UserRole.USER)
     avatar = Column(String(120), nullable=True)
+    reservations = db.relationship("Reservation", backref="user", lazy=True)
 
     def __repr__(self):
         return (

@@ -5,12 +5,12 @@ from flask_login import login_user, current_user, logout_user, login_required
 from app import login_manager, db
 from .forms import SignUpForm, LogInForm, UpdateAccountForm
 from . import auth_bp, dao
+from . import decorators
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
+@decorators.anonymous_user
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for("main.home"))
     form = LogInForm()
     # if method is POST and form is valid
     if form.validate_on_submit():
@@ -27,9 +27,8 @@ def login():
 
 
 @auth_bp.route("/signup", methods=["GET", "POST"])
+@decorators.anonymous_user
 def signup():
-    if current_user.is_authenticated:
-        return redirect(url_for("main.home"))
     form = SignUpForm()
     # if method is POST and form is valid
     if form.validate_on_submit():
