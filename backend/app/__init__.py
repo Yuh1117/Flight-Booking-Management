@@ -2,9 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-from flask_admin import Admin
 import cloudinary
-from flask_admin.contrib.sqla import ModelView
 
 from app.config import Config
 
@@ -26,7 +24,6 @@ cloudinary.config(
     secure=Config.CLOUDINARY_SECURE,
 )
 
-admin = Admin(app, name="Admin", template_mode="bootstrap4")
 from app.blueprints.admin import views
 
 
