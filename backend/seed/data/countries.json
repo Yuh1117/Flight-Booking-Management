@@ -21,7 +21,8 @@
   },
   {
     "id": 5,
-    "name": "Canada"
+    "name": "Canada",
+    "CountryCode": "CA"
   },
   {
     "id": 6,
@@ -80,7 +81,8 @@
   },
   {
     "id": 17,
-    "name": "Macau, China"
+    "name": "Macau, China",
+    "CountryCode": "MO"
   },
   {
     "id": 18,

@@ -25,7 +25,9 @@ class Airport(db.Model):
         return (
             f"Airport('{self.id}', '{self.name}', '{self.code}', '{self.country_id}')"
         )
-
+    @property
+    def country_name(self):
+        return self.country.name if self.country else None
 
 class Airline(db.Model):
     __tablename__ = "airlines"
@@ -46,7 +48,10 @@ class Aircraft(db.Model):
 
     def __repr__(self):
         return f"Aircraft('{self.id}', '{self.name}', '{self.capacity}')"
-
+    
+    @property
+    def airline_name(self):
+        return self.airline.name if self.airline else "N/A"
 
 class SeatClass(db.Model):
     __tablename__ = "seat_classes"
@@ -94,6 +99,13 @@ class Route(db.Model):
 
     def __repr__(self):
         return f"Route('{self.id}', '{self.depart_airport_id}', '{self.arrive_airport_id}')"
+    @property
+    def depart_airport_name(self):
+        return self.depart_airport.name if self.depart_airport else None
+
+    @property
+    def arrive_airport_name(self):
+        return self.arrive_airport.name if self.arrive_airport else None
 
 
 class Flight(db.Model):
