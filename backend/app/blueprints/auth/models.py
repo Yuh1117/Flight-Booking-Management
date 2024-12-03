@@ -1,5 +1,6 @@
 from enum import Enum as BaseEnum
 from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from app import db
 
@@ -25,7 +26,7 @@ class User(db.Model, UserMixin):
     phone = Column(String(15), nullable=False)
     role = Column(Enum(UserRole), default=UserRole.USER)
     avatar = Column(String(120), nullable=True)
-    reservations = db.relationship("Reservation", backref="user", lazy=True)
+    reservations = relationship("Reservation", backref="user", lazy=True)
 
     def __repr__(self):
         return (
