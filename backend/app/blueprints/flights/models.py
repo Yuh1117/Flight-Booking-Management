@@ -102,10 +102,17 @@ class Route(db.Model):
     @property
     def depart_airport_name(self):
         return self.depart_airport.name if self.depart_airport else None
-
+              
     @property
     def arrive_airport_name(self):
         return self.arrive_airport.name if self.arrive_airport else None
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "depart_airport": self.depart_airport_name,
+            "arrive_airport": self.arrive_airport_name,
+        }
 
 
 class Flight(db.Model):
@@ -120,3 +127,12 @@ class Flight(db.Model):
 
     def __repr__(self):
         return f"Flight('{self.id}', '{self.route_id}', '{self.depart_time}', '{self.arrive_time}')"
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "route_id": self.route_id,
+            "depart_time": self.depart_time.isoformat(),
+            "arrive_time": self.arrive_time.isoformat(),
+            "aircraft_id": self.aircraft_id
+        }
+

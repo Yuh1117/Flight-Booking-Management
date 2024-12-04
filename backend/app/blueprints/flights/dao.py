@@ -1,4 +1,5 @@
-from .models import Route, db
+from .models import Route, Flight, Airport , db
+
 
 def add_route(
     depart_airport_id,
@@ -29,3 +30,5 @@ def add_route(
         db.session.rollback()
         print(f"Failed to add new route: {e}")
         return None
+
+
