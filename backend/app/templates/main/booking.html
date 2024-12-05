@@ -5,7 +5,6 @@
         {% include "layouts/find.html" %}
     </div>
     <div class="card p-4 shadow-sm">
-        
         <div class="row">
             <button class="btn bg-warning col-1 d-flex gap-2 align-items-center justify-content-center">
                 <i class="fa-solid fa-filter"></i>
@@ -43,62 +42,107 @@
             </div>
         </div>
     </div>
-    <div class="card rounded-pill px-5 py-10 m-5 shadow-sm">
-        <div class="row g-0">
-            <!-- Thông tin giờ bay -->
-            <div class="col-md-4 text-center p-3">
-                <div class="w-100 h-100 d-flex align-items-center justify-content-around">
-                    <!-- Cột giờ đi -->
-                    <div class="text-center">
-                        <h5>22:00</h5>
-                        <p class="mb-0">SGN</p>
-                        <small>Nhà ga 1</small>
-                    </div>
-                    
-                    <!-- Phần "Bay thẳng" với gạch chân -->
-                    <div class="d-flex flex-column align-items-center">
-                        <span>Bay thẳng</span>
-                        <div class="dotted-underline"></div>
-                    </div>
-                    
-                    <!-- Cột giờ đến -->
-                    <div class="text-center">
-                        <h5 class="mb-0">+1 ngày 00:05</h5>
-                        <p class="mb-0">HAN</p>
-                        <small>Nhà ga 1</small>
-                    </div>
-                </div>
-
+    <div class="row m-5">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+            <!-- Điểm đi và đến -->
+            <div class="d-flex align-items-center">
+              <!-- Điểm đi -->
+              <div class="text-center me-3">
+                <div class="fw-bold">SGN</div>
+                <div class="text-muted small">TP. Hồ Chí Minh</div>
+              </div>
+        
+              <!-- Icon máy bay -->
+              <div class="me-3">
+                  <i class="fa-solid fa-plane"></i>
+                  <div class="dotted-underline"></div>
+              </div>
+        
+              <!-- Điểm đến -->
+              <div class="text-center">
+                <div class="fw-bold">HAN</div>
+                <div class="text-muted small">Hà Nội</div>
+              </div>
             </div>
-            <!-- Thông tin chuyến bay -->
-            <div class="col-md-5 border-start border-end p-3">
-                <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-
-
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-clock me-2"></i>
-                        <span>Thời gian bay 2h 5 phút</span>
-                    </div>
-                    <div class="d-flex align-items-center mt-2">
-                        <i class="bi bi-airplane me-2"></i>
-                        <span>VN 224 Khai thác bởi Vietnam Airlines</span>
-                    </div>
-                    <a href="#" class="text-decoration-none mt-2 d-block">Chi tiết hành trình</a>
-                </div>
+        
+            <!-- Ngày giờ chuyến đi -->
+            <div class="text-end">
+              <div class="fw-bold">Chuyến đi</div>
+              <div class="text-muted">Th 6, 20 thg 12</div>
             </div>
-            <!-- Giá vé -->
-            <div class="col-md-3 p-3 text-center">
-                <div class="mb-3">
-                    <button class="btn btn-secondary w-100" disabled>PHỔ THÔNG <br> HẾT VÉ</button>
-                </div>
-                <div class="bg-warning  rounded">
-                    <span class="fw-bold">THƯƠNG GIA</span>
-                    <div class="mt-2">
-                        <span class="fs-4">từ 5.860.000</span> <small>VND</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+          </div>
     </div>
+    <div class="result-flights">
+        <!-- <div class="card rounded-pill px-5 py-10 m-5 shadow-sm position-relative">
+            <div class="row g-0">
+                <div class="col-md-4 text-center p-3">
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-around">
+                        <div class="d-flex flex-column align-items-center">
+                            <h5>08:30</h5> 
+                            <p class="mb-0">Sân bay Nội Bài</p>
+                            <small>Nhà ga 1</small>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <span>Bay thẳng</span>
+                            <div class="dotted-underline"></div>
+                        </div>
+                        <div class="d-flex flex-column align-items-center">
+                            <h5>10:35</h5>
+                            <p class="mb-0">Sân bay Tân Sơn Nhất</p>
+                            <small>Nha ga 1</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5 border-start border-end p-3">
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock me-2"></i>
+                            <span>Thời gian bay 2h 5 phút</span>
+                        </div>
+                        <div class="d-flex align-items-center mt-2">
+                            <i class="bi bi-airplane me-2"></i>
+                            <span>VN 224 Khai thác bởi Vietnam Airlines</span>
+                        </div>
+                        <a href="#" class="text-decoration-none mt-2 d-block">Chi tiết hành trình</a>
+                    </div>
+                </div>
+                <div class="col-md-3 p-3 text-center">
+                    <div class="mb-3">
+                        <button class="btn btn-secondary w-100 type-ticket">PHỔ THÔNG</button>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-warning w-100 type-ticket">Thương Gia</button>
+                    </div>
+                </div> 
+
+            </div>
+
+            <div class="position-absolute top-100 start-100 w-100 mt-1">
+                <button id="bookButton" style="display: none;">Đặt vé</button>
+            </div>
+
+        </div> -->
+    </div>
+
 </div>
 {% endblock content %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+<!-- <script>
+    const typeTicket = document.querySelectorAll(".type-ticket")
+    const bookButton = document.getElementById("bookButton")
+    console.log(typeTicket);
+    typeTicket.forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.getElementById("bookButton").style.display = "block";
+        })
+    })
+    
+</script> -->
+{% endblock %}
+
+
+
+
+
