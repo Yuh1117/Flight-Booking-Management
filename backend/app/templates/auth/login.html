@@ -65,14 +65,10 @@
         <hr />
       </div>
       <div class="d-flex justify-content-between text-center my-2">
-        <a href="#" class="social-btn facebook">
-          <img
-            src="{{url_for('static',filename='images/icon/facebookIcon.png')}}"
-            alt=""
-          />
-          Facebook
-        </a>
-        <a href="#" class="social-btn google ms-1">
+        <a
+          href="{{url_for('auth.google_login')}}"
+          class="social-btn google col-12"
+        >
           <img
             src="{{url_for('static',filename='images/icon/googleIcon.png')}}"
             alt=""

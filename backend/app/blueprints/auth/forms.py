@@ -4,6 +4,7 @@ from wtforms import PasswordField
 from wtforms import SubmitField
 from wtforms import BooleanField
 from wtforms import TelField
+from wtforms import HiddenField
 from wtforms import ValidationError
 from wtforms.validators import DataRequired
 from wtforms.validators import Length
@@ -24,6 +25,7 @@ class SignUpForm(FlaskForm):
     first_name = StringField("First Name", validators=[DataRequired()])
     last_name = StringField("Last Name", validators=[DataRequired()])
     phone = TelField("Phone", validators=[DataRequired()])
+    avatar = HiddenField("Hidden avatar field for Google OAuth")
     submit = SubmitField("Sign up")
 
     def validate_citizen_id(self, citizen_id):
