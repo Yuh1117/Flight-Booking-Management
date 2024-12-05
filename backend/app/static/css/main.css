@@ -329,6 +329,10 @@ footer hr {
   border: 1px solid gray;
   border-radius: 4px !important;
 }
+.input-group input[readonly] {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
 .input-group {
   position: relative;
   margin-bottom: 15px;
@@ -387,10 +391,12 @@ footer hr {
   border-radius: 30px;
   text-decoration: none;
   transition: all 0.3s ease;
-  width: 250px;
   font-size: 16px;
   border: 1px solid black;
   color: black;
+}
+.social-btn:hover {
+  background-color: #ddd;
 }
 
 /* end login */
@@ -401,50 +407,46 @@ footer hr {
   margin-top: 4px; /* Tạo khoảng cách giữa nội dung và gạch chân */
 }
 
-
-
-
-
 /* animation  */
 /* Trạng thái ban đầu */
 .fade-left,
 .fade-right,
 .fade-opacity,
 .fade-translate {
-    opacity: 0; /* Mờ hoàn toàn */
-    transform: translateX(0); /* Trạng thái gốc cho dịch chuyển ngang */
-    transition: all 1s ease-out;
+  opacity: 0; /* Mờ hoàn toàn */
+  transform: translateX(0); /* Trạng thái gốc cho dịch chuyển ngang */
+  transition: all 1s ease-out;
 }
 
 /* Hiển thị khi vào viewport */
 .fade-left.visible {
-    opacity: 1;
-    transform: translateX(0); /* Về vị trí ban đầu */
+  opacity: 1;
+  transform: translateX(0); /* Về vị trí ban đầu */
 }
 
 .fade-right.visible {
-    opacity: 1;
-    transform: translateX(0);
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .fade-opacity.visible {
-    opacity: 1; /* Hiển thị rõ */
+  opacity: 1; /* Hiển thị rõ */
 }
 
 .fade-translate.visible {
-    opacity: 1;
-    transform: translateY(0); /* Về vị trí ban đầu */
+  opacity: 1;
+  transform: translateY(0); /* Về vị trí ban đầu */
 }
 
 /* Hiệu ứng dịch chuyển */
 .fade-left {
-    transform: translateX(-100px); /* Dịch chuyển từ trái */
+  transform: translateX(-100px); /* Dịch chuyển từ trái */
 }
 
 .fade-right {
-    transform: translateX(100px); /* Dịch chuyển từ phải */
+  transform: translateX(100px); /* Dịch chuyển từ phải */
 }
 
 .fade-translate {
-    transform: translateY(100px); /* Dịch chuyển từ dưới */
+  transform: translateY(100px); /* Dịch chuyển từ dưới */
 }
