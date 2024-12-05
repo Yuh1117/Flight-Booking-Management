@@ -1,6 +1,12 @@
 // JavaScript scripts
+
+const navbar = document.querySelector(".navbar-home");
+if (window.location.pathname === "/") {
+  navbar.classList.add("not-fixed");
+  navbar.classList.add("rounded-2");
+}
+
 window.addEventListener("scroll", function () {
-  const navbar = document.querySelector(".navbar-home");
   // Kiểm tra nếu đang ở trang chủ
   if (window.location.pathname === "/") {
     if (window.scrollY > navbar.clientHeight) {
@@ -19,7 +25,6 @@ window.addEventListener("scroll", function () {
   }
 });
 
-const navbar = document.querySelector(".navbar-home");
 navbar_toggle_btn = navbar.querySelector(".navbar-toggler");
 navbar_toggle_btn.addEventListener("click", function () {
   if (
@@ -158,7 +163,7 @@ document.querySelectorAll('input[name="tripType"]').forEach((radio) => {
 // document
 //   .querySelector(".find button.btn")
 //   .addEventListener("click", function () {
-    
+
 //     const fromValue = document.querySelector("#from").value;
 //     const toValue = document.querySelector("#to").value;
 //     const departDateInput = document.getElementById("depart").value;
@@ -182,12 +187,10 @@ document.querySelectorAll('input[name="tripType"]').forEach((radio) => {
 //           console.log(data);
 //           const currentPath = window.location.pathname;
 //           console.log(currentPath);
-          
 
 //           const container = document.querySelector(".result-flights");
 //           console.log(container);
 
-          
 //           if (data.success) {
 //             alert(`Tìm thấy tuyến đường: ${data}`);
 //             container.innerHTML = "";
@@ -247,7 +250,6 @@ document.querySelectorAll('input[name="tripType"]').forEach((radio) => {
 //                     </div>`;
 //             });
 //             // Kiểm tra và chuyển hướng sang trang /booking
-
 
 //           } else {
 //             alert(`Không tìm thấy tuyến đường. Lý do: ${data.message}`);
