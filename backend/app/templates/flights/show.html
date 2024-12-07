@@ -1,0 +1,99 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="height: 100vh">
+    <div class="row">
+        <div class="col-12 mx-auto">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Routes</h2>
+            </div>
+            <div class="p-4 my-3 border border-2 rounded-5 bg-white">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Depart Airport</th>
+                            <th>Arrive Airport</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody class="align-middle">
+                        <tr>
+                            <td>1</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>
+                                <a href="/schedule/1" class="btn btn-primary"><i
+                                        class="fa-solid fa-caret-right fa-xl"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>
+                                <a href="/schedule/2" class="btn btn-primary"><i
+                                        class="fa-solid fa-caret-right fa-xl"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>
+                                <a href="/schedule/3" class="btn btn-primary"><i
+                                        class="fa-solid fa-caret-right fa-xl"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>
+                                <a href="/schedule/4" class="btn btn-primary"><i
+                                        class="fa-solid fa-caret-right fa-xl"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>a</td>
+                            <td>
+                                <a href="/schedule/5" class="btn btn-primary"><i
+                                        class="fa-solid fa-caret-right fa-xl"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="/?page={{page}}">1</a></li>
+                    <li class="page-item"><a class="page-link" href="/?page={{page}}">2</a></li>
+                    <li class="page-item"><a class="page-link" href="/?page={{page}}">3</a></li>
+
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+</div>
+{% endblock content %}

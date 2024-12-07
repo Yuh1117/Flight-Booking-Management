@@ -1,0 +1,134 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container mt-5" style="height: 100vh">
+    <div class="row">
+        <div class="col-12 mx-auto">
+            <div class="d-flex justify-content-between">
+                <div class="d-flex align-items-center">
+                    <a href="/schedule" class="btn btn-primary me-4"><i class="fa-solid fa-caret-left fa-xl"></i></a>
+                    <h2>Route_Id: {{ id }} - Name: Nha Trang Da Nang</h2>
+                </div>
+                <button class="btn btn-secondary">View created flight schedules</button>
+            </div>
+            <div class="p-4 my-3 border border-2 rounded-5 bg-white">
+                <form action="/schedule" method="post">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="departureAirport" class="form-label">Depart Airport</label>
+                            <input type="text" id="departureAirport" class="form-control"
+                                placeholder="Sân bay Nha Trang" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="arrivalAirport" class="form-label">Arrive Airport</label>
+                            <input type="text" id="arrivalAirport" class="form-control" placeholder="Sân bay Đà Nẵng"
+                                readonly>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="departureDateTime" class="form-label">Depart Date Time</label>
+                            <input type="datetime-local" id="departureDateTime" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="flightDuration" class="form-label">Flight Duration</label>
+                            <input type="number" id="flightDuration" class="form-control" placeholder="phút">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="seatClass1" class="form-label">Seats class 1</label>
+                            <input type="number" id="seatClass1" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="seatClass2" class="form-label">Seats class 2</label>
+                            <input type="number" id="seatClass2" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="my-4">
+                        <hr>
+                    </div>
+
+                    <div id="stopovers">
+                        <h3>Stopover Airport</h3>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <div>
+                            <button type="button" id="addStopover" class="btn btn-success rounded-4 me-2">+</button>
+                            <span>(Remaining: <span id="remaining">2</span>)</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Schedule</button>
+                    </div>
+                    <!--  -->
+                    <div class="d-none" id="regulations">
+                        <input type="number" value="2" id="regulationNumberStopovers" />
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<style>
+    [readonly] {
+        pointer-events: none;
+        background-color: #f0f0f0;
+    }
+
+    .regulation {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+</style>
+<script>
+    const numberOfAirports = parseInt(document.getElementById('regulationNumberStopovers').value)
+    const remaining = document.getElementById("remaining")
+    // Add button
+    let stopoverCount = 0;
+
+    document.getElementById("addStopover").addEventListener("click", function () {
+            stopoverCount++;
+            remaining.innerText = numberOfAirports - stopoverCount
+            const stopoverDiv = document.createElement("div");
+            stopoverDiv.classList.add("row", "align-items-end", "mt-3");
+            stopoverDiv.innerHTML = `
+                <div class="col-md-1" style="width: 5%">
+                    <button type="button" class="btn btn-danger remove-stopover rounded-4">-</button>
+                </div>
+                <div class="col-md-4">
+                    <label for="stopoverAirport" class="form-label">Stopover Airport</label>
+                    <select class="form-select" id="stopoverAirport">
+                        <option selected="selected" value="a">a</option>
+                        <option value="b">b</option>
+                        <option value="c">c</option>
+                        <option value="d">d</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="stopoverDuration" class="form-label">Stopover Duration</label>
+                    <input type="number" id="stopoverDuration" class="form-control" placeholder="phút">
+                </div>
+                <div class="col-md-4">
+                    <label for="stopoverNotes" class="form-label">Note</label>
+                    <input type="text" id="stopoverNotes" class="form-control">
+                </div>
+              `;
+            document.getElementById("stopovers").appendChild(stopoverDiv);
+
+            // Remove button
+            stopoverDiv.querySelector(".remove-stopover").addEventListener("click", function () {
+                stopoverDiv.remove();
+                stopoverCount--;
+                document.getElementById('addStopover').classList.remove('regulation')
+                remaining.innerText = numberOfAirports - stopoverCount
+            });
+
+            if (stopoverCount === numberOfAirports) {
+                document.getElementById('addStopover').classList.add('regulation')
+            }
+        
+    });
+
+</script>
+{% endblock %}
