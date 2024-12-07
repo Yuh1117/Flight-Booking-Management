@@ -3,10 +3,10 @@
 <div class="container mt-5" style="height: 100vh">
     <div class="row">
         <div class="col-12 mx-auto">
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <a href="/schedule" class="btn btn-primary me-4"><i class="fa-solid fa-caret-left fa-xl"></i></a>
-                    <h2>Route_Id: {{ id }} - Name: Nha Trang Da Nang</h2>
+                    <a href="/schedule" class="btn btn-primary me-4"><i class="fa-solid fa-caret-left fa-xl"></i> Back</a>
+                    <h2><b>Route Id:</b> {{ id }} - <b>Name:</b> {{ route.name }}</h2>
                 </div>
                 <button class="btn btn-secondary">View created flight schedules</button>
             </div>
@@ -15,12 +15,12 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="departureAirport" class="form-label">Depart Airport</label>
-                            <input type="text" id="departureAirport" class="form-control"
-                                placeholder="Sân bay Nha Trang" readonly>
+                            <input type="text" id="departureAirport" class="form-control" value="{{ route.depart_airport.name }}"
+                               readonly>
                         </div>
                         <div class="col-md-6">
                             <label for="arrivalAirport" class="form-label">Arrive Airport</label>
-                            <input type="text" id="arrivalAirport" class="form-control" placeholder="Sân bay Đà Nẵng"
+                            <input type="text" id="arrivalAirport" class="form-control" value="{{ route.arrive_airport.name }}"
                                 readonly>
                         </div>
                     </div>

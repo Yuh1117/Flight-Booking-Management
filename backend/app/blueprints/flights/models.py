@@ -91,6 +91,7 @@ class FlightSeat(db.Model):
 class Route(db.Model):
     __tablename__ = "routes"
     id = Column(Integer, primary_key=True, autoincrement=True)
+    name=Column(String(50), nullable=False)
     depart_airport_id = Column(Integer, ForeignKey("airports.id"), nullable=False)
     arrive_airport_id = Column(Integer, ForeignKey("airports.id"), nullable=False)
     depart_airport = relationship("Airport", foreign_keys=[depart_airport_id])

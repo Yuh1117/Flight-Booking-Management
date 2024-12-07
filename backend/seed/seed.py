@@ -33,6 +33,7 @@ def seed_routes():
         for route in routes:
             print(route)
             existing_route = Route.query.filter_by(
+                name=route['name'],
                 depart_airport_id=route["depart_airport_id"],
                 arrive_airport_id=route["arrive_airport_id"],
             ).first()
@@ -40,6 +41,7 @@ def seed_routes():
             if not existing_route:
                 new_route = Route(
                     id=route["id"],
+                    name=route['name'],
                     depart_airport_id=route["depart_airport_id"],
                     arrive_airport_id=route["arrive_airport_id"],
                 )

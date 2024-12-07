@@ -5,8 +5,14 @@
     <div class="row">
         <div class="col-12 mx-auto">
             <div class="d-flex justify-content-between align-items-center">
-                <h2>Routes</h2>
+                <h2>Choose route:</h2>
+                <form method="get" action="/schedule" class="d-flex">
+                    <input class="form-control me-2" name="kw" type="text" placeholder="Name" value="{{kw}}">
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                    <a href="/schedule" class="btn btn-secondary ms-2" type="submit"><i class="fa-solid fa-arrow-rotate-right"></i></a>
+                </form>
             </div>
+            {% if routes %}
             <div class="p-4 my-3 border border-2 rounded-5 bg-white">
                 <table class="table table-hover">
                     <thead>
@@ -19,81 +25,46 @@
                         </tr>
                     </thead>
                     <tbody class="align-middle">
+                        {% for r in routes %}
                         <tr>
-                            <td>1</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>a</td>
+                            <td>{{r.id}}</td>
+                            <td>{{r.name}}</td>
+                            <td>{{r.depart_airport.name}}</td>
+                            <td>{{r.arrive_airport.name}}</td>
                             <td>
-                                <a href="/schedule/1" class="btn btn-primary"><i
+                                <a href="/schedule/{{r.id}}" class="btn btn-primary">Choose <i
                                         class="fa-solid fa-caret-right fa-xl"></i></a>
                             </td>
                         </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>
-                                <a href="/schedule/2" class="btn btn-primary"><i
-                                        class="fa-solid fa-caret-right fa-xl"></i></a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>
-                                <a href="/schedule/3" class="btn btn-primary"><i
-                                        class="fa-solid fa-caret-right fa-xl"></i></a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>
-                                <a href="/schedule/4" class="btn btn-primary"><i
-                                        class="fa-solid fa-caret-right fa-xl"></i></a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>5</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>a</td>
-                            <td>
-                                <a href="/schedule/5" class="btn btn-primary"><i
-                                        class="fa-solid fa-caret-right fa-xl"></i></a>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
+            <div class="d-flex justify-content-center">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item">
+                            <a class="page-link {% if current_page == 1 %}disabled{% endif %}" href="/schedule?page={{current_page - 1}}&kw={{kw}}" aria-label="Previous">
+                                <span aria-hidden="true"><i class='fas fa-angle-left'></i></span>
+                            </a>
+                        </li>
+                        {% for page in range(1, pages + 1) %}
+                        <li class="page-item"><a class="page-link {% if page == current_page %}active{% endif %}" href="/schedule?page={{page}}&kw={{kw}}">{{page}}</a></li>
+                        {% endfor %}
+                        <li class="page-item">
+                            <a class="page-link {% if current_page == pages %}disabled{% endif %}" href="/schedule?page={{current_page + 1}}&kw={{kw}}" aria-label="Next">
+                                <span aria-hidden="true"> <i class='fas fa-angle-right'></i></span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% else %}
+            <div class="p-4 my-3 border border-2 rounded-5 bg-white">
+                <h3 class="text-center">Nothing</h3>
+            </div>
+            {% endif %}
         </div>
-        <div class="d-flex justify-content-center">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="/?page={{page}}">1</a></li>
-                    <li class="page-item"><a class="page-link" href="/?page={{page}}">2</a></li>
-                    <li class="page-item"><a class="page-link" href="/?page={{page}}">3</a></li>
-
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-
     </div>
 </div>
 {% endblock content %}
