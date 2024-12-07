@@ -11,6 +11,7 @@ from app.config import *
 
 app = Flask(__name__)
 app.config.from_object(FlaskConfig)
+app.config["PAGE_SIZE"] = 5
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -42,3 +43,4 @@ app.register_blueprint(main_bp)
 app.register_blueprint(bookings_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(errors)
+app.register_blueprint(flights_bp)

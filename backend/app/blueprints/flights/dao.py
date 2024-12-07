@@ -30,6 +30,27 @@ def add_route(
         db.session.rollback()
         print(f"Failed to add new route: {e}")
         return None
+    
+def load_routes(kw=None, page=None):
+    query = Route.query
+    if kw:
+        query = query.filter(Route.name.contains(kw))
+    
+    page_size = app.config['PAGE_SIZE']
+    start = (page - 1) * page_size
+    query = query.slice(start, start + page_size)
+    
+    return query.all()
+
+def count_routes(kw=None):
+    if kw:
+        return Route.query.filter(Route.name.contains(kw)).count()
+        
+    return Route.query.count()
+
+def get_route_by_id(id):
+    return Route.query.get(id)
+    
 
 def find_intermediate_airport(flight_id):
     # Tìm tất cả sân bay trung gian của một chuyến bay cụ thể
