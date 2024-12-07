@@ -28,6 +28,14 @@ class Airport(db.Model):
     @property
     def country_name(self):
         return self.country.name if self.country else None
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "code": self.code,
+            "country_name": self.country_name,
+        }
 
 class Airline(db.Model):
     __tablename__ = "airlines"
@@ -95,7 +103,7 @@ class Route(db.Model):
     arrive_airport_id = Column(Integer, ForeignKey("airports.id"), nullable=False)
     depart_airport = relationship("Airport", foreign_keys=[depart_airport_id])
     arrive_airport = relationship("Airport", foreign_keys=[arrive_airport_id])
-    flights = relationship("Flight", backref="route", lazy=True)
+    # flights = relationship("Flight", backref="route", lazy=True)
 
     def __repr__(self):
         return f"Route('{self.id}', '{self.depart_airport_id}', '{self.arrive_airport_id}')"
@@ -124,7 +132,7 @@ class Flight(db.Model):
     aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=False)
     aircraft = relationship("Aircraft", backref="flights", lazy=True)
     flight_seats = relationship("FlightSeat", backref="flight", lazy=True)
-
+    intermediate_airport = relationship("IntermediateAirport", backref="flights", lazy="joined")
     def __repr__(self):
         return f"Flight('{self.id}', '{self.route_id}', '{self.depart_time}', '{self.arrive_time}')"
     def to_dict(self):
@@ -133,6 +141,33 @@ class Flight(db.Model):
             "route_id": self.route_id,
             "depart_time": self.depart_time.isoformat(),
             "arrive_time": self.arrive_time.isoformat(),
-            "aircraft_id": self.aircraft_id
+            "aircraft_id": self.aircraft_id,
         }
 
+class IntermediateAirport(db.Model):
+    __tablename__ = "intermediate_airports"
+    
+    airport_id = Column(Integer, ForeignKey("airports.id"), primary_key=True, nullable=False)  # Sân bay
+    flight_id = Column(Integer, ForeignKey("flights.id"), primary_key=True, nullable=False)  # Chuyến bay
+    arrival_time = Column(DateTime, primary_key=True, nullable=False)  # Thời gian đến
+    departure_time = Column(DateTime, nullable=False)  # Thời gian đi
+    order = Column(Integer, nullable=False)  # Thứ tự
+
+    # Quan hệ
+    airport = relationship("Airport", backref="intermediate_airports", lazy=True)
+    flight = relationship("Flight", backref="intermediate_airports", lazy=True)
+
+    def __repr__(self):
+        return (
+            f"IntermediateAirport('{self.airport_id}', '{self.flight_id}', "
+            f"'{self.arrival_time}', '{self.departure_time}', '{self.order}')"
+        )
+
+    def to_dict(self):
+        return {
+            "airport_id": self.airport_id,
+            "flight_id": self.flight_id,
+            "arrival_time": self.arrival_time.isoformat(),
+            "departure_time": self.departure_time.isoformat(),
+            "order": self.order,
+        }

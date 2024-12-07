@@ -2,94 +2,67 @@ from flask import render_template, jsonify, request
 from flask_login import login_required
 from . import bookings_bp, models
 from ..flights.models import Airport, Route, Flight
+from ..flights.dao import find_intermediate_airport
 from app import app
+from datetime import datetime
+from .dao import find_route_with_data, get_airports
+from math import ceil
 
 
 @bookings_bp.route("/booking")
-@login_required
 def booking():
-    """Render the about page."""
-    return render_template("main/booking.html")
+    dataAirport = get_airports()
+    from_city = request.args.get('from')     
+    to_city = request.args.get('to')        
+    depart_date = request.args.get('depart') 
+    
+    data = {
+        "from": from_city,
+        "to": to_city,
+        "departDate": depart_date
+    }
+    
+    # Giả sử `find_route_with_data` trả về kết quả với một danh sách các chuyến bay.
+    result = find_route_with_data(data)
+    
+    if result["success"]:
+        # Đảm bảo rằng chúng ta có danh sách các chuyến bay
+        flights = result["flights"]
+        
+        # Sử dụng tham số `page` từ query string để phân trang
+        page = request.args.get('page', 1, type=int)
+        per_page = 5
+        total_flights = len(flights)
+        total_pages = ceil(total_flights / per_page)
+        
+        # Cắt chuyến bay dựa trên trang hiện tại
+        flights_paginated = flights[(page - 1) * per_page: page * per_page]
+        
+        # Tạo dữ liệu phân trang
+        pagination = {
+            'page': page,
+            'per_page': per_page,
+            'total_pages': total_pages
+        }
+        
+        return render_template(
+            "main/booking.html",
+            route=result["route"],
+            flights=flights_paginated,
+            intermediate_airport=result["intermediate_airport"],
+            dataAirport=dataAirport,
+            pagination=pagination, 
+            data=data  # Truyền dữ liệu tìm kiếm vào template
+        )
+    
+    return render_template("main/booking.html", dataAirport=dataAirport)
 
 
-# API để lấy danh sách airport
-@app.route("/api/airports", methods=["GET"])
-def get_airports():
-    airports = Airport.query.all()
-    airport_list = [
-        {"id": airport.id, "name": airport.name, "code": airport.code}
-        for airport in airports
-    ]
-    return jsonify(airport_list)
 
 
-from datetime import datetime
+    
+    
 
-@app.route('/find_route', methods=['POST'])
-def find_route():
-    try:
-        # Lấy dữ liệu JSON từ request
-        data = request.get_json()
-        print(data)
-        if not data:
-            return (
-                jsonify(
-                    {"success": False, "message": "Dữ liệu không hợp lệ hoặc bị thiếu"}
-                ),
-                400,
-            )
 
-        # Ép kiểu từ và đến thành số nguyên
-        try:
-            from_value = int(data.get("from"))
-            to_value = int(data.get("to"))
-        except (ValueError, TypeError):
-            return (
-                jsonify(
-                    {"success": False, "message": "From và To phải là số nguyên hợp lệ"}
-                ),
-                400,
-            )
 
-        # Lấy ngày khởi hành từ request
-        depart_date_str = data.get('departDate')
-        if not depart_date_str:
-            return jsonify({"success": False, "message": "Ngày khởi hành (departDate) không được cung cấp"}), 400
 
-        try:
-            # Chuyển đổi ngày khởi hành sang định dạng datetime
-            depart_date = datetime.strptime(depart_date_str, "%Y-%m-%d").date()
-        except ValueError:
-            return jsonify({"success": False, "message": "Ngày khởi hành (departDate) không hợp lệ. Định dạng đúng: YYYY-MM-DD"}), 400
-
-        # Truy vấn tuyến đường
-        route = Route.query.filter_by(
-            depart_airport_id=from_value, arrive_airport_id=to_value
-        ).first()
-        if route:
-            print(route.to_dict())
-            
-            # Truy vấn các chuyến bay theo route_id và lọc ngày khởi hành
-            flights = Flight.query.filter(
-                Flight.route_id == route.id,
-                Flight.depart_time >= datetime.combine(depart_date, datetime.min.time()),
-                Flight.depart_time < datetime.combine(depart_date, datetime.max.time())
-            ).all()
-            
-            if flights:
-                flights_data = [flight.to_dict() for flight in flights[:10]]  # Giới hạn 10 kết quả
-                print(flights_data)
-                return jsonify(
-                    {"success": True, "route": route.to_dict(), "flights": flights_data}
-                )
-            else:
-                return jsonify(
-                    {"success": True, "route": route.to_dict(), "flights": []}
-                )
-        else:
-            return (
-                jsonify({"success": False, "message": "Không tìm thấy tuyến đường"}),
-                404,
-            )
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Lỗi hệ thống: {str(e)}"}), 500
