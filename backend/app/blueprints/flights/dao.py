@@ -1,5 +1,4 @@
-from .models import Route, Flight, Airport , db
-from app import app
+from .models import Route, Flight, Airport, IntermediateAirport , db
 
 
 def add_route(
@@ -96,3 +95,8 @@ def load_flights(page=None):
 def count_flights():
     return Flight.query.count()
 
+def find_intermediate_airport(flight_id):
+    # Tìm tất cả sân bay trung gian của một chuyến bay cụ thể
+    intermediate_airports = IntermediateAirport.query.filter(IntermediateAirport.flight_id == flight_id).all()
+    # Trả về kết quả dưới dạng danh sách dictionary
+    return [intermediate_airport.to_dict() for intermediate_airport in intermediate_airports]

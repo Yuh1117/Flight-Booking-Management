@@ -141,7 +141,7 @@ async function loadAirports() {
 }
 
 // Tải dữ liệu khi trang load
-window.onload = loadAirports;
+// window.onload = loadAirports;
 
 document.querySelectorAll('input[name="tripType"]').forEach((radio) => {
   radio.addEventListener("change", function () {

@@ -11,6 +11,7 @@
                 Filter
             </button>
         </div>
+        
         <div class="row d-flex align-items-center justify-content-center">
             <div class="col-md-3 mb-3">
                 <label for="ticketType" class="form-label fw-bold">Loại vé</label>
@@ -73,23 +74,36 @@
           </div>
     </div>
     <div class="result-flights">
-        <!-- <div class="card rounded-pill px-5 py-10 m-5 shadow-sm position-relative">
+        {% for item in flights %}
+        <div class="card rounded-pill px-5 py-10 m-5 shadow-sm">
             <div class="row g-0">
                 <div class="col-md-4 text-center p-3">
                     <div class="w-100 h-100 d-flex align-items-center justify-content-around">
                         <div class="d-flex flex-column align-items-center">
-                            <h5>08:30</h5> 
-                            <p class="mb-0">Sân bay Nội Bài</p>
+                            <h5>{{item.depart_time}}</h5>
+                            <p class="mb-0"></p>
                             <small>Nhà ga 1</small>
                         </div>
                         <div class="d-flex flex-column align-items-center">
-                            <span>Bay thẳng</span>
+                            <!-- Hiển thị các sân bay trung gian -->
+                            {% set has_stop = false %}
+                            {% for stop in intermediate_airport %}
+                                {% if stop.flight_id == item.id %}
+                                    <span>Sân bay ID {{ stop.airport_id }} vào lúc: {{ stop.departure_time }}</span>
+                                    {% set has_stop = true %}
+                                {% endif %}
+                            {% endfor %}
+                        
+                            {% if has_stop != true %}
+                                <span>Bay thẳng</span>
+                            {% endif %}
                             <div class="dotted-underline"></div>
                         </div>
+                        
                         <div class="d-flex flex-column align-items-center">
-                            <h5>10:35</h5>
-                            <p class="mb-0">Sân bay Tân Sơn Nhất</p>
-                            <small>Nha ga 1</small>
+                            <h5>{{item.arrive_time}}</h5>
+                            <p class="mb-0"></p>
+                            <small>Nhà ga 1</small>
                         </div>
                     </div>
                 </div>
@@ -108,38 +122,42 @@
                 </div>
                 <div class="col-md-3 p-3 text-center">
                     <div class="mb-3">
-                        <button class="btn btn-secondary w-100 type-ticket">PHỔ THÔNG</button>
+                        <button class="btn btn-secondary w-100" disabled>PHỔ THÔNG <br> HẾT VÉ</button>
                     </div>
-                    <div class="mb-3">
-                        <button class="btn btn-warning w-100 type-ticket">Thương Gia</button>
+                    <div class="bg-warning rounded">
+                        <span class="fw-bold">THƯƠNG GIA</span>
+                        <div class="mt-2">
+                            <span class="fs-4">từ 5.860.000</span> <small>VND</small>
+                        </div>
                     </div>
-                </div> 
-
+                </div>
             </div>
-
-            <div class="position-absolute top-100 start-100 w-100 mt-1">
-                <button id="bookButton" style="display: none;">Đặt vé</button>
-            </div>
-
-        </div> -->
+        </div>
+        {% endfor %}
+    </div>  
+    <!-- Phân trang, kiểm tra xem pagination có tồn tại không -->
+    {% if pagination %}
+    <div class="pagination">
+        {% if pagination.page > 1 %}
+            <a href="{{ url_for('bookings.booking', page=1, from=from_city, to=to_city, depart=depart_date) }}">First</a>
+            <a href="{{ url_for('bookings.booking', page=pagination.page - 1, from=from_city, to=to_city, depart=depart_date) }}">Prev</a>
+        {% endif %}
+        
+        <span>Page {{ pagination.page }} of {{ pagination.total_pages }}</span>
+        
+        {% if pagination.page < pagination.total_pages %}
+            <a class="mt-2" href="{{ url_for('bookings.booking', page=pagination.page + 1, from=from_city, to=to_city, depart=depart_date) }}">Next</a>
+            <a href="{{ url_for('bookings.booking', page=pagination.total_pages, from=from_city, to=to_city, depart=depart_date) }}">Last</a>
+        {% endif %}
     </div>
+    {% endif %}
 
 </div>
 {% endblock content %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
-<!-- <script>
-    const typeTicket = document.querySelectorAll(".type-ticket")
-    const bookButton = document.getElementById("bookButton")
-    console.log(typeTicket);
-    typeTicket.forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.getElementById("bookButton").style.display = "block";
-        })
-    })
-    
-</script> -->
+<!-- <script src="{{ url_for('static', filename='js/booking.js') }}"></script> -->
+
 {% endblock %}
 
 

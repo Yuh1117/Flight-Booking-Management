@@ -16,7 +16,8 @@ from app.blueprints.flights.models import Country
 from app.blueprints.flights.models import Flight
 from app.blueprints.flights.models import Airline
 from app.blueprints.flights.models import Aircraft
-
+from app.blueprints.flights.models import IntermediateAirport
+from app.blueprints.flights.dao import find_intermediate_airport
 
 def seed_users():
     with open("backend/seed/data/users.json") as f:
@@ -177,18 +178,44 @@ def seed_aircrafts():
         db.session.rollback()  # Rollback nếu có lỗi xảy ra
         print(f"Failed to seed aircrafts: {e}")
 
-
+def seed_intermediate_airport():
+    try:
+        with open("backend/seed/data/stops.json") as f:
+            intermediate_airports = json.load(f)
+        for intermediate_airport in intermediate_airports:
+            existing_intermediate_airport = IntermediateAirport.query.filter_by(
+                flight_id=intermediate_airport["flight_id"],
+                airport_id=intermediate_airport["airport_id"],
+            ).first()
+            if not existing_intermediate_airport:
+                new_intermediate_airport = IntermediateAirport(
+                        airport_id=intermediate_airport["airport_id"],
+                        flight_id=intermediate_airport["flight_id"],
+                        arrival_time=datetime.fromisoformat(intermediate_airport["arrive_time"].replace("Z", "")),
+                        departure_time=datetime.fromisoformat(intermediate_airport["depart_time"].replace("Z", "")),
+                        order=intermediate_airport["order"],
+                )
+                db.session.add(new_intermediate_airport)  # Thêm vào session
+                print(new_intermediate_airport.to_dict())
+        db.session.commit()
+        print("Intermediate airports seeded successfully!")
+    except Exception as e:
+        db.session.rollback()  # Rollback nếu có lỗi xảy ra
+        print(f"Failed to seed intermediate airports: {e}")
+     
 if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-        # seed_users()
-        # seed_countries()
-        # seed_airports()
-        # seed_routes()
-        # seed_flights()
-        # seed_airlines()
-        # seed_aircrafts()
-        # db.session.commit()
+        seed_users()
+        seed_countries()
+        seed_airports()
+        seed_routes()
+        seed_flights()
+        seed_airlines()
+        seed_aircrafts()
+        seed_intermediate_airport()
+        print("Sân bay trung gian",find_intermediate_airport(14))
+        db.session.commit()
         print("Data seeded successfully.")
         print(inspect(db.engine).get_table_names())
