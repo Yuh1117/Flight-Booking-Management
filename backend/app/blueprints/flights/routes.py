@@ -10,14 +10,23 @@ from app import app
 @decorators.flight_manager_required
 def show_routes():
     if request.method.__eq__('GET'):
-        kw = request.args.get('kw')
+        kw_depart_airport = request.args.get('kw_depart_airport')
+        kw_arrive_airport = request.args.get('kw_arrive_airport')
         page = request.args.get('page', 1)
         
-        routes = dao.load_routes(kw=kw, page=int(page))
-        total_elements = dao.count_routes(kw)
+        airports = dao.load_stopover_airport()
+        
+        routes = dao.load_routes(kw_depart_airport=kw_depart_airport, kw_arrive_airport=kw_arrive_airport, page=int(page))
+        total_elements = dao.count_routes(kw_depart_airport, kw_arrive_airport)
+        
+        if kw_arrive_airport or kw_depart_airport:
+            query_string = f"&kw_depart_airport={kw_depart_airport}&kw_arrive_airport={kw_arrive_airport}"
+        else:
+            query_string = ''
     
         return render_template("flights/show.html", routes=routes, pages=math.ceil(total_elements / app.config['PAGE_SIZE']),
-                               current_page=int(page), kw=kw if kw else '')
+                               current_page=int(page), kw_depart_airport=kw_depart_airport if kw_depart_airport else '',
+                               kw_arrive_airport=kw_arrive_airport if kw_arrive_airport else '', airports=airports, query_string=query_string)
     
     if request.method.__eq__('POST'):
         data = request.form.copy()
@@ -37,11 +46,12 @@ def schedule(id):
         flights = None
         total_elements = None
         
-        
+    aircrafts = dao.load_aircarfts()
+            
     # not stopover airport
     airports = dao.load_stopover_airport()
     
     
     return render_template("flights/schedule.html", id=id, route=route, airports=airports, flights=flights, current_page=int(page) if page else '',
-                           pages=math.ceil(total_elements / app.config['PAGE_SIZE']) if total_elements else '')
+                           pages=math.ceil(total_elements / app.config['PAGE_SIZE']) if total_elements else '', aircrafts=aircrafts)
 

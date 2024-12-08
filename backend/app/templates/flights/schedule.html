@@ -6,7 +6,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
                     <a href="/schedule" class="btn btn-primary me-4"><i class='fas fa-angle-left'></i> Back</a>
-                    <h2><b>Route Id:</b> {{ id }} - <b>Name:</b> {{ route.name }}</h2>
+                    <h2><b>Route Id:</b> {{ id }}</h2>
                 </div>
                 <form action="/schedule/{{ route.id }}" method="get">
                     <input type="text" class="d-none" value="1" name="page">
@@ -38,13 +38,13 @@
                             <label for="flightDuration" class="form-label">Flight Duration</label>
                             <input type="number" id="flightDuration" class="form-control" placeholder="minutes" name="flightDuration">
                         </div>
-                        <div class="col-md-3">
-                            <label for="seatClass1" class="form-label">Seats class 1</label>
-                            <input type="number" id="seatClass1" class="form-control" name="seatClass1">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="seatClass2" class="form-label">Seats class 2</label>
-                            <input type="number" id="seatClass2" class="form-control" name="seatClass2">
+                        <div class="col-md-6">
+                            <label for="aircraft" class="form-label">Aircraft</label>
+                            <select class="form-select" id="aircraft" name="aircraft">
+                                {% for a in aircrafts %}
+                                    <option value="{{ a.id }}">{{ a.name }}</option>    
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
@@ -185,11 +185,11 @@
                 </div>
                 <div class="col-md-3">
                     <label for="stopoverDuration" class="form-label">Stopover Duration</label>
-                    <input type="number" id="stopoverDuration" class="form-control" placeholder="minutes">
+                    <input type="number" id="stopoverDuration" name="stopoverDuration" class="form-control" placeholder="minutes">
                 </div>
                 <div class="col-md-4">
                     <label for="stopoverNotes" class="form-label">Note</label>
-                    <input type="text" id="stopoverNotes" class="form-control">
+                    <input type="text" id="stopoverNotes" name="stopoverNotes" class="form-control">
                 </div>
               `;
             document.getElementById("stopovers").appendChild(stopoverDiv);

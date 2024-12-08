@@ -1,4 +1,5 @@
-from .models import Route, Flight, Airport, IntermediateAirport , db
+from .models import Route, Flight, Airport, IntermediateAirport , db, Aircraft
+from app import app
 
 
 def add_route(
@@ -59,21 +60,30 @@ def add_flight(
         print(f"Failed to add new route: {e}")
         return None
     
-def load_routes(kw=None, page=None):
+def load_routes(kw_depart_airport=None, kw_arrive_airport=None, page=None):
     query = Route.query
-    if kw:
-        query = query.filter(Route.name.contains(kw))
-    
+    if kw_depart_airport:
+        query = query.filter(Route.depart_airport_id.in_(find_airport(kw_depart_airport)))
+    if kw_arrive_airport:
+        query = query.filter(Route.arrive_airport_id.in_(find_airport(kw_arrive_airport)))
+
     page_size = app.config['PAGE_SIZE']
     start = (page - 1) * page_size
     query = query.slice(start, start + page_size)
     
     return query.all()
 
-def count_routes(kw=None):
-    if kw:
-        return Route.query.filter(Route.name.contains(kw)).count()
-        
+def count_routes(kw_depart_airport=None, kw_arrive_airport=None):
+    query = Route.query
+    if kw_depart_airport and kw_arrive_airport:
+        query = query.filter(Route.depart_airport_id.in_(find_airport(kw_depart_airport)))
+        query = query.filter(Route.arrive_airport_id.in_(find_airport(kw_arrive_airport)))
+        return query.count()
+    elif kw_depart_airport:
+        return query.filter(Route.depart_airport_id.in_(find_airport(kw_depart_airport))).count()
+    elif kw_arrive_airport:
+        return query.filter(Route.arrive_airport_id.in_(find_airport(kw_arrive_airport))).count()
+
     return Route.query.count()
 
 def get_route_by_id(id):
@@ -100,3 +110,10 @@ def find_intermediate_airport(flight_id):
     intermediate_airports = IntermediateAirport.query.filter(IntermediateAirport.flight_id == flight_id).all()
     # Trả về kết quả dưới dạng danh sách dictionary
     return [intermediate_airport.to_dict() for intermediate_airport in intermediate_airports]
+
+def find_airport(kw):
+    airport_ids = [airport_id[0] for airport_id in Airport.query.filter(Airport.name.contains(kw)).with_entities(Airport.id).all()]
+    return airport_ids
+    
+def load_aircarfts():
+    return Aircraft.query.all()

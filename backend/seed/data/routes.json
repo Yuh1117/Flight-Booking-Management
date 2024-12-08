@@ -1,43 +1,36 @@
 [
     {
         "id": 1,
-        "name":"Ho Chi Minh Da Nang",
         "depart_airport_id": 2,
         "arrive_airport_id": 3
     },
     {
         "id": 2,
-        "name":"Ha Noi Ho Chi Minh",
         "depart_airport_id": 1,
         "arrive_airport_id": 2
     },
     {
         "id": 3,
-        "name":"Da Nang Ho Chi Minh",
         "depart_airport_id": 2,
         "arrive_airport_id": 1
     },
     {
         "id": 4,
-        "name":"Ca Mau Da Nang",
         "depart_airport_id": 5,
         "arrive_airport_id": 3
     },
     {
         "id": 5,
-        "name":"Phu Bai Quy Nhon",
         "depart_airport_id": 13,
         "arrive_airport_id": 17
     },
     {
         "id": 6,
-        "name":"Phu Quoc Cam Ranh",
         "depart_airport_id": 14,
         "arrive_airport_id": 15
     },
     {
         "id": 7,
-        "name":"Da Nang Ca Mau",
         "depart_airport_id": 3,
         "arrive_airport_id": 5
     }
