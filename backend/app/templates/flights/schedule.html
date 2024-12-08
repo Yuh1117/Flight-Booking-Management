@@ -1,26 +1,30 @@
 {% extends "layouts/base.html" %}
 {% block content %}
-<div class="container mt-5" style="height: 100vh">
+<div class="container mt-5">
     <div class="row">
         <div class="col-12 mx-auto">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <a href="/schedule" class="btn btn-primary me-4"><i class="fa-solid fa-caret-left fa-xl"></i> Back</a>
+                    <a href="/schedule" class="btn btn-primary me-4"><i class='fas fa-angle-left'></i> Back</a>
                     <h2><b>Route Id:</b> {{ id }} - <b>Name:</b> {{ route.name }}</h2>
                 </div>
-                <button class="btn btn-secondary">View created flight schedules</button>
+                <form action="/schedule/{{ route.id }}" method="get">
+                    <input type="text" class="d-none" value="1" name="page">
+                    <button class="btn btn-secondary">View created flight schedules</button>
+                </form>
             </div>
             <div class="p-4 my-3 border border-2 rounded-5 bg-white">
                 <form action="/schedule" method="post">
+                    <input type="text" class="d-none" name="route_id" value="{{ route.id }}">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="departureAirport" class="form-label">Depart Airport</label>
-                            <input type="text" id="departureAirport" class="form-control" value="{{ route.depart_airport.name }}"
+                            <input type="text" id="departureAirport" class="form-control" name="departureAirport" value="{{ route.depart_airport.name }}"
                                readonly>
                         </div>
                         <div class="col-md-6">
                             <label for="arrivalAirport" class="form-label">Arrive Airport</label>
-                            <input type="text" id="arrivalAirport" class="form-control" value="{{ route.arrive_airport.name }}"
+                            <input type="text" id="arrivalAirport" class="form-control" name="arrivalAirport" value="{{ route.arrive_airport.name }}"
                                 readonly>
                         </div>
                     </div>
@@ -28,19 +32,19 @@
                     <div class="row mb-3">
                         <div class="col-md-3">
                             <label for="departureDateTime" class="form-label">Depart Date Time</label>
-                            <input type="datetime-local" id="departureDateTime" class="form-control">
+                            <input type="datetime-local" id="departureDateTime" class="form-control" name="departureDateTime">
                         </div>
                         <div class="col-md-3">
                             <label for="flightDuration" class="form-label">Flight Duration</label>
-                            <input type="number" id="flightDuration" class="form-control" placeholder="phút">
+                            <input type="number" id="flightDuration" class="form-control" placeholder="minutes" name="flightDuration">
                         </div>
                         <div class="col-md-3">
                             <label for="seatClass1" class="form-label">Seats class 1</label>
-                            <input type="number" id="seatClass1" class="form-control">
+                            <input type="number" id="seatClass1" class="form-control" name="seatClass1">
                         </div>
                         <div class="col-md-3">
                             <label for="seatClass2" class="form-label">Seats class 2</label>
-                            <input type="number" id="seatClass2" class="form-control">
+                            <input type="number" id="seatClass2" class="form-control" name="seatClass2">
                         </div>
                     </div>
 
@@ -66,6 +70,77 @@
                     </div>
                 </form>
             </div>
+
+            {% if flights %}
+            <div class="createdFlights mt-4">
+                <div class="row align-items-center p-3">
+                    <div class="col-md-1 col-12"></div>
+                    <h3 class="text-center col-md-10 col-10">Created flights schedules</h3>
+                    <button class="btn btn-secondary col-md-1 col-2" id="btnCloseCreatedFlights">Close</button>
+                </div>
+                <div class="p-4 my-3 border border-2 rounded-5 bg-white">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Route Id</th>
+                                <th>Depart time</th>
+                                <th>Arrive time</th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-middle">
+                            {% for f in flights %}
+                            <tr>
+                                <td>{{f.id}}</td>
+                                <td>{{f.route_id}}</td>
+                                <td>{{f.depart_time}}</td>
+                                <td>{{f.arrive_time}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            <!-- Previous Button -->
+                            <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                                <a class="page-link" href="/schedule/{{route.id}}?page={{current_page - 1}}" aria-label="Previous">
+                                    <span aria-hidden="true"><i class='fas fa-angle-left'></i></span>
+                                </a>
+                            </li>
+                    
+                            <!-- First Page -->
+                            {% if current_page > 3 %}
+                            <li class="page-item"><a class="page-link" href="/schedule/{{route.id}}?page=1">1</a></li>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                    
+                            <!-- Pages around the current page -->
+                            {% for page in range(current_page - 2 if current_page > 2 else 1, current_page + 3 if current_page + 2 <= pages else pages + 1) %}
+                            <li class="page-item {% if page == current_page %}active{% endif %}">
+                                <a class="page-link" href="/schedule/{{route.id}}?page={{page}}">{{page}}</a>
+                            </li>
+                            {% endfor %}
+                    
+                            <!-- Last Page -->
+                            {% if current_page < pages - 2 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                            <li class="page-item"><a class="page-link" href="/schedule/{{route.id}}?page={{pages}}">{{pages}}</a></li>
+                            {% endif %}
+                    
+                            <!-- Next Button -->
+                            <li class="page-item {% if current_page == pages %}disabled{% endif %}">
+                                <a class="page-link" href="/schedule/{{route.id}}?page={{current_page + 1}}" aria-label="Next">
+                                    <span aria-hidden="true"><i class='fas fa-angle-right'></i></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+                </div>
+            </div>
+            {% endif %}
         </div>
 
     </div>
@@ -79,6 +154,10 @@
     .regulation {
         pointer-events: none;
         opacity: 0.5;
+    }
+
+    footer{
+        margin-top: 20%;
     }
 </style>
 <script>
@@ -98,16 +177,15 @@
                 </div>
                 <div class="col-md-4">
                     <label for="stopoverAirport" class="form-label">Stopover Airport</label>
-                    <select class="form-select" id="stopoverAirport">
-                        <option selected="selected" value="a">a</option>
-                        <option value="b">b</option>
-                        <option value="c">c</option>
-                        <option value="d">d</option>
+                    <select class="form-select" id="stopoverAirport" name="stopoverAirport">
+                        {% for a in airports %}
+                            <option value="{{ a.id }}">{{ a.name }}</option>    
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label for="stopoverDuration" class="form-label">Stopover Duration</label>
-                    <input type="number" id="stopoverDuration" class="form-control" placeholder="phút">
+                    <input type="number" id="stopoverDuration" class="form-control" placeholder="minutes">
                 </div>
                 <div class="col-md-4">
                     <label for="stopoverNotes" class="form-label">Note</label>
@@ -129,6 +207,11 @@
             }
         
     });
+
+
+    document.getElementById("btnCloseCreatedFlights").addEventListener("click", function (){
+        document.querySelector(".createdFlights").classList.add("d-none")
+    })
 
 </script>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-<div class="container mt-5" style="height: 100vh">
+<div class="container mt-5" >
     <div class="row">
         <div class="col-12 mx-auto">
             <div class="d-flex justify-content-between align-items-center">
@@ -32,8 +32,7 @@
                             <td>{{r.depart_airport.name}}</td>
                             <td>{{r.arrive_airport.name}}</td>
                             <td>
-                                <a href="/schedule/{{r.id}}" class="btn btn-primary">Choose <i
-                                        class="fa-solid fa-caret-right fa-xl"></i></a>
+                                <a href="/schedule/{{r.id}}" class="btn btn-primary">Choose <i class='fas fa-angle-right'></i></a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -67,4 +66,9 @@
         </div>
     </div>
 </div>
+<style>
+    footer{
+        margin-top: 20%;
+    }
+</style>
 {% endblock content %}
