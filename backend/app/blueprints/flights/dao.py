@@ -1,5 +1,5 @@
 from .models import Route, Flight, Airport, IntermediateAirport , db
-
+from app import app
 
 def add_route(
     depart_airport_id,

@@ -15,47 +15,42 @@ def booking():
     from_city = request.args.get('from')     
     to_city = request.args.get('to')        
     depart_date = request.args.get('depart') 
+    print(depart_date)
     
+    # Truyền dữ liệu tìm kiếm
     data = {
         "from": from_city,
         "to": to_city,
-        "departDate": depart_date
+        "depart": depart_date
     }
+
+    # Lấy trang hiện tại từ URL hoặc mặc định là 1
+    page = int(request.args.get("page", 1))
+
+    # Gọi hàm tìm kiếm chuyến bay với dữ liệu và trang hiện tại
+    result = find_route_with_data(data, page=page)
     
-    # Giả sử `find_route_with_data` trả về kết quả với một danh sách các chuyến bay.
-    result = find_route_with_data(data)
-    
+    # Xử lý kết quả tìm kiếm
+    page_size = app.config['PAGE_SIZE']
+    total_flights = result.get("total_flights", 0)  # Lấy tổng số chuyến bay
+    total_pages = (total_flights + page_size - 1) // page_size  # Tính số trang
+
+    # Nếu tìm thấy chuyến bay, render template
     if result["success"]:
-        # Đảm bảo rằng chúng ta có danh sách các chuyến bay
         flights = result["flights"]
-        
-        # Sử dụng tham số `page` từ query string để phân trang
-        page = request.args.get('page', 1, type=int)
-        per_page = 5
-        total_flights = len(flights)
-        total_pages = ceil(total_flights / per_page)
-        
-        # Cắt chuyến bay dựa trên trang hiện tại
-        flights_paginated = flights[(page - 1) * per_page: page * per_page]
-        
-        # Tạo dữ liệu phân trang
-        pagination = {
-            'page': page,
-            'per_page': per_page,
-            'total_pages': total_pages
-        }
-        
         return render_template(
             "main/booking.html",
             route=result["route"],
-            flights=flights_paginated,
+            flights=flights,
             intermediate_airport=result["intermediate_airport"],
             dataAirport=dataAirport,
-            pagination=pagination, 
-            data=data  # Truyền dữ liệu tìm kiếm vào template
+            data=data,  # Truyền dữ liệu tìm kiếm vào template
+            current_page=page,
+            total_pages=total_pages
         )
-    
-    return render_template("main/booking.html", dataAirport=dataAirport)
+
+    # Nếu không có chuyến bay, render trang trống
+    return render_template("main/booking.html", dataAirport=dataAirport, current_page=page)
 
 
 

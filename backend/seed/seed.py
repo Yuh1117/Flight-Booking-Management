@@ -215,7 +215,6 @@ if __name__ == "__main__":
         seed_airlines()
         seed_aircrafts()
         seed_intermediate_airport()
-        print("Sân bay trung gian",find_intermediate_airport(14))
         db.session.commit()
         print("Data seeded successfully.")
         print(inspect(db.engine).get_table_names())
