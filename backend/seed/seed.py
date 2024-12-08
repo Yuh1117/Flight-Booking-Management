@@ -34,7 +34,6 @@ def seed_routes():
         for route in routes:
             print(route)
             existing_route = Route.query.filter_by(
-                name=route['name'],
                 depart_airport_id=route["depart_airport_id"],
                 arrive_airport_id=route["arrive_airport_id"],
             ).first()
@@ -42,7 +41,6 @@ def seed_routes():
             if not existing_route:
                 new_route = Route(
                     id=route["id"],
-                    name=route['name'],
                     depart_airport_id=route["depart_airport_id"],
                     arrive_airport_id=route["arrive_airport_id"],
                 )
@@ -207,14 +205,22 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-        seed_users()
-        seed_countries()
-        seed_airports()
+        # seed_users()
+        # seed_countries()
+        # seed_airports()
         seed_routes()
+<<<<<<< HEAD
         seed_flights()
         seed_airlines()
         seed_aircrafts()
         seed_intermediate_airport()
+=======
+        # seed_flights()
+        # seed_airlines()
+        # seed_aircrafts()
+        # seed_intermediate_airport()
+        # print("Sân bay trung gian",find_intermediate_airport(14))
+>>>>>>> 56923cb236d0e99731e05ee459c68a1f623fa3f4
         db.session.commit()
         print("Data seeded successfully.")
         print(inspect(db.engine).get_table_names())
