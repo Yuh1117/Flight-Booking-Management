@@ -20,6 +20,8 @@ class Reservation(db.Model):
     flight_seat_id = Column(Integer, ForeignKey("flight_seats.id"), nullable=False)
     status = Column(Enum(ReservationStatus), default=ReservationStatus.UNPAID)
     created_at = Column(DateTime, nullable=False)
+    user = relationship("User", backref="reservations", lazy=True)
+    flight_seat = relationship("FlightSeat", backref="reservations", lazy=True)
 
     def __repr__(self):
         return f"Reservation('{self.id}', '{self.flight_seat_id}', '{self.user_id}', '{self.status}')"
