@@ -6,7 +6,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from datetime import datetime as dt
 import json
-from sqlalchemy import inspect
 from app import app, db
 from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import UserRole
@@ -32,7 +31,6 @@ def seed_routes():
         with open("backend/seed/data/routes.json") as f:
             routes = json.load(f)
         for route in routes:
-            print(route)
             existing_route = Route.query.filter_by(
                 depart_airport_id=route["depart_airport_id"],
                 arrive_airport_id=route["arrive_airport_id"],
@@ -59,7 +57,6 @@ def seed_airports():
         with open("backend/seed/data/airportsFull.json") as f:
             airports = json.load(f)
         for airport in airports:
-            print(airport)
             existing_airport = Airport.query.filter_by(code=airport["code"]).first()
             if not existing_airport:
                 # Tạo đối tượng Airport mới
@@ -84,7 +81,6 @@ def seed_countries():
         with open("backend/seed/data/countries.json") as f:
             countries = json.load(f)
         for country in countries:
-            print(country)
             existing_country = Country.query.filter_by(
                 code=country["CountryCode"]
             ).first()
@@ -194,7 +190,6 @@ def seed_intermediate_airport():
                         order=intermediate_airport["order"],
                 )
                 db.session.add(new_intermediate_airport)  # Thêm vào session
-                print(new_intermediate_airport.to_dict())
         db.session.commit()
         print("Intermediate airports seeded successfully!")
     except Exception as e:
@@ -205,22 +200,13 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-        # seed_users()
-        # seed_countries()
-        # seed_airports()
+        seed_users()
+        seed_countries()
+        seed_airports()
         seed_routes()
-<<<<<<< HEAD
-        seed_flights()
         seed_airlines()
         seed_aircrafts()
+        seed_flights()
         seed_intermediate_airport()
-=======
-        # seed_flights()
-        # seed_airlines()
-        # seed_aircrafts()
-        # seed_intermediate_airport()
-        # print("Sân bay trung gian",find_intermediate_airport(14))
->>>>>>> 56923cb236d0e99731e05ee459c68a1f623fa3f4
         db.session.commit()
         print("Data seeded successfully.")
-        print(inspect(db.engine).get_table_names())
