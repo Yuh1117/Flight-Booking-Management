@@ -122,15 +122,17 @@
                 </div>
                 <div class="col-md-3 p-3 text-center">
                     <div class="mb-3">
-                        <button class="btn btn-secondary w-100" disabled>PHỔ THÔNG <br> HẾT VÉ</button>
+                        <!-- Nút PHỔ THÔNG -->
+                        <a href="{{ url_for('bookings.reserve_ticket', flight_id=item.id, ticket_class='phổ thông') }}" 
+                           class="btn btn-secondary w-100">PHỔ THÔNG</a>
                     </div>
                     <div class="bg-warning rounded">
-                        <span class="fw-bold">THƯƠNG GIA</span>
-                        <div class="mt-2">
-                            <span class="fs-4">từ 5.860.000</span> <small>VND</small>
-                        </div>
+                        <!-- Nút THƯƠNG GIA -->
+                        <a href="{{ url_for('bookings.reserve_ticket', flight_id=item.id, ticket_class='thương gia') }}" 
+                           class="btn btn-warning">THƯƠNG GIA</a>
                     </div>
                 </div>
+                
             </div>
         </div>
         {% endfor %}
@@ -162,18 +164,12 @@
             <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
         {% endif %}
     </ul>
-    
-    
     {% endif %}
-    
-    
-
 </div>
 {% endblock content %}
 
 {% block scripts %}
 <!-- <script src="{{ url_for('static', filename='js/booking.js') }}"></script> -->
-
 {% endblock %}
 
 

@@ -55,7 +55,7 @@ class Aircraft(db.Model):
     seats = relationship("AircraftSeat", backref="aircraft", lazy=True)
 
     def __repr__(self):
-        return f"Aircraft('{self.id}', '{self.name}', '{self.capacity}')"
+        return f"Aircraft('{self.id}', '{self.name}')"
     
     @property
     def airline_name(self):
