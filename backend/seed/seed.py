@@ -212,7 +212,8 @@ def seed_seatclasses():
                     name=seatclass["name"],
                 )
                 db.session.add(new_seatclass)
-        db.session.commit()
+        
+        db.session.commit()    
         print("Seatclasses seeded successfully!")
     except Exception as e:
         db.session.rollback()
