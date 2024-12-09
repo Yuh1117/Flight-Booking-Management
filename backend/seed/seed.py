@@ -6,7 +6,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from datetime import datetime as dt
 import json
-from sqlalchemy import inspect
 from app import app, db
 from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import UserRole
@@ -35,7 +34,6 @@ def seed_routes():
         with open("backend/seed/data/routes.json") as f:
             routes = json.load(f)
         for route in routes:
-            print(route)
             existing_route = Route.query.filter_by(
                 depart_airport_id=route["depart_airport_id"],
                 arrive_airport_id=route["arrive_airport_id"],
@@ -62,7 +60,6 @@ def seed_airports():
         with open("backend/seed/data/airportsFull.json") as f:
             airports = json.load(f)
         for airport in airports:
-            print(airport)
             existing_airport = Airport.query.filter_by(code=airport["code"]).first()
             if not existing_airport:
                 # Tạo đối tượng Airport mới
@@ -87,7 +84,6 @@ def seed_countries():
         with open("backend/seed/data/countries.json") as f:
             countries = json.load(f)
         for country in countries:
-            print(country)
             existing_country = Country.query.filter_by(
                 code=country["CountryCode"]
             ).first()
@@ -276,10 +272,10 @@ if __name__ == "__main__":
         seed_flights()
         seed_airlines()
         seed_aircrafts()
+        seed_flights()
         seed_intermediate_airport()
         seed_aircraft_seat()
         seed_seatclasses()
         seed_flight_seat()
         db.session.commit()
         print("Data seeded successfully.")
-        print(inspect(db.engine).get_table_names())
