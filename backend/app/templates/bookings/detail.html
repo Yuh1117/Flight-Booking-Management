@@ -20,7 +20,9 @@
             <div class="row mb-2 justify-content-center d-fex">
                 {% for seat in flight_seats %}
                     {% if seat.aircraft_seat.seat_class.name == ticket_class %}
-                        <button class="col-4 btn btn-light seat " onclick="selectSeat('{{ seat.aircraft_seat.seat_name }}', '{{ seat.price }}')">{{ seat.aircraft_seat.seat_name }}</button>
+                        <button class="col-4 btn btn-light seat " 
+                                onclick="selectSeat('{{ seat.aircraft_seat.seat_name }}', '{{ seat.price }}', '{{seat.currency}}' )"
+                        >{{ seat.aircraft_seat.seat_name }}</button>
                     {% else %}
                         <button class="col-4 btn btn-secondary seat" disabled>{{ seat.aircraft_seat.seat_name }}</button>
                     {% endif %}
@@ -32,7 +34,18 @@
             <div class="bg-light mt-1 p-2 rounded">
                 <h3>Thông tin chuyến đi</h3>
                 <div>
-                    Hà nội => Sài Gòn
+                    <span>
+                        <b>From:</b> {{flight.route.depart_airport.name}} </span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <span><b>To:</b > {{flight.route.arrive_airport.name}} </span>
+                    <div class="d-flex justify-content-between">
+                        <span>
+                            <b>Depart time: </b> {{flight.depart_time}}
+                        </span>
+                        <span>
+                            <b>Arrive time: </b> {{flight.arrive_time}}
+                        </span>
+                    </div>
                 </div>
                 <div id="selected_seat_info"></div>
             </div>
@@ -40,7 +53,13 @@
             <div class="bg-light mt-3 p-2 rounded">
                 <div class="mb-3">
                     <label for="fullName" class="form-label">Tên người đi <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="fullName" placeholder="Phạm Đình Dương" required>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="fullName" 
+                        placeholder="Phạm Đình Dương" 
+                        value="{{ user.first_name + ' ' + user.last_name }}"
+                        >
                 </div>
                 <div class="row g-2 align-items-center mb-3">
                     <div class="col-auto">
@@ -53,12 +72,12 @@
                     </div>
                     <div class="col">
                         <label for="phone" class="form-label visually-hidden">Số điện thoại</label>
-                        <input type="text" class="form-control" id="phone" placeholder="0347163896" required>
+                        <input type="text" class="form-control" id="phone" placeholder="0347163896" value="{{user.phone}}">
                     </div>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Email để nhận thông tin đặt chỗ <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" id="email" placeholder="duongxummo@gmail.com" required>
+                    <input type="email" class="form-control" id="email" placeholder="duongxummo@gmail.com" value="{{user.email}}">
                 </div>
                 <div class="alert alert-success d-flex align-items-center" role="alert">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check-circle me-2" viewBox="0 0 16 16">
@@ -75,12 +94,14 @@
     </form>
 </div>
 <script>
-    function selectSeat(seatName, seatPrice) {
+    function selectSeat(seatName, seatPrice, currency) {
         document.getElementById('selected_seat_info').innerHTML = `
-            <p>Ghế: ${seatName}</p>
-            <p>Giá: ${seatPrice} VNĐ</p>
-            <input type="hidden" name="seat_name" value="${seatName}">
-            <input type="hidden" name="seat_price" value="${seatPrice}">
+            <div>
+                <span><b>Ghế: </b>${seatName}</span>
+            </div>
+            <div>
+                <span><b>Giá: </b> ${seatPrice} ${currency}</span>
+            </div>
         `;
     }
 </script>

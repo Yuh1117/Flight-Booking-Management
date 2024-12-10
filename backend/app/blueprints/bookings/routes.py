@@ -2,6 +2,7 @@ from flask import render_template, jsonify, request
 from flask_login import login_required, current_user
 from . import bookings_bp, models
 from ..flights.models import Airport, Route, Flight
+from app.blueprints.bookings.models import Reservation
 from ..flights.dao import find_intermediate_airport
 from app import app
 from datetime import datetime
@@ -49,10 +50,17 @@ def reserve_ticket():
     flight = Flight.query.get(flight_id)
     flight_seats = flight.flight_seats
     user = current_user
-
     if not flight:
         return "Chuyến bay không tồn tại!", 404
-    return render_template("bookings/detail.html", flight=flight, ticket_class=ticket_class, flight_seats=flight_seats)
+    return render_template(
+        "bookings/detail.html", 
+        flight=flight, 
+        ticket_class=ticket_class, 
+        flight_seats=flight_seats,
+        user=user
+        )
+
+    
 
 
 

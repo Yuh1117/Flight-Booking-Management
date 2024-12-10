@@ -132,6 +132,7 @@ class Flight(db.Model):
     aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=False)
     aircraft = relationship("Aircraft", backref="flights", lazy=True)
     flight_seats = relationship("FlightSeat", backref="flight", lazy=True)
+    route = relationship("Route", backref="flights", lazy=True)
     intermediate_airport = relationship("IntermediateAirport", backref="flights", lazy="joined")
     def __repr__(self):
         return f"Flight('{self.id}', '{self.route_id}', '{self.depart_time}', '{self.arrive_time}')"
