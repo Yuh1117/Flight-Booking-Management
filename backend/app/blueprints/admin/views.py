@@ -29,6 +29,10 @@ class MyAdminView(AdminIndexView, AdminView):
 
 
 class CountryAdmin(ModelView, AdminView):
+    column_list = ("id", "name", "code")
+    form_excluded_columns = ["airports"]
+    column_searchable_list = ["name", "code"]
+
     def create_model(self, form):
         if flight_dao.get_country_by_code(form.code.data):
             form.code.errors.append("Country code already exists!")
@@ -53,6 +57,7 @@ class UserView(ModelView, AdminView):
         "phone",
         "role",
     )
+    column_searchable_list = ["first_name", "last_name", "email", "citizen_id", "phone"]
 
 
 class RouteAdmin(ModelView, AdminView):
@@ -64,6 +69,7 @@ class RouteAdmin(ModelView, AdminView):
         "arrive_airport.id",
     ]
     form_excluded_columns = ["flights"]
+    column_searchable_list = ["depart_airport.name"]
 
     def create_model(self, form):
 
@@ -96,16 +102,17 @@ class FlightAdmin(ModelView, AdminView):
         "aircraft.name",
         "aircraft.airline_name",
     )
+    # column_searchable_list = ["route.depart_airport.name"]
 
-    column_labels = {
-        "route.depart_airport.name": "Depart Airport",
-        "route.arrive_airport.name": "Arrive Airport",
-        "depart_time": "Departure Time",
-        "arrive_time": "Arrival Time",
-        "aircraft.id": "Aircraft ID",
-        "aircraft.name": "Aircraft Name",
-        "aircraft.airline_name": "Airline",
-    }
+    # column_labels = {
+    #     "route.depart_airport.name": "Depart Airport",
+    #     "route.arrive_airport.name": "Arrive Airport",
+    #     "depart_time": "Departure Time",
+    #     "arrive_time": "Arrival Time",
+    #     "aircraft.id": "Aircraft ID",
+    #     "aircraft.name": "Aircraft Name",
+    #     "aircraft.airline_name": "Airline",
+    # }
 
     form_excluded_columns = ["flight_seats"]
 
@@ -134,6 +141,8 @@ class FlightAdmin(ModelView, AdminView):
 
 class AirportAdmin(ModelView, AdminView):
     column_list = ("id", "name", "code", "country.name", "country.id")
+    form_excluded_columns = ["intermediate_airports"]
+    column_searchable_list = ["code", "name", "country.name"]
 
     def create_model(self, form):
         if flight_dao.get_airport_by_code(form.code.data):
@@ -170,7 +179,13 @@ class AirlineAdmin(ModelView, AdminView):
 
 
 class SeatClassAdmin(ModelView, AdminView):
-    pass
+    form_excluded_columns = ["seats"]
+
+
+class RegulationView(ModelView, AdminView):
+    form_excluded_columns = ["key"]
+    can_create = False
+    can_delete = False
 
 
 class LogoutView(AuthenticatedView):
@@ -200,4 +215,5 @@ admin.add_view(CountryAdmin(Country, db.session, name="Countries"))
 admin.add_view(AircraftAdmin(Aircraft, db.session, name="Aircrafts"))
 admin.add_view(AirlineAdmin(Airline, db.session, name="Airlines"))
 admin.add_view(SeatClassAdmin(SeatClass, db.session, name="Seat Classes"))
+admin.add_view(RegulationView(Regulation, db.session, name="Regulations"))
 admin.add_view(LogoutView(name="Log out"))

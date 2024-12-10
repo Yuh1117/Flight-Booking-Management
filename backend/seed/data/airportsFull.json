@@ -757,14 +757,14 @@
   },
   {
     "id": 127,
-    "name": "Nuremberg Airport",
-    "code": "NUE",
+    "name": "Malmö Airport",
+    "code": "MMX",
     "country_id": 27
   },
   {
     "id": 128,
-    "name": "Stuttgart Airport",
-    "code": "STR",
+    "name": "Skavsta Airport",
+    "code": "NYO",
     "country_id": 27
   },
   {
@@ -799,7 +799,7 @@
   },
   {
     "id": 134,
-    "name": "Dyce",
+    "name": "Aberdeen Airport",
     "code": "ABZ",
     "country_id": 30
   },
@@ -825,25 +825,25 @@
     "id": 138,
     "name": "Bilbao Airport",
     "code": "BIO",
-    "country_id": 30
+    "country_id": 25
   },
   {
     "id": 139,
     "name": "Billund Airport",
     "code": "BLL",
-    "country_id": 30
+    "country_id": 8
   },
   {
     "id": 140,
     "name": "Guglielmo Marconi Airport",
     "code": "BLQ",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 141,
     "name": "Bordeaux Airport",
     "code": "BOD",
-    "country_id": 30
+    "country_id": 9
   },
   {
     "id": 142,
@@ -853,27 +853,27 @@
   },
   {
     "id": 143,
-    "name": "Palese",
+    "name": "Bari Airport",
     "code": "BRI",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 144,
-    "name": "Brighton",
-    "code": "BSH",
+    "name": "Brighton City Airport",
+    "code": "ESH",
     "country_id": 30
   },
   {
     "id": 145,
-    "name": "Elmas",
+    "name": "Elmas Airport",
     "code": "CAG",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 146,
-    "name": "Canberra",
+    "name": "Canberra Airport",
     "code": "CBR",
-    "country_id": 30
+    "country_id": 1
   },
   {
     "id": 147,
@@ -891,17 +891,17 @@
     "id": 149,
     "name": "Catania Fontanarossa Airport",
     "code": "CTA",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 150,
-    "name": "Coventry",
+    "name": "Coventry Airport",
     "code": "CVT",
     "country_id": 30
   },
   {
     "id": 151,
-    "name": "Cardiff",
+    "name": "Cardiff Airport",
     "code": "CWL",
     "country_id": 30
   },
@@ -913,21 +913,21 @@
   },
   {
     "id": 153,
-    "name": "Peretola",
+    "name": "Florence Airport",
     "code": "FLR",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 154,
     "name": "Cristoforo Colombo",
     "code": "GOA",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 155,
-    "name": "Dulles International",
+    "name": "Dulles International Airport",
     "code": "IAD",
-    "country_id": 30
+    "country_id": 31
   },
   {
     "id": 156,
@@ -943,27 +943,27 @@
   },
   {
     "id": 158,
-    "name": "Executive",
+    "name": "Executive Airport",
     "code": "ORL",
-    "country_id": 30
+    "country_id": 31
   },
   {
     "id": 159,
     "name": "Sky Harbor International",
     "code": "PHX",
-    "country_id": 30
+    "country_id": 31
   },
   {
     "id": 160,
-    "name": "Punta Raisi",
+    "name": "Punta Raisi Airport",
     "code": "PMO",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 161,
     "name": "Galileo Galilei",
     "code": "PSA",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 162,
@@ -991,8 +991,8 @@
   },
   {
     "id": 166,
-    "name": "Seattle Tacoma International",
-    "code": "SEA",
+    "name": "Belfast International Airport",
+    "code": "BFS",
     "country_id": 30
   },
   {
@@ -1005,7 +1005,7 @@
     "id": 168,
     "name": "Lamezia Terme",
     "code": "SUF",
-    "country_id": 30
+    "country_id": 13
   },
   {
     "id": 169,
@@ -1111,7 +1111,7 @@
   },
   {
     "id": 186,
-    "name": "Exeter",
+    "name": "Exeter International Airport",
     "code": "EXT",
     "country_id": 30
   },
@@ -1219,13 +1219,13 @@
   },
   {
     "id": 204,
-    "name": "International",
+    "name": "Norwich International Airport",
     "code": "NWI",
     "country_id": 30
   },
   {
     "id": 205,
-    "name": "London Oxford",
+    "name": "Oxford Airport",
     "code": "OXF",
     "country_id": 30
   },
@@ -1243,7 +1243,7 @@
   },
   {
     "id": 208,
-    "name": "City Airport",
+    "name": "Plymouth City Airport",
     "code": "PLH",
     "country_id": 30
   },
@@ -1267,7 +1267,7 @@
   },
   {
     "id": 212,
-    "name": "Southampton",
+    "name": "Southampton Airport",
     "code": "SOU",
     "country_id": 30
   },
@@ -1705,13 +1705,13 @@
   },
   {
     "id": 285,
-    "name": "International",
+    "name": "San Diego International Airport",
     "code": "SAN",
     "country_id": 31
   },
   {
     "id": 286,
-    "name": "Seattle Tacoma International",
+    "name": "Seattle Tacoma International Airport",
     "code": "SEA",
     "country_id": 31
   },
@@ -1723,12 +1723,6 @@
   },
   {
     "id": 288,
-    "name": "Dulles International",
-    "code": "IAD",
-    "country_id": 31
-  },
-  {
-    "id": 289,
     "name": "Vancouver Airport",
     "code": "YVR",
     "country_id": 31
