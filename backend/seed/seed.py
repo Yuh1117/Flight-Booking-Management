@@ -6,7 +6,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from datetime import datetime as dt
 import json
-from sqlalchemy import inspect
 from app import app, db
 from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import UserRole
@@ -17,7 +16,10 @@ from app.blueprints.flights.models import Flight
 from app.blueprints.flights.models import Airline
 from app.blueprints.flights.models import Aircraft
 from app.blueprints.flights.models import IntermediateAirport
-from app.blueprints.flights.dao import find_intermediate_airport
+from app.blueprints.flights.models import AircraftSeat
+from app.blueprints.flights.models import SeatClass
+from app.blueprints.flights.models import FlightSeat
+
 
 def seed_users():
     with open("backend/seed/data/users.json") as f:
@@ -32,7 +34,6 @@ def seed_routes():
         with open("backend/seed/data/routes.json") as f:
             routes = json.load(f)
         for route in routes:
-            print(route)
             existing_route = Route.query.filter_by(
                 depart_airport_id=route["depart_airport_id"],
                 arrive_airport_id=route["arrive_airport_id"],
@@ -59,7 +60,6 @@ def seed_airports():
         with open("backend/seed/data/airportsFull.json") as f:
             airports = json.load(f)
         for airport in airports:
-            print(airport)
             existing_airport = Airport.query.filter_by(code=airport["code"]).first()
             if not existing_airport:
                 # Tạo đối tượng Airport mới
@@ -84,7 +84,6 @@ def seed_countries():
         with open("backend/seed/data/countries.json") as f:
             countries = json.load(f)
         for country in countries:
-            print(country)
             existing_country = Country.query.filter_by(
                 code=country["CountryCode"]
             ).first()
@@ -193,27 +192,91 @@ def seed_intermediate_airport():
                         departure_time=datetime.fromisoformat(intermediate_airport["depart_time"].replace("Z", "")),
                         order=intermediate_airport["order"],
                 )
-                db.session.add(new_intermediate_airport)  # Thêm vào session
-                print(new_intermediate_airport.to_dict())
+                db.session.add(new_intermediate_airport)  
         db.session.commit()
         print("Intermediate airports seeded successfully!")
     except Exception as e:
-        db.session.rollback()  # Rollback nếu có lỗi xảy ra
+        db.session.rollback()
         print(f"Failed to seed intermediate airports: {e}")
      
+
+def seed_seatclasses():
+    try:
+        with open("backend/seed/data/seatclasses.json") as f:
+            seatclasses = json.load(f)
+        for seatclass in seatclasses:
+            existing_seatclass = SeatClass.query.filter_by(id=seatclass["id"]).first()
+            if not existing_seatclass:
+                new_seatclass = SeatClass(
+                    id=seatclass["id"],
+                    name=seatclass["name"],
+                )
+                db.session.add(new_seatclass)
+        
+        db.session.commit()    
+        print("Seatclasses seeded successfully!")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed to seed seatclasses: {e}")
+
+def seed_aircraft_seat():
+    try:
+        with open("backend/seed/data/aircraft_seats.json") as f:
+            aircraft_seats = json.load(f)
+        for aircraft_seat in aircraft_seats:
+            existing_aircraft_seat = AircraftSeat.query.filter_by(
+                id = aircraft_seat["id"]
+            ).first()
+            if not existing_aircraft_seat:
+                new_aircraft_seat = AircraftSeat(
+                    aircraft_id=aircraft_seat["aircraft_id"],
+                    seat_class_id=aircraft_seat["class"],  
+                    seat_name=aircraft_seat["seat_number"]
+                )
+                db.session.add(new_aircraft_seat)
+        db.session.commit()
+        print("AircraftSeat seeded successfully!")
+    except Exception as e:
+        db.session.rollback() 
+        print(f"Failed to seed aircraft seats: {e}")
+
+
+def seed_flight_seat():
+    try:
+        with open("backend/seed/data/flight_seats.json") as f:
+            flight_seats = json.load(f)
+        for flight_seat in flight_seats:
+            existing_flight_seat = FlightSeat.query.filter_by(
+                id=flight_seat["id"]
+            ).first()
+            if not existing_flight_seat:
+                new_flight_seat = FlightSeat(
+                    flight_id=flight_seat["flight_id"],
+                    aircraft_seat_id=flight_seat["aircraft_seat_id"],
+                    price = flight_seat["price"],
+                    currency = flight_seat["currency"],
+                )
+                db.session.add(new_flight_seat)
+        db.session.commit()
+        print("FlightSeat seeded successfully!")
+    except Exception as e:
+        db.session.rollback()
+
 if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
-        # seed_users()
-        # seed_countries()
-        # seed_airports()
-        # seed_routes()
-        # seed_flights()
-        # seed_airlines()
-        # seed_aircrafts()
-        # seed_intermediate_airport()
-        # print("Sân bay trung gian",find_intermediate_airport(14))
+        seed_users()
+        seed_countries()
+        seed_airports()
+        seed_routes()
+        seed_flights()
+        seed_airlines()
+        seed_aircrafts()
+        seed_flights()
+        seed_intermediate_airport()
+        seed_aircraft_seat()
+        seed_seatclasses()
+        seed_flight_seat()
         db.session.commit()
         print("Data seeded successfully.")
-        print(inspect(db.engine).get_table_names())

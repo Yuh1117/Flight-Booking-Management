@@ -1,7 +1,8 @@
 from flask import render_template, jsonify, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 from . import bookings_bp, models
 from ..flights.models import Airport, Route, Flight
+from app.blueprints.bookings.models import Reservation
 from ..flights.dao import find_intermediate_airport
 from app import app
 from datetime import datetime
@@ -15,53 +16,52 @@ def booking():
     from_city = request.args.get('from')     
     to_city = request.args.get('to')        
     depart_date = request.args.get('depart') 
-    
     data = {
         "from": from_city,
         "to": to_city,
-        "departDate": depart_date
+        "depart": depart_date
     }
-    
-    # Giả sử `find_route_with_data` trả về kết quả với một danh sách các chuyến bay.
-    result = find_route_with_data(data)
-    
+    page = int(request.args.get("page", 1))
+    result = find_route_with_data(data, page=page)
+    page_size = app.config['PAGE_SIZE']
+    total_flights = result.get("total_flights", 0)  
+    total_pages = (total_flights + page_size - 1) // page_size  
     if result["success"]:
-        # Đảm bảo rằng chúng ta có danh sách các chuyến bay
         flights = result["flights"]
-        
-        # Sử dụng tham số `page` từ query string để phân trang
-        page = request.args.get('page', 1, type=int)
-        per_page = 5
-        total_flights = len(flights)
-        total_pages = ceil(total_flights / per_page)
-        
-        # Cắt chuyến bay dựa trên trang hiện tại
-        flights_paginated = flights[(page - 1) * per_page: page * per_page]
-        
-        # Tạo dữ liệu phân trang
-        pagination = {
-            'page': page,
-            'per_page': per_page,
-            'total_pages': total_pages
-        }
-        
         return render_template(
-            "main/booking.html",
+            "bookings/index.html",
             route=result["route"],
-            flights=flights_paginated,
+            flights=flights,
             intermediate_airport=result["intermediate_airport"],
             dataAirport=dataAirport,
-            pagination=pagination, 
-            data=data  # Truyền dữ liệu tìm kiếm vào template
+            data=data, 
+            current_page=page,
+            total_pages=total_pages
         )
-    
-    return render_template("main/booking.html", dataAirport=dataAirport)
-
-
-
+    return render_template("bookings/index.html", dataAirport=dataAirport, current_page=page)
 
     
     
+@bookings_bp.route("/booking/reserve", methods=["GET"])
+@login_required
+def reserve_ticket():
+    flight_id = request.args.get("flight_id")
+    ticket_class = request.args.get("ticket_class")
+    flight = Flight.query.get(flight_id)
+    flight_seats = flight.flight_seats
+    user = current_user
+    if not flight:
+        return "Chuyến bay không tồn tại!", 404
+    return render_template(
+        "bookings/detail.html", 
+        flight=flight, 
+        ticket_class=ticket_class, 
+        flight_seats=flight_seats,
+        user=user
+        )
+
+    
+
 
 
 
