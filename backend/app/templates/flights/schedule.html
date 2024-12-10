@@ -1,20 +1,23 @@
 {% extends "layouts/base.html" %}
 {% block content %}
+{% with messages = get_flashed_messages() %}
+{% endwith %}
 <div class="container mt-5">
     <div class="row">
         <div class="col-12 mx-auto">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
                     <a href="/schedule" class="btn btn-primary me-4"><i class='fas fa-angle-left'></i> Back</a>
-                    <h2><b>Route Id:</b> {{ id }}</h2>
+                    <h2><b>Route Id:</b> {{ route.id }}</h2>
                 </div>
+
                 <form action="/schedule/{{ route.id }}" method="get">
                     <input type="text" class="d-none" value="1" name="page">
                     <button class="btn btn-secondary">View created flight schedules</button>
                 </form>
             </div>
             <div class="p-4 my-3 border border-2 rounded-5 bg-white">
-                <form action="/schedule" method="post">
+                <form action="/schedule/{{ route.id }}" method="post">
                     <input type="text" class="d-none" name="route_id" value="{{ route.id }}">
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -52,21 +55,21 @@
                         <hr>
                     </div>
 
-                    <div id="stopovers">
-                        <h3>Stopover Airport</h3>
+                    <div id="intermediates">
+                        <h3>Intermediate Airport</h3>
 
                     </div>
 
                     <div class="d-flex justify-content-between mt-3">
                         <div>
-                            <button type="button" id="addStopover" class="btn btn-success rounded-4 me-2">+</button>
+                            <button type="button" id="addIntermediate" class="btn btn-success rounded-4 me-2">+</button>
                             <span>(Remaining: <span id="remaining">2</span>)</span>
                         </div>
                         <button type="submit" class="btn btn-primary">Schedule</button>
                     </div>
                     <!--  -->
                     <div class="d-none" id="regulations">
-                        <input type="number" value="2" id="regulationNumberStopovers" />
+                        <input type="number" value="2" id="regulationNumberIntermediate" />
                     </div>
                 </form>
             </div>
@@ -161,49 +164,58 @@
     }
 </style>
 <script>
-    const numberOfAirports = parseInt(document.getElementById('regulationNumberStopovers').value)
+    const numberOfAirports = parseInt(document.getElementById('regulationNumberIntermediate').value)
     const remaining = document.getElementById("remaining")
     // Add button
-    let stopoverCount = 0;
+    let intermediateCount = 0;
 
-    document.getElementById("addStopover").addEventListener("click", function () {
-            stopoverCount++;
-            remaining.innerText = numberOfAirports - stopoverCount
-            const stopoverDiv = document.createElement("div");
-            stopoverDiv.classList.add("row", "align-items-end", "mt-3");
-            stopoverDiv.innerHTML = `
-                <div class="col-md-1" style="width: 5%">
-                    <button type="button" class="btn btn-danger remove-stopover rounded-4">-</button>
+    document.getElementById("addIntermediate").addEventListener("click", function () {
+            intermediateCount++;
+            remaining.innerText = numberOfAirports - intermediateCount
+            const intermediateDiv = document.createElement("div");
+            intermediateDiv.classList.add("mt-3");
+            intermediateDiv.innerHTML = `
+                <div class="row align-items-end">
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger remove-intermediate rounded-4">-</button>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="intermediateAirport" class="form-label">Intermediate Airport</label>
+                        <select class="form-select" id="intermediateAirport" name="intermediateAirport">
+                            {% for a in airports %}
+                                <option value="{{ a.id }}">{{ a.name }}</option>    
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="intermediateArrivalTime" class="form-label">Intermediate Arrival Time</label>
+                        <input type="datetime-local" id="intermediateArrivalTime" name="intermediateArrivalTime" class="form-control" placeholder="minutes">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="intermediateDuration" class="form-label">Intermediate Duration</label>
+                        <input type="number" id="intermediateDuration" name="intermediateDuration" class="form-control" placeholder="minutes">
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <label for="stopoverAirport" class="form-label">Stopover Airport</label>
-                    <select class="form-select" id="stopoverAirport" name="stopoverAirport">
-                        {% for a in airports %}
-                            <option value="{{ a.id }}">{{ a.name }}</option>    
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="stopoverDuration" class="form-label">Stopover Duration</label>
-                    <input type="number" id="stopoverDuration" name="stopoverDuration" class="form-control" placeholder="minutes">
-                </div>
-                <div class="col-md-4">
-                    <label for="stopoverNotes" class="form-label">Note</label>
-                    <input type="text" id="stopoverNotes" name="stopoverNotes" class="form-control">
+                <div class="row mt-3">
+                    <div class=col-md-1 col-12></div>
+                    <div class="col-md-11">
+                        <label for="intermediateNotes" class="form-label">Note</label>
+                        <textarea id="intermediateNotes" name="intermediateNotes" class="form-control"></textarea>
+                    </div>
                 </div>
               `;
-            document.getElementById("stopovers").appendChild(stopoverDiv);
+            document.getElementById("intermediates").appendChild(intermediateDiv);
 
             // Remove button
-            stopoverDiv.querySelector(".remove-stopover").addEventListener("click", function () {
-                stopoverDiv.remove();
-                stopoverCount--;
-                document.getElementById('addStopover').classList.remove('regulation')
-                remaining.innerText = numberOfAirports - stopoverCount
+            intermediateDiv.querySelector(".remove-intermediate").addEventListener("click", function () {
+                intermediateDiv.remove();
+                intermediateCount--;
+                document.getElementById('addIntermediate').classList.remove('regulation')
+                remaining.innerText = numberOfAirports - intermediateCount
             });
 
-            if (stopoverCount === numberOfAirports) {
-                document.getElementById('addStopover').classList.add('regulation')
+            if (intermediateCount === numberOfAirports) {
+                document.getElementById('addIntermediate').classList.add('regulation')
             }
         
     });

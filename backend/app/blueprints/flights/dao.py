@@ -38,26 +38,44 @@ def add_flight(
     arrive_time,
     aircraft_id,
 ):
-    # Tạo đối tượng Route mới
-    new_flight = Route(
+    new_flight = Flight(
         route_id=route_id,
         depart_time=depart_time,
         arrive_time=arrive_time,
         aircraft_id=aircraft_id,
     )
 
-    # Thêm vào session của SQLAlchemy
     db.session.add(new_flight)
     
     try:
-        #commit dữ liệu vào cơ sở dữ liệu
         db.session.commit()
-        print("New flight added successfully!")
         return new_flight
     except Exception as e:
-        # Rollback nếu có lỗi xảy ra
         db.session.rollback()
-        print(f"Failed to add new route: {e}")
+        return None
+
+def add_intermediate_airport(
+    airport_id,
+    flight_id,
+    arrival_time,
+    departure_time,
+    order
+):
+    new_intermediate_airport = IntermediateAirport(
+        airport_id=airport_id,
+        flight_id=flight_id,
+        arrival_time=arrival_time,
+        departure_time=departure_time,
+        order=order
+    )
+
+    db.session.add(new_intermediate_airport)
+    
+    try:
+        db.session.commit()
+        return new_intermediate_airport
+    except Exception as e:
+        db.session.rollback()
         return None
     
 def load_routes(kw_depart_airport=None, kw_arrive_airport=None, page=None):
@@ -89,9 +107,8 @@ def count_routes(kw_depart_airport=None, kw_arrive_airport=None):
 def get_route_by_id(id):
     return Route.query.get(id)
 
-# not stopover airport
-def load_stopover_airport():
-    return Airport.query.all()
+def load_airports(id_depart_airport=None, id_arrive_airport=None):
+    return Airport.query.filter(Airport.id != id_depart_airport, Airport.id != id_arrive_airport).all()
 
 def load_flights(page=None):
     query = Flight.query.order_by(Flight.id.desc())

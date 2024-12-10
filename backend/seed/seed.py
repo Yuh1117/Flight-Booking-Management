@@ -208,7 +208,7 @@ if __name__ == "__main__":
         # seed_users()
         # seed_countries()
         # seed_airports()
-        seed_routes()
+        # seed_routes()
         # seed_flights()
         # seed_airlines()
         # seed_aircrafts()
