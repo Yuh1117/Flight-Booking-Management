@@ -5,7 +5,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from datetime import datetime as dt
 import json
-from sqlalchemy import inspect
 from app import app, db
 from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import User
@@ -19,8 +18,6 @@ from app.blueprints.flights.models import Aircraft
 from app.blueprints.flights.models import SeatClass
 from app.blueprints.flights.models import IntermediateAirport
 from app.blueprints.flights.models import Regulation
-
-from app.blueprints.flights.dao import find_intermediate_airport
 
 
 def seed_users():

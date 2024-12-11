@@ -12,7 +12,7 @@ def get_airports():
 
 
 
-def find_route_with_data(data):
+def find_route_with_data(data, page):
     try:
         print("Yêu cầu truyền vào", data)
         if not data:
@@ -24,7 +24,7 @@ def find_route_with_data(data):
         except (ValueError, TypeError):
             return {"success": False, "message": "From và To phải là số nguyên hợp lệ"}
         # Lấy ngày khởi hành từ dữ liệu
-        depart_date_str = data.get('departDate')
+        depart_date_str = data.get('depart')
         if not depart_date_str:
             return {"success": False, "message": "Ngày khởi hành (departDate) không được cung cấp"}
 
@@ -58,12 +58,11 @@ def find_route_with_data(data):
                         print(intermediate_airport)
                         print(intermediate_airport.airport.name)  # Giả sử 'name' là thuộc tính của 'Airport'
                         print("==========")
-
-            # In danh sách dictionary
-
-
-
-            flights_data = [flight.to_dict() for flight in flights]
+            print("page", page  )
+            page_size = app.config['PAGE_SIZE']
+            start = (page -1 )* page_size
+            end = start + page_size
+            flights_data = [flight.to_dict() for flight in flights][start:end]
             print("flight data", flights_data)
             print("stops data", intermediate_airports)
             return {
@@ -71,6 +70,8 @@ def find_route_with_data(data):
                 "route": route.to_dict(),
                 "flights": flights_data,
                 "intermediate_airport": intermediate_airports,
+                "total_flights": len(flights),  # Tổng số chuyến bay không phân trang
+
             }
         else:
             return {"success": False, "message": "Không tìm thấy tuyến đường"}

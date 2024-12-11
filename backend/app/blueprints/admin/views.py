@@ -72,7 +72,6 @@ class RouteAdmin(ModelView, AdminView):
     column_searchable_list = ["depart_airport.name"]
 
     def create_model(self, form):
-
         route = flight_dao.get_route_by_airports(
             form.depart_airport.data.id, form.arrive_airport.data.id
         )
@@ -102,17 +101,18 @@ class FlightAdmin(ModelView, AdminView):
         "aircraft.name",
         "aircraft.airline_name",
     )
-    # column_searchable_list = ["route.depart_airport.name"]
-
-    # column_labels = {
-    #     "route.depart_airport.name": "Depart Airport",
-    #     "route.arrive_airport.name": "Arrive Airport",
-    #     "depart_time": "Departure Time",
-    #     "arrive_time": "Arrival Time",
-    #     "aircraft.id": "Aircraft ID",
-    #     "aircraft.name": "Aircraft Name",
-    #     "aircraft.airline_name": "Airline",
-    # }
+    column_labels = {
+        "route.depart_airport.name": "Depart Airport",
+        "route.arrive_airport.name": "Arrive Airport",
+        "aircraft.id": "Aircraft ID",
+        "aircraft.name": "Aircraft Name",
+        "aircraft.airline_name": "Airline Name",
+    }
+    column_searchable_list = [
+        "id",
+        "route.depart_airport.name",
+        "route.arrive_airport.name",
+    ]
 
     form_excluded_columns = ["flight_seats"]
 
@@ -160,7 +160,7 @@ class AirportAdmin(ModelView, AdminView):
 
 class AircraftAdmin(ModelView, AdminView):
     # Hiển thị thêm airline_name
-    column_list = ("id", "name", "airline_name")
+    column_list = ("id", "name", "airline.name")
     form_excluded_columns = ["seats", "flights"]
     form_extra_fields = {
         "aircraft_1seats": IntegerField(
@@ -170,12 +170,17 @@ class AircraftAdmin(ModelView, AdminView):
             "Seats for 2nd class", validators=[DataRequired(), NumberRange(min=1)]
         ),
     }
+    column_searchable_list = [
+        "id",
+        "name",
+        "airline.name",
+    ]
 
 
 class AirlineAdmin(ModelView, AdminView):
     column_list = ("id", "name")
 
-    column_labels = {"id": "ID", "name": "Tên Hãng"}
+    column_searchable_list = ["id", "name"]
 
 
 class SeatClassAdmin(ModelView, AdminView):
@@ -206,14 +211,14 @@ admin = Admin(
     index_view=MyAdminView(name="Index"),
 )
 
-admin.add_view(HomeView(name="Home"))
+admin.add_view(HomeView(name="Home", menu_class_name="bg-primary"))
 admin.add_view(UserView(User, db.session, name="Users"))
+admin.add_view(CountryAdmin(Country, db.session, name="Countries"))
+admin.add_view(AirportAdmin(Airport, db.session, name="Airports"))
+admin.add_view(AirlineAdmin(Airline, db.session, name="Airlines"))
+admin.add_view(AircraftAdmin(Aircraft, db.session, name="Aircrafts"))
+admin.add_view(SeatClassAdmin(SeatClass, db.session, name="Seat Classes"))
 admin.add_view(RouteAdmin(Route, db.session, name="Routes"))
 admin.add_view(FlightAdmin(Flight, db.session, name="Flights"))
-admin.add_view(AirportAdmin(Airport, db.session, name="Airports"))
-admin.add_view(CountryAdmin(Country, db.session, name="Countries"))
-admin.add_view(AircraftAdmin(Aircraft, db.session, name="Aircrafts"))
-admin.add_view(AirlineAdmin(Airline, db.session, name="Airlines"))
-admin.add_view(SeatClassAdmin(SeatClass, db.session, name="Seat Classes"))
 admin.add_view(RegulationView(Regulation, db.session, name="Regulations"))
-admin.add_view(LogoutView(name="Log out"))
+admin.add_view(LogoutView(name="Log out", menu_class_name="bg-danger"))

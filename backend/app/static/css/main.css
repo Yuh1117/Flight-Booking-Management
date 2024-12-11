@@ -450,3 +450,37 @@ footer hr {
 .fade-translate {
   transform: translateY(100px); /* Dịch chuyển từ dưới */
 }
+
+
+/*  */
+.seat-layout {
+  background-color: #f1f1f1;
+  padding: 20px;
+  border-radius: 15px;
+  width: 300px;
+  margin: 20px auto;
+  display: flex;
+  flex-wrap: wrap; /* Cho phép các ghế xuống dòng nếu vượt quá chiều rộng */
+  justify-content: center; /* Căn giữa ngang các phần tử */
+}
+.seat {
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px; 
+  padding: 10px;
+}
+.seat:hover{
+  background-color: green;
+  color: white;
+}
+/* 
+.seat.occupied {
+  background-color: #d6d6d6;
+}
+
+.seat:not(.occupied):hover {
+  cursor: pointer;
+  background-color: #e0f7fa;
+} */

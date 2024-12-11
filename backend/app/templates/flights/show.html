@@ -1,15 +1,33 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-<div class="container mt-5" >
+<div class="container mt-5">
     <div class="row">
         <div class="col-12 mx-auto">
             <div class="d-flex justify-content-between align-items-center">
                 <h2>Choose route:</h2>
                 <form method="get" action="/schedule" class="d-flex">
-                    <input class="form-control me-2" name="kw" type="text" placeholder="Name" value="{{kw}}">
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
-                    <a href="/schedule" class="btn btn-secondary ms-2" type="submit"><i class="fa-solid fa-arrow-rotate-right"></i></a>
+                    <div class="form-group">
+                        <input list="aiport" id="depart_airport" name="kw_depart_airport" class="form-control"
+                            placeholder="Depart Airport" value="{{ kw_depart_airport }}">
+                        <datalist id="aiport">
+                            {% for a in airports %}
+                            <option value="{{ a.name }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="form-group ms-2">
+                        <input list="aiport" id="arrive_airport" name="kw_arrive_airport" class="form-control"
+                            placeholder="Arrive Airport" value="{{ kw_arrive_airport }}">
+                        <datalist id="aiport">
+                            {% for a in airports %}
+                            <option value="{{ a.name }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <button class="btn btn-primary ms-2" type="submit"><i class="fas fa-search"></i></button>
+                    <a href="/schedule" class="btn btn-secondary ms-2" type="submit"><i
+                            class="fa-solid fa-arrow-rotate-right"></i></a>
                 </form>
             </div>
             {% if routes %}
@@ -18,7 +36,6 @@
                     <thead>
                         <tr>
                             <th>Id</th>
-                            <th>Name</th>
                             <th>Depart Airport</th>
                             <th>Arrive Airport</th>
                             <th></th>
@@ -28,11 +45,11 @@
                         {% for r in routes %}
                         <tr>
                             <td>{{r.id}}</td>
-                            <td>{{r.name}}</td>
                             <td>{{r.depart_airport.name}}</td>
                             <td>{{r.arrive_airport.name}}</td>
                             <td>
-                                <a href="/schedule/{{r.id}}" class="btn btn-primary">Choose <i class='fas fa-angle-right'></i></a>
+                                <a href="/schedule/{{r.id}}" class="btn btn-primary">Choose <i
+                                        class='fas fa-angle-right'></i></a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -43,15 +60,19 @@
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-center">
                         <li class="page-item">
-                            <a class="page-link {% if current_page == 1 %}disabled{% endif %}" href="/schedule?page={{current_page - 1}}&kw={{kw}}" aria-label="Previous">
+                            <a class="page-link {% if current_page == 1 %}disabled{% endif %}"
+                                href="/schedule?page={{current_page - 1}}{{ query_string }}" aria-label="Previous">
                                 <span aria-hidden="true"><i class='fas fa-angle-left'></i></span>
                             </a>
                         </li>
                         {% for page in range(1, pages + 1) %}
-                        <li class="page-item"><a class="page-link {% if page == current_page %}active{% endif %}" href="/schedule?page={{page}}&kw={{kw}}">{{page}}</a></li>
+                        <li class="page-item"><a class="page-link {% if page == current_page %}active{% endif %}"
+                                href="/schedule?page={{page}}{{ query_string }}">{{page}}</a>
+                        </li>
                         {% endfor %}
                         <li class="page-item">
-                            <a class="page-link {% if current_page == pages %}disabled{% endif %}" href="/schedule?page={{current_page + 1}}&kw={{kw}}" aria-label="Next">
+                            <a class="page-link {% if current_page == pages %}disabled{% endif %}"
+                                href="/schedule?page={{current_page + 1}}{{ query_string }}" aria-label="Next">
                                 <span aria-hidden="true"> <i class='fas fa-angle-right'></i></span>
                             </a>
                         </li>
@@ -67,7 +88,7 @@
     </div>
 </div>
 <style>
-    footer{
+    footer {
         margin-top: 20%;
     }
 </style>

@@ -19,7 +19,6 @@ class Country(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     code = Column(VARCHAR(5), unique=True, nullable=False)
-    airports = relationship("Airport", backref="country", lazy=True)
 
     def __repr__(self):
         return f"Country({self.id}, '{self.name}', '{self.code}')"
@@ -31,6 +30,7 @@ class Airport(db.Model):
     name = Column(String(50), nullable=False)
     code = Column(VARCHAR(5), unique=True, nullable=False)
     country_id = Column(Integer, ForeignKey("countries.id"), nullable=True)
+    country = relationship("Country", backref="airports", lazy=True)
 
     def __repr__(self):
         return f"Airport({self.id}, '{self.name}', '{self.code}', '{self.country_id}')"
@@ -52,7 +52,6 @@ class Airline(db.Model):
     __tablename__ = "airlines"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
-    aircrafts = relationship("Aircraft", backref="airline", lazy=True)
 
     def __repr__(self):
         return f"Airline({self.id}, '{self.name}')"
@@ -63,7 +62,7 @@ class Aircraft(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     airline_id = Column(Integer, ForeignKey("airlines.id"), nullable=False)
-    seats = relationship("AircraftSeat", backref="aircraft", lazy=True)
+    airline = relationship("Airline", backref="aircrafts", lazy=True)
 
     def __repr__(self):
         return f"Aircraft({self.id}, '{self.airline.name}', '{self.name}')"
@@ -94,6 +93,7 @@ class AircraftSeat(db.Model):
     aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=False)
     seat_class_id = Column(Integer, ForeignKey("seat_classes.id"), nullable=False)
     seat_name = Column(String(5), nullable=False)
+    aircraft = relationship("Aircraft", backref="seats", lazy=True)
     seat_class = relationship("SeatClass", backref="seats", lazy=True)
 
     def __repr__(self):
@@ -107,6 +107,7 @@ class FlightSeat(db.Model):
     aircraft_seat_id = Column(Integer, ForeignKey("aircraft_seats.id"), nullable=False)
     price = Column(Double, nullable=False)
     currency = Column(VARCHAR(20), nullable=False)
+    flight = relationship("Flight", backref="seats", lazy=True)
     aircraft_seat = relationship("AircraftSeat", backref="flight_seats", lazy=True)
 
     def __repr__(self):
@@ -125,9 +126,12 @@ class Route(db.Model):
     arrive_airport_id = Column(
         Integer, ForeignKey("airports.id", ondelete="CASCADE"), nullable=False
     )
-    depart_airport = relationship("Airport", foreign_keys=[depart_airport_id])
-    arrive_airport = relationship("Airport", foreign_keys=[arrive_airport_id])
-    flights = relationship("Flight", backref="route", lazy=True)
+    depart_airport = relationship(
+        "Airport", foreign_keys=[depart_airport_id], backref="depart_routes"
+    )
+    arrive_airport = relationship(
+        "Airport", foreign_keys=[arrive_airport_id], backref="arrive_routes"
+    )
 
     def __repr__(self):
         return f"Route({self.id}, '{self.depart_airport}', '{self.arrive_airport}')"
@@ -147,15 +151,11 @@ class Flight(db.Model):
     depart_time = Column(DateTime, nullable=False)
     arrive_time = Column(DateTime, nullable=False)
     aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=False)
+    route = relationship("Route", backref="flights", lazy=True)
     aircraft = relationship("Aircraft", backref="flights", lazy=True)
-    flight_seats = relationship("FlightSeat", backref="flight", lazy=True)
 
     __table_args__ = (
         CheckConstraint("depart_time < arrive_time", name="check_depart_time"),
-    )
-
-    intermediate_airport = relationship(
-        "IntermediateAirport", backref="flights", lazy="joined"
     )
 
     def __repr__(self):
