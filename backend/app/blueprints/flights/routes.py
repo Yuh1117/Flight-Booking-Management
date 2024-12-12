@@ -25,8 +25,8 @@ def show_routes():
         query_string = ''
 
     return render_template("flights/show.html", routes=routes, pages=math.ceil(total_elements / app.config['PAGE_SIZE']),
-                            current_page=int(page), kw_depart_airport=kw_depart_airport if kw_depart_airport else '',
-                            kw_arrive_airport=kw_arrive_airport if kw_arrive_airport else '', airports=airports, query_string=query_string)
+                            current_page=int(page), kw_depart_airport=int(kw_depart_airport) if kw_depart_airport else '',
+                            kw_arrive_airport=int(kw_arrive_airport) if kw_arrive_airport else '', airports=airports, query_string=query_string)
 
 
 @flights_bp.route("/schedule/<id>", methods=['GET', 'POST'])
@@ -46,15 +46,26 @@ def schedule(id):
                 
         airports = dao.load_airports(route.depart_airport_id, route.arrive_airport_id)
         
+        # regulation
+        max_stopover_airports = dao.get_max_stopover_airports()
+        min_flight_duration = dao.get_min_flight_duration()
+        max_flight_duration = dao.get_max_flight_duration()
+
+        regulations = {
+            'max_stopover_airports': max_stopover_airports,
+            'min_flight_duration': min_flight_duration,
+            'max_flight_duration': max_flight_duration
+        }
         
         return render_template("flights/schedule.html", route=route, airports=airports, flights=flights, current_page=int(page) if page else '',
-                            pages=math.ceil(total_elements / app.config['PAGE_SIZE']) if total_elements else '', aircrafts=aircrafts)
+                            pages=math.ceil(total_elements / app.config['PAGE_SIZE']) if total_elements else '', aircrafts=aircrafts,
+                            regulations=regulations)
     
     if request.method.__eq__('POST'):
         data = request.form.copy()
         # print(data)
         message = None
-
+        
         # flight 
         depart_time = datetime.strptime(data['departureDateTime'],  "%Y-%m-%dT%H:%M")
         time_to_add = timedelta(minutes=int(data['flightDuration']))
@@ -97,3 +108,18 @@ def schedule(id):
         flash(message)
         return redirect(f'/schedule/{data['route_id']}')
 
+# @flights_bp.route("/api/schedule/validate", methods=['POST'])
+# @decorators.flight_manager_required
+# def validate():
+#     data = request.json
+#     message = {
+#         "flight_duration":'',
+        
+#     }
+#     max_flight_duration = dao.get_max_flight_duration()
+#     min_flight_duration = dao.get_min_flight_duration()
+    
+#     if(int(data.get('flightDuration')) < min_flight_duration or int(data.get('flightDuration')) > max_flight_duration):
+#         message['flight_duration'] = f"Flight duration must be between {min_flight_duration} - {max_flight_duration} minutes!"
+    
+#     return jsonify(message)

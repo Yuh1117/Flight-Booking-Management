@@ -8,22 +8,20 @@
                 <h2>Choose route:</h2>
                 <form method="get" action="/schedule" class="d-flex">
                     <div class="form-group">
-                        <input list="aiport" id="depart_airport" name="kw_depart_airport" class="form-control"
-                            placeholder="Depart Airport" value="{{ kw_depart_airport }}">
-                        <datalist id="aiport">
+                        <select class="selectpicker" data-live-search="true" name="kw_depart_airport">
+                            <option value="">-- Depart Airport --</option>
                             {% for a in airports %}
-                            <option value="{{ a.name }}">
+                            <option value="{{ a.id }}" {% if kw_depart_airport == a.id %}selected{% endif %}>{{ a.name }}</option>
                             {% endfor %}
-                        </datalist>
+                        </select>
                     </div>
                     <div class="form-group ms-2">
-                        <input list="aiport" id="arrive_airport" name="kw_arrive_airport" class="form-control"
-                            placeholder="Arrive Airport" value="{{ kw_arrive_airport }}">
-                        <datalist id="aiport">
+                        <select class="selectpicker" data-live-search="true" name="kw_arrive_airport">
+                            <option value="">-- Arrive Airport --</option>
                             {% for a in airports %}
-                            <option value="{{ a.name }}">
+                            <option value="{{ a.id }}" {% if kw_arrive_airport == a.id %}selected{% endif %}>{{ a.name }}</option>
                             {% endfor %}
-                        </datalist>
+                        </select>
                     </div>
                     <button class="btn btn-primary ms-2" type="submit"><i class="fas fa-search"></i></button>
                     <a href="/schedule" class="btn btn-secondary ms-2" type="submit"><i
