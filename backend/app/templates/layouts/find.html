@@ -38,15 +38,7 @@
                     <label for="to" class="form-label">To:</label>
                     <select id="to" name="to" class="form-select" required>
                         <option value="" disabled selected>Select destination airport</option>
-                        {% for airport in dataAirport %}
-                            {% if airport.id == request.args.get('to')|int %}
-                                <option value="{{ airport.id }}" selected>{{ airport.name }}</option>
-                            {% else %}
-                                <option value="{{ airport.id }}">{{ airport.name }}</option>
-                            {% endif %}
-                        {% endfor %}
                     </select>
-                    
                 </div>
                 <div class="col-md-2">
                     <label for="depart" class="form-label">Depart:</label>
@@ -54,7 +46,7 @@
                 </div>
                 <div class="col-md-2">
                     <label for="return" class="form-label">Return:</label>
-                    <input type="date" id="return" name="return" class="form-control">
+                    <input type="date" id="return" name="return" class="form-control" disabled>
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary d-flex align-items-center">
