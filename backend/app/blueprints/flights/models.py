@@ -139,8 +139,8 @@ class Route(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "depart_airport": self.depart_airport_name,
-            "arrive_airport": self.arrive_airport_name,
+            "depart_airport": self.depart_airport.name,
+            "arrive_airport": self.arrive_airport.name,
         }
 
 

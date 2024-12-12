@@ -1,0 +1,34 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Xác nhận đặt vé thành công!</h2>
+    <p>Đơn đặt vé của bạn đã được xác nhận. Dưới đây là thông tin chi tiết chuyến bay:</p>
+    
+    <div class="bg-light mt-3 p-2 rounded">
+        <h3>Thông tin chuyến bay</h3>
+        <p><b>From:</b> {{ flight.route.depart_airport.name }} <i class="fa-solid fa-arrow-right"></i> <b>To:</b> {{ flight.route.arrive_airport.name }}</p>
+        <div class="d-flex justify-content-between">
+            <span><b>Depart time:</b> {{ flight.depart_time }}</span>
+            <span><b>Arrive time:</b> {{ flight.arrive_time }}</span>
+        </div>
+    </div>
+
+    <div class="bg-light mt-3 p-2 rounded">
+        <h3>Thông tin ghế</h3>
+        <p><b>Ghế:</b> {{ flight_seat.aircraft_seat.seat_name }}</p>
+        <p><b>Giá:</b> {{ flight_seat.price }} {{ flight_seat.currency }}</p>
+    </div>
+
+    <div class="bg-light mt-3 p-2 rounded">
+        <h3>Thông tin người đặt</h3>
+        <p><b>Tên:</b> {{ reservation.user.first_name }} {{ reservation.user.last_name }}</p>
+        <p><b>Email:</b> {{ reservation.user.email }}</p>
+        <p><b>Số điện thoại:</b> {{ reservation.user.phone }}</p>
+    </div>
+
+    <div class="alert alert-success mt-3" role="alert">
+        Cảm ơn bạn đã đặt vé! Chúng tôi sẽ liên hệ với bạn qua email hoặc số điện thoại khi có thông tin mới.
+    </div>
+</div>
+{% endblock %}

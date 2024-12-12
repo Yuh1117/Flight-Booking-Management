@@ -3,6 +3,8 @@
 <div class="container mt-5">
     <h2>Đặt vé cho chuyến bay {{ flight.route_code }}</h2>
     <p>Loại vé: {{ ticket_class }}</p>
+
+    <!-- Các nút ghế -->
     <div class="d-flex align-items-center justify-content-around">
         <div class="d-flex align-items-center gap-1">
             <button class="btn btn-secondary">B000</button><span>Ghế khách hạng</span>
@@ -14,52 +16,51 @@
             <button class="btn btn-light">C222</button><span>Còn trống</span>
         </div>
     </div>
+
+    <!-- Sơ đồ ghế -->
     <div class="info-booking d-flex mt-5">
         <div class="seat-layout text-center">
             <p>SƠ ĐỒ</p>
-            <div class="row mb-2 justify-content-center d-fex">
+            <div class="row mb-2 justify-content-center">
                 {% for seat in flight_seats %}
                     {% if seat.aircraft_seat.seat_class.name == ticket_class %}
-                        <button class="col-4 btn btn-light seat " 
-                                onclick="selectSeat('{{ seat.aircraft_seat.seat_name }}', '{{ seat.price }}', '{{seat.currency}}' )"
-                        >{{ seat.aircraft_seat.seat_name }}</button>
+                        <button class="col-4 btn btn-light seat" 
+                                onclick="selectSeat('{{ seat.aircraft_seat.seat_name }}', '{{ seat.price }}', '{{ seat.currency }}', '{{ seat.id }}')">
+                            {{ seat.aircraft_seat.seat_name }}
+                        </button>
                     {% else %}
-                        <button class="col-4 btn btn-secondary seat" disabled>{{ seat.aircraft_seat.seat_name }}</button>
+                        <button class="col-4 btn btn-secondary seat" disabled>
+                            {{ seat.aircraft_seat.seat_name }}
+                        </button>
                     {% endif %}
                 {% endfor %}
             </div>
         </div>
 
-        <form>
+        <!-- Form thông tin chuyến đi -->
+        <form method="POST" action="{{ url_for('bookings.reserve_ticket') }}">
             <div class="bg-light mt-1 p-2 rounded">
                 <h3>Thông tin chuyến đi</h3>
                 <div>
-                    <span>
-                        <b>From:</b> {{flight.route.depart_airport.name}} </span>
+                    <span><b>From:</b> {{ flight.route.depart_airport.name }}</span>
                     <i class="fa-solid fa-arrow-right"></i>
-                    <span><b>To:</b > {{flight.route.arrive_airport.name}} </span>
+                    <span><b>To:</b> {{ flight.route.arrive_airport.name }}</span>
                     <div class="d-flex justify-content-between">
-                        <span>
-                            <b>Depart time: </b> {{flight.depart_time}}
-                        </span>
-                        <span>
-                            <b>Arrive time: </b> {{flight.arrive_time}}
-                        </span>
+                        <span><b>Depart time:</b> {{ flight.depart_time }}</span>
+                        <span><b>Arrive time:</b> {{ flight.arrive_time }}</span>
                     </div>
                 </div>
                 <div id="selected_seat_info"></div>
+
+                <!-- Thêm input ẩn để gửi  -->
+                <input type="hidden" name="seat_id" id="seat_id">
             </div>
-            
+
+            <!-- Thông tin người đi -->
             <div class="bg-light mt-3 p-2 rounded">
                 <div class="mb-3">
                     <label for="fullName" class="form-label">Tên người đi <span class="text-danger">*</span></label>
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        id="fullName" 
-                        placeholder="Phạm Đình Dương" 
-                        value="{{ user.first_name + ' ' + user.last_name }}"
-                        >
+                    <input type="text" class="form-control" id="fullName" placeholder="Phạm Đình Dương" value="{{ user.first_name + ' ' + user.last_name }}">
                 </div>
                 <div class="row g-2 align-items-center mb-3">
                     <div class="col-auto">
@@ -72,12 +73,12 @@
                     </div>
                     <div class="col">
                         <label for="phone" class="form-label visually-hidden">Số điện thoại</label>
-                        <input type="text" class="form-control" id="phone" placeholder="0347163896" value="{{user.phone}}">
+                        <input type="text" class="form-control" id="phone" placeholder="0347163896" value="{{ user.phone }}">
                     </div>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Email để nhận thông tin đặt chỗ <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" id="email" placeholder="duongxummo@gmail.com" value="{{user.email}}">
+                    <input type="email" class="form-control" id="email" placeholder="duongxummo@gmail.com" value="{{ user.email }}">
                 </div>
                 <div class="alert alert-success d-flex align-items-center" role="alert">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check-circle me-2" viewBox="0 0 16 16">
@@ -87,22 +88,28 @@
                     <div>Số điện thoại và email được sử dụng để gửi thông tin đơn hàng và liên hệ khi cần thiết.</div>
                 </div>
             </div>
+            
+            <!-- Nút xác nhận đặt vé -->
+            <button type="submit" class="btn btn-success">Xác nhận đặt vé</button>
         </form>
+
+         
     </div>
-    <form method="POST">
-        <button type="submit" class="btn btn-success">Xác nhận đặt vé</button>
-    </form>
 </div>
+
 <script>
-    function selectSeat(seatName, seatPrice, currency) {
-        document.getElementById('selected_seat_info').innerHTML = `
-            <div>
-                <span><b>Ghế: </b>${seatName}</span>
-            </div>
-            <div>
-                <span><b>Giá: </b> ${seatPrice} ${currency}</span>
-            </div>
-        `;
-    }
+function selectSeat(seatName, seatPrice, currency, id) {
+    // Cập nhật thông tin ghế đã chọn
+    document.getElementById('selected_seat_info').innerHTML = `
+        <div>
+            <span><b>Ghế: </b>${seatName}</span>
+        </div>
+        <div><span><b>Giá: </b>${seatPrice} ${currency}</span></div>
+    `;
+
+    // Cập nhật giá trị của input ẩn với ID của ghế
+    document.getElementById('seat_id').value = id;
+}
+
 </script>
 {% endblock %}

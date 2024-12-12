@@ -1,0 +1,29 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Quản lý vé của bạn</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã vé</th>
+                <th>Ghế</th>
+                <th>Thời gian tạo</th>
+                <th>Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reservation in reservations %}
+                <tr>
+                    <td>{{ reservation.id }}</td>
+                    <td>{{ reservation.flight_seat.aircraft_seat.seat_name }}</td>
+                    <td>{{ reservation.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ reservation.status }}</td>
+                    <td>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

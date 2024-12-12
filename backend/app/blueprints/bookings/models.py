@@ -26,7 +26,6 @@ class Reservation(db.Model):
     created_at = Column(DateTime, nullable=False)
     user = relationship("User", backref="reservations", lazy=True)
     flight_seat = relationship("FlightSeat", backref="reservations", lazy=True)
-
     def __repr__(self):
         return f"Reservation('{self.id}', '{self.flight_seat_id}', '{self.user_id}', '{self.status}')"
     
