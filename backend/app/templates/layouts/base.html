@@ -1,89 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="icon"
-      href="{{ url_for('static', filename='images/image.png') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/main.css') }}"
-    />
-    <!-- Thêm CSS cho Swiper -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/swiper@9.0.0/swiper-bundle.min.css"
-    />
 
-    <!-- Thêm JS cho Swiper -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@9.0.0/swiper-bundle.min.js"></script>
+<head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="{{ url_for('static', filename='images/image.png') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-      rel="stylesheet"
-    />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+        <!-- Thêm CSS cho Swiper -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9.0.0/swiper-bundle.min.css" />
 
+        <!-- Thêm JS cho Swiper -->
+        <script src="https://cdn.jsdelivr.net/npm/swiper@9.0.0/swiper-bundle.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.6.2/countUp.min.js"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
 
-    <title>Pay</title>
-  </head>
-  <body>
-    {% include 'layouts/navbar.html' %}
-    <div aria-live="polite" aria-atomic="true" class="noti-panel sticky-top">
-      <!-- Position it: -->
-      <!-- - `.toast-container` for spacing between toasts -->
-      <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
-      <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
-      <div class="toast-container position-absolute top-0 end-0 p-3">
-        <!-- SHOW MESSAGES -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        <!-- if there is a message -->
-        {% if messages %}
-        <!-- Print all the messages -->
-        {% for category,message in messages %}
-        <div
-          class="toast show"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
-          <div class="toast-header alert-{{ category }}">
-            <strong class="me-auto">Pay</strong>
-            <button
-              type="button"
-              class="btn-close fs-5"
-              data-bs-dismiss="toast"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="toast-body">{{message}}</div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.6.2/countUp.min.js"></script>
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet"
+                href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+        <title>Pay</title>
+</head>
+
+<body>
+        {% include 'layouts/navbar.html' %}
+        <div aria-live="polite" aria-atomic="true" class="noti-panel sticky-top">
+                <!-- Position it: -->
+                <!-- - `.toast-container` for spacing between toasts -->
+                <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+                <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+                <div class="toast-container position-absolute top-0 end-0 p-3">
+                        <!-- SHOW MESSAGES -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        <!-- if there is a message -->
+                        {% if messages %}
+                        <!-- Print all the messages -->
+                        {% for category,message in messages %}
+                        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="toast-header alert-{{ category }}">
+                                        <strong class="me-auto">Pay</strong>
+                                        <button type="button" class="btn-close fs-5" data-bs-dismiss="toast"
+                                                aria-label="Close"></button>
+                                </div>
+                                <div class="toast-body">{{message}}</div>
+                        </div>
+                        {% endfor %}
+                        <!--  -->
+                        {% endif %}
+                        <!--  -->
+                        {% endwith %}
+                        <!--  -->
+                </div>
         </div>
-        {% endfor %}
-        <!--  -->
-        {% endif %}
-        <!--  -->
-        {% endwith %}
-        <!--  -->
-      </div>
-    </div>
-    <main class="">
-      {% block content %}
-      <!--  -->
-      {% endblock content %}
-    </main>
-    {% include 'layouts/footer.html' %}
+        <main class="">
+                {% block content %}
+                <!--  -->
+                {% endblock content %}
+        </main>
+        {% include 'layouts/footer.html' %}
 
-    {% block scripts %}
-    {% endblock %}
-  </body>
+        {% block scripts %}
+        {% endblock %}
+</body>
+<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
-  <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </html>

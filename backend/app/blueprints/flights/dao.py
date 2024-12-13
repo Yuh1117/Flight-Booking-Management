@@ -1,6 +1,7 @@
 from datetime import datetime as dt
 
 from .models import *
+from .models import Route, Flight, Airport, IntermediateAirport , db, Aircraft
 from app import app
 
 
@@ -85,13 +86,11 @@ def add_intermediate_airport(
 def load_routes(kw_depart_airport=None, kw_arrive_airport=None, page=None):
     query = Route.query
     if kw_depart_airport:
-        query = query.filter(
-            Route.depart_airport_id.in_(find_airport(kw_depart_airport))
-        )
+        query = query.filter(Route.depart_airport_id == int(kw_depart_airport))
+        
     if kw_arrive_airport:
-        query = query.filter(
-            Route.arrive_airport_id.in_(find_airport(kw_arrive_airport))
-        )
+        query = query.filter(Route.arrive_airport_id == int(kw_arrive_airport))
+        
 
     page_size = app.config["PAGE_SIZE"]
     start = (page - 1) * page_size
@@ -118,21 +117,13 @@ def get_route_by_airports(depart_airport_id, arrive_airport_id):
 def count_routes(kw_depart_airport=None, kw_arrive_airport=None):
     query = Route.query
     if kw_depart_airport and kw_arrive_airport:
-        query = query.filter(
-            Route.depart_airport_id.in_(find_airport(kw_depart_airport))
-        )
-        query = query.filter(
-            Route.arrive_airport_id.in_(find_airport(kw_arrive_airport))
-        )
-        return query.count()
+        return query.filter(Route.depart_airport_id == int(kw_depart_airport), Route.arrive_airport_id == int(kw_arrive_airport)).count()
     elif kw_depart_airport:
         return query.filter(
-            Route.depart_airport_id.in_(find_airport(kw_depart_airport))
-        ).count()
+            Route.depart_airport_id == int(kw_depart_airport)).count()
     elif kw_arrive_airport:
         return query.filter(
-            Route.arrive_airport_id.in_(find_airport(kw_arrive_airport))
-        ).count()
+            Route.arrive_airport_id == int(kw_arrive_airport)).count()
 
     return Route.query.count()
 
@@ -166,14 +157,25 @@ def count_flights():
     return Flight.query.count()
 
 
-def find_airport(kw):
-    airport_ids = [
-        airport_id[0]
-        for airport_id in Airport.query.filter(Airport.name.contains(kw))
-        .with_entities(Airport.id)
-        .all()
+def find_intermediate_airport(flight_id):
+    # Tìm tất cả sân bay trung gian của một chuyến bay cụ thể
+    intermediate_airports = IntermediateAirport.query.filter(
+        IntermediateAirport.flight_id == flight_id
+    ).all()
+    # Trả về kết quả dưới dạng danh sách dictionary
+    return [
+        intermediate_airport.to_dict() for intermediate_airport in intermediate_airports
     ]
-    return airport_ids
+
+
+# def find_airport(kw):
+#     airport_ids = [
+#         airport_id[0]
+#         for airport_id in Airport.query.filter(Airport.name.contains(kw))
+#         .with_entities(Airport.id)
+#         .all()
+#     ]
+#     return airport_ids
 
 
 def load_aircarfts():
@@ -190,3 +192,6 @@ def get_max_flight_duration():
     return (
         Regulation.query.filter(Regulation.key == "max_flight_duration").first().value
     )
+
+def get_max_stopover_airports():
+    return Regulation.query.filter(Regulation.key == 'max_stopover_airports').first().value
