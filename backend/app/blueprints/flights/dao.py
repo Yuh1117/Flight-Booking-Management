@@ -190,3 +190,31 @@ def get_max_flight_duration():
     return (
         Regulation.query.filter(Regulation.key == "max_flight_duration").first().value
     )
+
+
+def get_seat_classes():
+    return SeatClass.query.all()
+
+
+def get_airlines():
+    with app.app_context():
+        return Airline.query.all()
+
+
+def add_aircraft(name, airline_id, seat_data: dict):
+    """
+    Add a new aircraft to the database along with its seats
+    seat_data: dict of seat class id and number of seats
+    """
+    new_aircraft = Aircraft(name=name, airline_id=airline_id)
+    count = 1
+    for seat_class_id, seat_num in seat_data.items():
+        for _ in range(seat_num):
+            new_aircraft.seats.append(
+                AircraftSeat(seat_class_id=seat_class_id, seat_name=f"S{count:03d}")
+            )
+            count += 1
+
+    db.session.add(new_aircraft)
+    db.session.commit()
+    return new_aircraft

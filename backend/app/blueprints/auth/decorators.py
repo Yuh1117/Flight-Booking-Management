@@ -33,7 +33,7 @@ def flight_manager_required(f):
     @wraps(f)
     @login_required
     def decorated_func(*args, **kwargs):
-        if current_user.role != UserRole.FLIGHT_MANAGER:
+        if current_user.role not in [UserRole.FLIGHT_MANAGER, UserRole.ADMIN]:
             abort(403)
         return f(*args, **kwargs)
 
@@ -44,7 +44,7 @@ def sales_employee_required(f):
     @wraps(f)
     @login_required
     def decorated_func(*args, **kwargs):
-        if current_user.role != UserRole.SALES_EMPLOYEE:
+        if current_user.role not in [UserRole.SALES_EMPLOYEE, UserRole.ADMIN]:
             abort(403)
         return f(*args, **kwargs)
 

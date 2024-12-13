@@ -1,11 +1,9 @@
-from flask import redirect, flash
+from flask import redirect, flash, render_template, url_for, request
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
 from flask_admin import AdminIndexView, BaseView, Admin, expose
-from wtforms.fields import IntegerField
-from wtforms.validators import DataRequired
-from wtforms.validators import NumberRange
 
+from .forms import CreateAircraftForm
 from app import app, db
 from app.blueprints.auth.models import User
 from app.blueprints.auth.models import UserRole
@@ -24,7 +22,7 @@ class AdminView(AuthenticatedView):
         return super().is_accessible() and current_user.role == UserRole.ADMIN
 
 
-class MyAdminView(AdminIndexView, AdminView):
+class DashboardAdmin(AdminIndexView, AdminView):
     pass
 
 
@@ -138,11 +136,17 @@ class FlightAdmin(ModelView, AdminView):
             return False
         return super().update_model(form, model)
 
+    @expose("/new", methods=["GET"])
+    def create_view(self):
+        return redirect(url_for("flights.show_routes"))
+
 
 class AirportAdmin(ModelView, AdminView):
     column_list = ("id", "name", "code", "country.name", "country.id")
-    form_excluded_columns = ["intermediate_airports"]
+    form_excluded_columns = ["intermediate_airports", "depart_routes", "arrive_routes"]
     column_searchable_list = ["code", "name", "country.name"]
+    column_filters = ["country.name"]
+    column_sortable_list = ["id", "name", "code", "country.name"]
 
     def create_model(self, form):
         if flight_dao.get_airport_by_code(form.code.data):
@@ -161,30 +165,59 @@ class AirportAdmin(ModelView, AdminView):
 class AircraftAdmin(ModelView, AdminView):
     # Hiển thị thêm airline_name
     column_list = ("id", "name", "airline.name")
-    form_excluded_columns = ["seats", "flights"]
-    form_extra_fields = {
-        "aircraft_1seats": IntegerField(
-            "Seats for 1st class", validators=[DataRequired(), NumberRange(min=1)]
-        ),
-        "aircraft_2seats": IntegerField(
-            "Seats for 2nd class", validators=[DataRequired(), NumberRange(min=1)]
-        ),
-    }
+    form_excluded_columns = ["flights"]
     column_searchable_list = [
         "id",
         "name",
         "airline.name",
     ]
+    column_sortable_list = ["id", "name", "airline.name"]
+
+    @expose("/new", methods=("GET", "POST"))
+    def create_view(self):
+        if request.method == "POST":
+            airline_id = request.form.get("airline_id")
+            aircraft_name = request.form.get("aircraft_name")
+            seat_data = {}
+            for name, value in request.form.items():
+                if name.startswith("class") and value:
+                    class_id = int(name.replace("class", ""))
+                    seat_data[class_id] = int(value)
+
+            # Validate data
+            if not seat_data:
+                flash("Please input seat data!", "danger")
+                return self.render("admin/createAirCraft.html")
+
+            # Add aircraft
+            try:
+                flight_dao.add_aircraft(aircraft_name, airline_id, seat_data)
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Error: {e}", "danger")
+                return self.render("admin/createAirCraft.html")
+
+            flash("Create aircraft successfully!", "success")
+            return redirect(url_for("aircraft.index_view"))
+        return self.render("admin/createAirCraft.html")
 
 
 class AirlineAdmin(ModelView, AdminView):
     column_list = ("id", "name")
-
     column_searchable_list = ["id", "name"]
+    form_excluded_columns = ["aircrafts"]
 
 
 class SeatClassAdmin(ModelView, AdminView):
     form_excluded_columns = ["seats"]
+
+
+class AircraftSeatAdmin(ModelView, AdminView):
+    form_excluded_columns = ["flight_seats"]
+
+
+class FlightSeatAdmin(ModelView, AdminView):
+    pass
 
 
 class RegulationView(ModelView, AdminView):
@@ -208,17 +241,19 @@ class HomeView(AuthenticatedView):
 admin = Admin(
     app,
     template_mode="bootstrap4",
-    index_view=MyAdminView(name="Index"),
+    index_view=DashboardAdmin(name="Dashboard"),
 )
 
-admin.add_view(HomeView(name="Home", menu_class_name="bg-primary"))
 admin.add_view(UserView(User, db.session, name="Users"))
 admin.add_view(CountryAdmin(Country, db.session, name="Countries"))
 admin.add_view(AirportAdmin(Airport, db.session, name="Airports"))
 admin.add_view(AirlineAdmin(Airline, db.session, name="Airlines"))
 admin.add_view(AircraftAdmin(Aircraft, db.session, name="Aircrafts"))
-admin.add_view(SeatClassAdmin(SeatClass, db.session, name="Seat Classes"))
+admin.add_view(AircraftSeatAdmin(AircraftSeat, db.session, name="AircraftSeats"))
+admin.add_view(SeatClassAdmin(SeatClass, db.session, name="SeatClasses"))
 admin.add_view(RouteAdmin(Route, db.session, name="Routes"))
 admin.add_view(FlightAdmin(Flight, db.session, name="Flights"))
+admin.add_view(FlightSeatAdmin(FlightSeat, db.session, name="FlightSeats"))
 admin.add_view(RegulationView(Regulation, db.session, name="Regulations"))
-admin.add_view(LogoutView(name="Log out", menu_class_name="bg-danger"))
+admin.add_view(HomeView(name="Home", menu_class_name="bg-success"))
+admin.add_view(LogoutView(name="Logout", menu_class_name="bg-danger"))

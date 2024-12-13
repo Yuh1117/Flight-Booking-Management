@@ -15,6 +15,8 @@ from app.blueprints.flights.models import Country
 from app.blueprints.flights.models import Flight
 from app.blueprints.flights.models import Airline
 from app.blueprints.flights.models import Aircraft
+from app.blueprints.flights.models import AircraftSeat
+from app.blueprints.flights.models import FlightSeat
 from app.blueprints.flights.models import SeatClass
 from app.blueprints.flights.models import IntermediateAirport
 from app.blueprints.flights.models import Regulation
@@ -124,6 +126,22 @@ def seed_seat_classes():
     print("Seat classes seeded successfully!")
 
 
+def seed_aircarft_seats():
+    with open("backend/seed/data/aircraft_seats.json") as f:
+        aircraft_seats = json.load(f)
+    for aircraft_seat in aircraft_seats:
+        db.session.add(AircraftSeat(**aircraft_seat))
+    print("Aircraft seats seeded successfully!")
+
+
+def seed_flight_seats():
+    with open("backend/seed/data/flight_seats.json") as f:
+        flight_seats = json.load(f)
+    for flight_seat in flight_seats:
+        db.session.add(FlightSeat(**flight_seat))
+    print("Flight seats seeded successfully!")
+
+
 def seed_regulations():
     with open("backend/seed/data/regulations.json") as f:
         regulations = json.load(f)
@@ -146,6 +164,8 @@ if __name__ == "__main__":
             seed_routes()
             seed_flights()
             seed_intermediate_airport()
+            seed_aircarft_seats()
+            seed_flight_seats()
             seed_regulations()
             db.session.commit()
             print("Data seeded successfully.")
