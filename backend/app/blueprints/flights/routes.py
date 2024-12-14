@@ -36,8 +36,8 @@ def schedule(id):
         route = dao.get_route_by_id(id)
         page = request.args.get('page')
         if page:
-            flights = dao.load_flights(page=int(page))
-            total_elements = dao.count_flights()
+            flights = dao.load_flights(page=int(page), route_id=route.id)
+            total_elements = dao.count_flights(route_id=route.id)
         else:
             flights = None
             total_elements = None
@@ -50,11 +50,15 @@ def schedule(id):
         max_stopover_airports = dao.get_max_stopover_airports()
         min_flight_duration = dao.get_min_flight_duration()
         max_flight_duration = dao.get_max_flight_duration()
+        min_stopover_duration = dao.get_min_stopover_duration()
+        max_stopover_duration = dao.get_max_stopover_duration()
 
         regulations = {
             'max_stopover_airports': max_stopover_airports,
             'min_flight_duration': min_flight_duration,
-            'max_flight_duration': max_flight_duration
+            'max_flight_duration': max_flight_duration,
+            'min_stopover_duration': min_stopover_duration,
+            'max_stopover_duration': max_stopover_duration
         }
         
         return render_template("flights/schedule.html", route=route, airports=airports, flights=flights, current_page=int(page) if page else '',
