@@ -17,7 +17,7 @@
                 </form>
             </div>
             <div class="p-4 my-3 border border-2 rounded-5 bg-white">
-                <form action="/schedule/{{ route.id }}" method="post" onsubmit="return validateSchedule()">
+                <form action="/schedule/{{ route.id }}" method="post" id="formSchedule">
                     <input type="text" class="d-none" name="route_id" value="{{ route.id }}">
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -76,14 +76,6 @@
                     <div class="d-none" id="regulations">
                         <input type="number" value="{{ regulations['max_stopover_airports'] }}"
                             id="regulationNumberIntermediate" />
-                        <input type="number" value="{{ regulations['min_flight_duration'] }}"
-                            id="regulationMinFlightDuration" />
-                        <input type="number" value="{{ regulations['max_flight_duration'] }}"
-                            id="regulationMaxFlightDuration" />
-                        <input type="number" value="{{ regulations['min_stopover_duration'] }}"
-                            id="regulationMinStopoverFlightDuration" />
-                        <input type="number" value="{{ regulations['max_stopover_duration'] }}"
-                            id="regulationMaxStopoverFlightDuration" />
                     </div>
                 </form>
             </div>
@@ -186,6 +178,102 @@
     }
 </style>
 <script>
+
+    document.getElementById("formSchedule").addEventListener("submit", function (e) {
+        e.preventDefault()
+        const flightDuration = parseInt(document.getElementById("flightDuration").value)
+        const departureDateTime = document.getElementById("departureDateTime").value
+
+        let intermediateAirport = []
+        let intermediateDuration = []
+        let intermediateArrivalTime = []
+        if (numberOfAirports !== parseInt(remaining.innerText)) {
+            const airport = document.querySelectorAll('#intermediateAirport')
+            airport.forEach(item => {
+                intermediateAirport.push(item.value)
+            })
+
+            const duration = document.querySelectorAll("#intermediateDuration")
+            duration.forEach(item => {
+                intermediateDuration.push(item.value)
+            })
+
+            const time = document.querySelectorAll('#intermediateArrivalTime')
+            time.forEach(item =>{
+                intermediateArrivalTime.push(item.value)
+            })
+        }
+
+        fetch("/api/schedule/validate", {
+            method: "post",
+            body: JSON.stringify({
+                "flightDuration": flightDuration,
+                "departureDateTime": departureDateTime,
+                "intermediateAirport": intermediateAirport,
+                "intermediateDuration": intermediateDuration,
+                "intermediateArrivalTime": intermediateArrivalTime
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(res => res.json()).then(data => {
+            //
+            if (data.flight_duration !== '') {
+                document.getElementById("flightDuration").classList.add("is-invalid")
+            } else {
+                document.getElementById("flightDuration").classList.remove("is-invalid")
+            }
+
+            //
+            if (data.depart_date_time !== '') {
+                document.getElementById("departureDateTime").classList.add("is-invalid")
+            } else {
+                document.getElementById("departureDateTime").classList.remove("is-invalid")
+            }
+
+            //
+            let count = 0
+            if (numberOfAirports !== parseInt(remaining.innerText)) {
+                const intermediateRows = document.querySelectorAll('.intermediateRow');
+                intermediateRows.forEach(row => {
+                    //
+                    if(data.intermediate_airport[count] !== ''){
+                        row.querySelector('#intermediateAirport').classList.add("is-invalid")
+                    }else{
+                        row.querySelector('#intermediateAirport').classList.remove("is-invalid")
+                    }
+
+                    //
+                    if(data.intermediate_duration[count] !== ''){
+                        row.querySelector('#intermediateDuration').classList.add("is-invalid")
+                    }else{
+                        row.querySelector('#intermediateDuration').classList.remove("is-invalid")
+                    }
+
+                    //
+                    if(data.intermediate_arrival_time[count] !== ''){
+                        row.querySelector('#intermediateArrivalTime').classList.add("is-invalid")
+                    }else{
+                        row.querySelector('#intermediateArrivalTime').classList.remove("is-invalid")
+                    }
+                    
+                    row.querySelector("#intermediateAirportError").innerHTML = data.intermediate_airport[count]
+                    row.querySelector("#intermediateDurationError").innerHTML = data.intermediate_duration[count]
+                    row.querySelector("#intermediateArrivalTimeError").innerHTML = data.intermediate_arrival_time[count]
+
+                    count++
+                })
+            }
+
+            document.getElementById("flightDurationError").innerHTML = data.flight_duration
+            document.getElementById("departureDateTimeError").innerHTML = data.depart_date_time
+
+            if (data.valid == true){
+                document.getElementById("formSchedule").submit()
+            }
+        })
+    })
+
     const numberOfAirports = parseInt(document.getElementById('regulationNumberIntermediate').value)
     const remaining = document.getElementById("remaining")
     // Add button
@@ -249,150 +337,6 @@
         document.querySelector(".createdFlights").classList.add("d-none")
     })
 
-    function validateSchedule() {
-        let check = true
-        flightDurationValid = validateFlightDuration()
-        departDateTimeValid = validateDepartDateTime()
-
-        if (numberOfAirports === parseInt(remaining.innerText)) {
-            if (!flightDurationValid || !departDateTimeValid) {
-                check = false
-            }
-        } else {
-            intermediateAirportValid = validateImtermediateAirport()
-            intermediateDurationValid = validateIntermediateDuration()
-            intermediateArrivalTimeValid = validateIntermediateArrivalTime()
-            if (!flightDurationValid || !departDateTimeValid || !intermediateAirportValid || !intermediateDurationValid || !intermediateArrivalTimeValid) {
-                check = false
-            }
-        }
-
-        // form submit if true
-        return check
-    }
-
-    function validateFlightDuration() {
-        let flag = false
-        const flightDuration = parseInt(document.getElementById("flightDuration").value)
-        const minFlightDuration = parseInt(document.getElementById("regulationMinFlightDuration").value)
-        const maxFlightDuration = parseInt(document.getElementById("regulationMaxFlightDuration").value)
-        let flightDurationError = ''
-
-        if (flightDuration < minFlightDuration || flightDuration > maxFlightDuration) {
-            document.getElementById("flightDuration").classList.add("is-invalid")
-            flightDurationError = `Flight duration must be between ${minFlightDuration} - ${maxFlightDuration}`
-            flag = false
-        } else {
-            document.getElementById("flightDuration").classList.remove("is-invalid")
-            flightDurationError = ''
-            flag = true
-        }
-        document.getElementById("flightDurationError").innerHTML = flightDurationError
-
-        return flag
-    }
-
-    function validateDepartDateTime() {
-        let flag = false
-        const departureDateTime = document.getElementById("departureDateTime").value
-        let departureDateTimeError = ''
-
-        const currentDate = new Date()
-        const departDate = new Date(departureDateTime)
-        if (departDate < currentDate) {
-            document.getElementById("departureDateTime").classList.add("is-invalid")
-            departureDateTimeError = 'Invalid depart date time'
-            flag = false
-        } else {
-            document.getElementById("departureDateTime").classList.remove("is-invalid")
-            departureDateTimeError = ''
-            flag = true
-        }
-        document.getElementById("departureDateTimeError").innerHTML = departureDateTimeError
-
-        return flag
-    }
-
-    function validateImtermediateAirport() {
-        const intermediateRows = document.querySelectorAll('.intermediateRow');
-        let airportSelections = [];
-        let flag = false;
-
-
-        intermediateRows.forEach(row => {
-            const airport = row.querySelector('#intermediateAirport')
-            let intermediateAirportError = ''
-            //
-            if (airportSelections.includes(airport.value)) {
-                airport.classList.add("is-invalid")
-                intermediateAirportError = 'Duplicate airport'
-                flag = false;
-            } else {
-                airport.classList.remove("is-invalid")
-                intermediateAirportError = ''
-                flag = true
-            }
-            airportSelections.push(airport.value);
-
-            row.querySelector("#intermediateAirportError").innerHTML = intermediateAirportError
-        });
-
-        return flag
-    }
-
-    function validateIntermediateDuration() {
-        const intermediateRows = document.querySelectorAll('.intermediateRow');
-        let flag = false;
-
-        const minStopoverDuration = parseInt(document.getElementById("regulationMinStopoverFlightDuration").value)
-        const maxStopoverDuration = parseInt(document.getElementById("regulationMaxStopoverFlightDuration").value)
-
-        intermediateRows.forEach(row => {
-            const duration = row.querySelector('#intermediateDuration')
-            let intermediateDurationError = ''
-            //
-            if (parseInt(duration.value) < minStopoverDuration || parseInt(duration.value) > maxStopoverDuration) {
-                duration.classList.add("is-invalid")
-                intermediateDurationError = `Intermediate duration must be between ${minStopoverDuration} - ${maxStopoverDuration}`
-                flag = false;
-            } else {
-                duration.classList.remove("is-invalid")
-                intermediateDurationError = ''
-                flag = true
-            }
-
-            row.querySelector("#intermediateDurationError").innerHTML = intermediateDurationError
-        });
-
-        return flag
-    }
-
-    function validateIntermediateArrivalTime() {
-        const intermediateRows = document.querySelectorAll('.intermediateRow');
-        let flag = false;
-
-        const departDateTime = new Date(document.getElementById("departureDateTime").value)
-
-        intermediateRows.forEach(row => {
-            const time = row.querySelector('#intermediateArrivalTime')
-            const intermediateArrivalTime = new Date(time.value)
-            let intermediateArrivalTimeError = ''
-            //
-            if (intermediateArrivalTime < departDateTime) {
-                time.classList.add("is-invalid")
-                intermediateArrivalTimeError = `Invalid intermediate arrival time`
-                flag = false;
-            } else {
-                time.classList.remove("is-invalid")
-                intermediateArrivalTimeError = ''
-                flag = true
-            }
-
-            row.querySelector("#intermediateArrivalTimeError").innerHTML = intermediateArrivalTimeError
-        });
-
-        return flag
-    }
 
 </script>
 {% endblock %}
