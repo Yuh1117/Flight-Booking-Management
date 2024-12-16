@@ -39,6 +39,16 @@ def flight_manager_required(f):
 
     return decorated_func
 
+def admin_or_flight_manager_required(f):
+    @wraps(f)
+    @login_required
+    def decorated_func(*args, **kwargs):
+        if current_user.role not in [UserRole.ADMIN, UserRole.FLIGHT_MANAGER]:
+            abort(403)
+        return f(*args, **kwargs)
+
+    return decorated_func
+
 
 def sales_employee_required(f):
     @wraps(f)

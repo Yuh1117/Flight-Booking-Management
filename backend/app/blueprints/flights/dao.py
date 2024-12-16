@@ -166,8 +166,10 @@ def load_airports(id_depart_airport=None, id_arrive_airport=None):
     ).all()
 
 
-def load_flights(page=None):
-    query = Flight.query.order_by(Flight.id.desc())
+def load_flights(page=None, route_id=None):
+    query = Flight.query
+    query = query.filter(Flight.route_id == route_id)
+    query = query.order_by(Flight.id.desc())
 
     page_size = app.config["PAGE_SIZE"]
     start = (page - 1) * page_size
@@ -176,8 +178,8 @@ def load_flights(page=None):
     return query.all()
 
 
-def count_flights():
-    return Flight.query.count()
+def count_flights(route_id=None):
+    return Flight.query.filter(Flight.route_id == route_id).count()
 
 
 def find_intermediate_airport(flight_id):
@@ -269,4 +271,16 @@ def get_staff_min_booking_time():
         Regulation.query.filter(Regulation.key == "staff_min_booking_time")
         .first()
         .value
+    )
+
+
+def get_min_stopover_duration():
+    return (
+        Regulation.query.filter(Regulation.key == "min_stopover_duration").first().value
+    )
+
+
+def get_max_stopover_duration():
+    return (
+        Regulation.query.filter(Regulation.key == "max_stopover_duration").first().value
     )

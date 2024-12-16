@@ -37,7 +37,7 @@ def get_countries():
 
 
 @flights_bp.route("/schedule", methods=["GET"])
-@decorators.flight_manager_required
+@decorators.admin_or_flight_manager_required
 def show_routes():
     kw_depart_airport = request.args.get("kw_depart_airport")
     kw_arrive_airport = request.args.get("kw_arrive_airport")
@@ -70,14 +70,14 @@ def show_routes():
 
 
 @flights_bp.route("/schedule/<id>", methods=["GET", "POST"])
-@decorators.flight_manager_required
+@decorators.admin_or_flight_manager_required
 def schedule(id):
     if request.method.__eq__("GET"):
         route = dao.get_route_by_id(id)
         page = request.args.get("page")
         if page:
-            flights = dao.load_flights(page=int(page))
-            total_elements = dao.count_flights()
+            flights = dao.load_flights(page=int(page), route_id=route.id)
+            total_elements = dao.count_flights(route_id=route.id)
         else:
             flights = None
             total_elements = None
@@ -88,13 +88,9 @@ def schedule(id):
 
         # regulation
         max_stopover_airports = dao.get_max_stopover_airports()
-        min_flight_duration = dao.get_min_flight_duration()
-        max_flight_duration = dao.get_max_flight_duration()
 
         regulations = {
             "max_stopover_airports": max_stopover_airports,
-            "min_flight_duration": min_flight_duration,
-            "max_flight_duration": max_flight_duration,
         }
 
         return render_template(
@@ -264,3 +260,96 @@ def showFlight(id):
         customer_min_booking_time=dao.get_customer_min_booking_time(),
         title="Flight Details",
     )
+
+
+@flights_bp.route("/api/schedule/validate", methods=["POST"])
+@decorators.admin_or_flight_manager_required
+def validate():
+    data = request.json
+    message = {
+        "flight_duration": "",
+        "depart_date_time": "",
+        "intermediate_airport": [],
+        "intermediate_duration": [],
+        "intermediate_arrival_time": [],
+        "valid": False,
+    }
+    ##
+    max_flight_duration = dao.get_max_flight_duration()
+    min_flight_duration = dao.get_min_flight_duration()
+
+    if (
+        int(data.get("flightDuration")) < min_flight_duration
+        or int(data.get("flightDuration")) > max_flight_duration
+    ):
+        message["flight_duration"] = (
+            f"Flight duration must be between {min_flight_duration} - {max_flight_duration} minutes!"
+        )
+
+    ##
+    now = datetime.strptime(str(datetime.now()), "%Y-%m-%d %H:%M:%S.%f")
+    depart_date_time = datetime.strptime(
+        data.get("departureDateTime"), "%Y-%m-%dT%H:%M"
+    )
+
+    if depart_date_time < now:
+        message["depart_date_time"] = "Invalid date time"
+
+    ##
+    duplicate = []
+    if data.get("intermediateAirport"):
+        for i in range(0, len(data.get("intermediateAirport"))):
+            message["intermediate_airport"].append("")
+            if i == 0:
+                duplicate.append(data.get("intermediateAirport")[i])
+                continue
+
+            if data.get("intermediateAirport")[i] in duplicate:
+                message["intermediate_airport"][i] = "Duplicate Airport"
+            duplicate.append(data.get("intermediateAirport")[i])
+
+    ##
+    min_stopover_duration = dao.get_min_stopover_duration()
+    max_stopover_duration = dao.get_max_stopover_duration()
+
+    if data.get("intermediateDuration"):
+        for i in range(0, len(data.get("intermediateDuration"))):
+            message["intermediate_duration"].append("")
+            if (
+                int(data.get("intermediateDuration")[i]) < min_stopover_duration
+                or int(data.get("intermediateDuration")[i]) > max_stopover_duration
+            ):
+                message["intermediate_duration"][
+                    i
+                ] = f"Value must be between {min_stopover_duration} - {max_stopover_duration}"
+
+    ##
+    if data.get("intermediateArrivalTime"):
+        for i in range(0, len(data.get("intermediateArrivalTime"))):
+            message["intermediate_arrival_time"].append("")
+            intermediate_arrival_time = datetime.strptime(
+                data.get("intermediateArrivalTime")[i], "%Y-%m-%dT%H:%M"
+            )
+            if intermediate_arrival_time < depart_date_time:
+                message["intermediate_arrival_time"][i] = "Invalid arrival time"
+
+    ####
+    intermediate_airport_valid = all(
+        item == "" for item in message["intermediate_airport"]
+    )
+    intermediate_duration_valid = all(
+        item == "" for item in message["intermediate_duration"]
+    )
+    intermediate_arrival_time_valid = all(
+        item == "" for item in message["intermediate_arrival_time"]
+    )
+    if (
+        message["depart_date_time"] == ""
+        and message["flight_duration"] == ""
+        and intermediate_airport_valid
+        and intermediate_duration_valid
+        and intermediate_arrival_time_valid
+    ):
+        message["valid"] = True
+
+    return jsonify(message)
