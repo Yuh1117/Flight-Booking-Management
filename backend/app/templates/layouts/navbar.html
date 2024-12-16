@@ -32,12 +32,20 @@
             <a class="nav-link active" aria-current="page" href="/">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/booking"
+            <a
+              class="nav-link"
+              aria-current="page"
+              href="{{url_for('flights.searchFlights')}}"
               >Book Flights</a
             >
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="{{url_for('main.manage_bookings')}}">Manage Bookings</a>
+            <a
+              class="nav-link"
+              aria-current="page"
+              href="{{url_for('main.manage_bookings')}}"
+              >Manage Bookings</a
+            >
           </li>
           {% if current_user.is_authenticated and current_user.is_admin() %}
           <li class="nav-item">

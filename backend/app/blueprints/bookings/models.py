@@ -1,10 +1,6 @@
 from enum import Enum as BaseEnum
 from sqlalchemy import Column, Integer, Enum, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from app.blueprints.flights.models import FlightSeat
-from app.blueprints.auth.models import User
-from enum import Enum as PyEnum
-from sqlalchemy.sql import func
 from app import db
 
 
@@ -26,7 +22,6 @@ class Reservation(db.Model):
     created_at = Column(DateTime, nullable=False)
     user = relationship("User", backref="reservations", lazy=True)
     flight_seat = relationship("FlightSeat", backref="reservations", lazy=True)
+
     def __repr__(self):
         return f"Reservation('{self.id}', '{self.flight_seat_id}', '{self.user_id}', '{self.status}')"
-    
-

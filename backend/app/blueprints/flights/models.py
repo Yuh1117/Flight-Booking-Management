@@ -11,6 +11,7 @@ from sqlalchemy import (
     CheckConstraint,
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref
 from app import db
 
 
@@ -22,6 +23,9 @@ class Country(db.Model):
 
     def __repr__(self):
         return f"Country({self.id}, '{self.name}', '{self.code}')"
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Airport(db.Model):
@@ -35,17 +39,15 @@ class Airport(db.Model):
     def __repr__(self):
         return f"Airport({self.id}, '{self.name}', '{self.code}', '{self.country_id}')"
 
+    def __str__(self):
+        return f"{self.name} ({self.code}) - {self.country.name}"
+
     @property
     def country_name(self):
         return self.country.name if self.country else None
 
     def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "code": self.code,
-            "country_name": self.country_name,
-        }
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Airline(db.Model):
@@ -55,6 +57,9 @@ class Airline(db.Model):
 
     def __repr__(self):
         return f"Airline({self.id}, '{self.name}')"
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Aircraft(db.Model):
@@ -86,6 +91,9 @@ class SeatClass(db.Model):
     def __repr__(self):
         return f"SeatClass({self.id}, '{self.name}')"
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class AircraftSeat(db.Model):
     __tablename__ = "aircraft_seats"
@@ -113,6 +121,9 @@ class FlightSeat(db.Model):
     def __repr__(self):
         return f"FlightSeat({self.id}, Flight-{self.flight_id}, '{self.aircraft_seat.seat_name}', '{self.aircraft_seat.seat_class.name}', {self.price}-{self.currency})"
 
+    def is_sold(self):
+        return
+
 
 class Route(db.Model):
     __tablename__ = "routes"
@@ -137,11 +148,7 @@ class Route(db.Model):
         return f"Route({self.id}, '{self.depart_airport}', '{self.arrive_airport}')"
 
     def to_dict(self):
-        return {
-            "id": self.id,
-            "depart_airport": self.depart_airport.name,
-            "arrive_airport": self.arrive_airport.name,
-        }
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class Flight(db.Model):
@@ -151,7 +158,7 @@ class Flight(db.Model):
     depart_time = Column(DateTime, nullable=False)
     arrive_time = Column(DateTime, nullable=False)
     aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=False)
-    route = relationship("Route", backref="flights", lazy=True)
+    route = relationship("Route", backref=backref("flights", uselist=False), lazy=True)
     aircraft = relationship("Aircraft", backref="flights", lazy=True)
 
     __table_args__ = (
@@ -162,13 +169,22 @@ class Flight(db.Model):
         return f"Flight({self.id}, {self.route}, '{self.depart_time}', '{self.arrive_time}', {self.aircraft})"
 
     def to_dict(self):
-        return {
-            "id": self.id,
-            "route_id": self.route_id,
-            "depart_time": self.depart_time.isoformat(),
-            "arrive_time": self.arrive_time.isoformat(),
-            "aircraft_id": self.aircraft_id,
-        }
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def get_seatclasses_and_info(self):
+        seat_classes_prices = {}
+        for seat in self.seats:
+            seat_class_id = seat.aircraft_seat.seat_class_id
+            if seat_class_id not in seat_classes_prices:
+                seat_classes_prices[seat_class_id] = {
+                    "class_name": SeatClass.query.get(seat_class_id).name,
+                    "price": seat.price,
+                    "currency": seat.currency,
+                    "remaining": 0,
+                }
+            # if
+            seat_classes_prices[seat_class_id]["remaining"] += 1
+        return seat_classes_prices
 
 
 class IntermediateAirport(db.Model):

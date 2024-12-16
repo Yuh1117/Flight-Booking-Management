@@ -11,7 +11,7 @@ from app.config import *
 
 app = Flask(__name__)
 app.config.from_object(FlaskConfig)
-app.config["PAGE_SIZE"] = 5
+app.config["PAGE_SIZE"] = 20
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)

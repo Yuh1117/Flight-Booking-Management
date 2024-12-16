@@ -43,95 +43,103 @@
             </div>
         </div>
     </div>
-    <div class="row m-5">
-        <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-            <!-- Điểm đi và đến -->
-            <div class="d-flex align-items-center">
-              <!-- Điểm đi -->
-              <div class="text-center me-3">
-                <div class="fw-bold">{{route.depart_airport.code}}</div>
-                <div class="text-muted small">{{route.depart_airport.name}}</div>
-              </div>
-        
-              <!-- Icon máy bay -->
-              <div class="me-3">
-                  <i class="fa-solid fa-plane"></i>
-                  <div class="dotted-underline"></div>
-              </div>
-        
-              <!-- Điểm đến -->
-              <div class="text-center">
-                <div class="fw-bold">{{route.arrive_airport.code}}</div>
-                <div class="text-muted small">{{route.arrive_airport.name}}</div>
-              </div>
-            </div>
-        
-            <!-- Ngày giờ chuyến đi -->
-            <div class="text-end">
-              <div class="fw-bold">Flights</div>
-              <div class="text-muted">{{data.depart}}</div>
-            </div>
-          </div>
-    </div>
-    <div class="result-flights">
-        {% for item in flights %}
-        <div class="card rounded-pill px-5 py-10 m-5 shadow-sm">
-            <div class="row g-0">
-                <div class="col-md-4 text-center p-3">
-                    <div class="w-100 h-100 d-flex align-items-center justify-content-around">
-                        <div class="d-flex flex-column align-items-center">
-                            <h5>{{item.depart_time}}</h5>
-                            <p class="mb-0"></p>
-                            <p>{{route.depart_airport.name}}</p>
-                        </div>
-                        <div class="d-flex flex-column align-items-center">
-                            <!-- Hiển thị các sân bay trung gian -->
-                            {% for stop in intermediate_airports %}
-                                {% if stop.flight_id == item.id %}
-                                    <p>{{ stop.departure_time }}</p>
-                                    <p>{{ stop.airport.name }} </p>
-                                {% endif %}
-                            {% endfor %}
-                            <div class="dotted-underline"></div>
-                        </div>
-                        
-                        <div class="d-flex flex-column align-items-center">
-                            <h5>{{item.arrive_time}}</h5>
-                            <p class="mb-0"></p>
-                            <p>{{route.arrive_airport.name}}</p>
-                        </div>
-                    </div>
+    {% if flights %}
+        <div class="row m-5">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                <!-- Điểm đi và đến -->
+                <div class="d-flex align-items-center">
+                <!-- Điểm đi -->
+                <div class="text-center me-3">
+                    <div class="fw-bold">{{route.depart_airport.code}}</div>
+                    <div class="text-muted small">{{route.depart_airport.name}}</div>
                 </div>
-                <div class="col-md-5 border-start border-end p-3">
-                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-clock me-2"></i>
-                            <span>Thời gian bay 2h 5 phút</span>
-                        </div>
-                        <div class="d-flex align-items-center mt-2">
-                            <i class="bi bi-airplane me-2"></i>
-                            <span>VN 224 Khai thác bởi Vietnam Airlines</span>
-                        </div>
-                        <a href="#" class="text-decoration-none mt-2 d-block">Chi tiết hành trình</a>
-                    </div>
+            
+                <!-- Icon máy bay -->
+                <div class="me-3">
+                    <i class="fa-solid fa-plane"></i>
+                    <div class="dotted-underline"></div>
                 </div>
-                <div class="col-md-3 p-3 text-center">
-                    <div class="mb-3">
-                        <!-- Nút PHỔ THÔNG -->
-                        <a href="{{ url_for('bookings.reserve_ticket', flight_id=item.id, ticket_class='Economy') }}" 
-                           class="btn btn-secondary w-100">PHỔ THÔNG</a>
-                    </div>
-                    <div class="bg-warning rounded">
-                        <!-- Nút THƯƠNG GIA -->
-                        <a href="{{ url_for('bookings.reserve_ticket', flight_id=item.id, ticket_class='Business') }}" 
-                           class="btn btn-warning">THƯƠNG GIA</a>
-                    </div>
+            
+                <!-- Điểm đến -->
+                <div class="text-center">
+                    <div class="fw-bold">{{route.arrive_airport.code}}</div>
+                    <div class="text-muted small">{{route.arrive_airport.name}}</div>
                 </div>
-                
+                </div>
+            
+                <!-- Ngày giờ chuyến đi -->
+                <div class="text-end">
+                <div class="fw-bold">Flights</div>
+                <div class="text-muted">{{data.depart}}</div>
+                </div>
             </div>
         </div>
-        {% endfor %}
-    </div>  
+
+        <div class="result-flights">
+            {% for item in flights %}
+            <div class="card rounded-pill px-5 py-10 m-5 shadow-sm">
+                <div class="row g-0">
+                    <div class="col-md-4 text-center p-3">
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-around">
+                            <div class="d-flex flex-column align-items-center">
+                                <h5>{{item.depart_time}}</h5>
+                                <p class="mb-0"></p>
+                                <p>{{route.depart_airport.name}}</p>
+                            </div>
+                            <div class="d-flex flex-column align-items-center">
+                                <!-- Hiển thị các sân bay trung gian -->
+                                {% for stop in intermediate_airports %}
+                                    {% if stop.flight_id == item.id %}
+                                        <p>{{ stop.departure_time }}</p>
+                                        <p>{{ stop.airport.name }} </p>
+                                    {% endif %}
+                                {% endfor %}
+                                <div class="dotted-underline"></div>
+                            </div>
+                            
+                            <div class="d-flex flex-column align-items-center">
+                                <h5>{{item.arrive_time}}</h5>
+                                <p class="mb-0"></p>
+                                <p>{{route.arrive_airport.name}}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 border-start border-end p-3">
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-clock me-2"></i>
+                                <span>Thời gian bay 2h 5 phút</span>
+                            </div>
+                            <div class="d-flex align-items-center mt-2">
+                                <i class="bi bi-airplane me-2"></i>
+                                <span>VN 224 Khai thác bởi Vietnam Airlines</span>
+                            </div>
+                            <a href="#" class="text-decoration-none mt-2 d-block">Chi tiết hành trình</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 p-3 text-center">
+                        <div class="mb-3">
+                            <!-- Nút PHỔ THÔNG -->
+                            <a href="{{ url_for('bookings.reserve_ticket', flight_id=item.id, ticket_class='Economy') }}" 
+                            class="btn btn-secondary w-100">PHỔ THÔNG</a>
+                        </div>
+                        <div class="bg-warning rounded">
+                            <!-- Nút THƯƠNG GIA -->
+                            <a href="{{ url_for('bookings.reserve_ticket', flight_id=item.id, ticket_class='Business') }}" 
+                            class="btn btn-warning">THƯƠNG GIA</a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            {% endfor %}
+        </div>  
+    {% else  %}
+        <!-- Thông báo khi không có chuyến bay -->
+        <div class="alert alert-warning text-center mt-5">
+            Không tìm thấy chuyến bay nào phù hợp. Vui lòng thử thay đổi bộ lọc hoặc thông tin tìm kiếm.
+        </div>
+    {% endif %}
     {% if flights %}
     <ul class="pagination">
         <!-- Nút Previous -->
@@ -171,3 +179,43 @@
 
 
 
+<ul class="pagination">
+    <!-- Nút Previous -->
+    {% if current_page > 1 %}
+    <li class="page-item">
+      <a
+        class="page-link"
+        href="{{ url_for('flights.searchFlights', page=current_page - 1) }}"
+        >Previous</a
+      >
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <a class="page-link" href="#">Previous</a>
+    </li>
+    {% endif %}
+
+    <!-- Các số trang -->
+    {% for page_num in range(1, total_pages + 1) %}
+    <li class="page-item {% if page_num == current_page %}active{% endif %}">
+      <a
+        class="page-link"
+        href="{{ url_for('flights.searchFlights', page=page_num, from=route.depart_airport_id, to=route.arrive_airport_id, depart=depart_date) }}"
+        >{{ page_num }}</a
+      >
+    </li>
+    {% endfor %}
+
+    <!-- Nút Next -->
+    {% if current_page < total_pages %}
+    <li class="page-item">
+      <a
+        class="page-link"
+        href="{{ url_for('flights.searchFlights', page=current_page + 1) }}"
+        >Next</a
+      >
+    </li>
+    {% else %}
+    <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+    {% endif %}
+  </ul>

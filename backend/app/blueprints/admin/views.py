@@ -3,13 +3,13 @@ from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
 from flask_admin import AdminIndexView, BaseView, Admin, expose
 
-from .forms import CreateAircraftForm
 from app import app, db
 from app.blueprints.auth.models import User
 from app.blueprints.auth.models import UserRole
 from app.blueprints.auth.routes import logout_process
 from app.blueprints.flights.models import *
 from app.blueprints.flights import dao as flight_dao
+from app.blueprints.bookings.models import Reservation
 
 
 class AuthenticatedView(BaseView):
@@ -213,17 +213,23 @@ class SeatClassAdmin(ModelView, AdminView):
 
 
 class AircraftSeatAdmin(ModelView, AdminView):
+    column_list = ("id", "aircraft", "seat_class", "seat_name")
     form_excluded_columns = ["flight_seats"]
 
 
 class FlightSeatAdmin(ModelView, AdminView):
-    pass
+    column_list = ("flight.id", "aircraft_seat", "price", "currency")
+    column_searchable_list = ["flight.id"]
 
 
 class RegulationView(ModelView, AdminView):
     form_excluded_columns = ["key"]
     can_create = False
     can_delete = False
+
+
+class ReservationView(ModelView, AdminView):
+    pass
 
 
 class LogoutView(AuthenticatedView):
@@ -254,6 +260,7 @@ admin.add_view(SeatClassAdmin(SeatClass, db.session, name="SeatClasses"))
 admin.add_view(RouteAdmin(Route, db.session, name="Routes"))
 admin.add_view(FlightAdmin(Flight, db.session, name="Flights"))
 admin.add_view(FlightSeatAdmin(FlightSeat, db.session, name="FlightSeats"))
+admin.add_view(ReservationView(Reservation, db.session, name="Reservations"))
 admin.add_view(RegulationView(Regulation, db.session, name="Regulations"))
 admin.add_view(HomeView(name="Home", menu_class_name="bg-success"))
 admin.add_view(LogoutView(name="Logout", menu_class_name="bg-danger"))
