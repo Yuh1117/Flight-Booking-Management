@@ -48,7 +48,7 @@ def seed_routes():
 
 
 def seed_airports():
-    with open("backend/seed/data/airportsFull.json") as f:
+    with open("backend/seed/data/airports.json") as f:
         airports = json.load(f)
     for airport in airports:
         # Tạo đối tượng Airport mới
