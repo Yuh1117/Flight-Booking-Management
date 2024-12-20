@@ -48,7 +48,7 @@ def add_user(
     first_name,
     last_name,
     phone,
-    role=UserRole.USER,
+    role=UserRole.CUSTOMER,
     avatar=None,
 ):
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")

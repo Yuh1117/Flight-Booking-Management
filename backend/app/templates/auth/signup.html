@@ -1,3 +1,5 @@
+{% from "layouts/field.html" import render_field with context%}
+
 {% extends "layouts/base.html" %} {% block content %}
 <div class="container d-flex justify-content-between align-items-center vh-100">
   <div class="card" style="width: 40rem">
@@ -6,113 +8,28 @@
       <form action="" method="post">
         {{ form.hidden_tag() }}
         <!-- ======================== Email ======================== -->
-        <div class="input-group">
-          <!------------------------ Check errors -------------------------->
-          {% if form.email.errors %}
-          <!---->
-          {{ form.email(class='form-control is-invalid', placeholder='') }}
-          <div class="invalid-feedback">
-            {% for error in form.email.errors %}
-            <span>{{error}}</span>
-            {% endfor %}
-          </div>
-          {% else %}
-          <!--  -->
-          {{ form.email(class='form-control', placeholder='') }}
-          <!--  -->
-          {% endif %}
-          <!------------------------ End check errors -------------------------->
-          {{ form.email.label(class='form-control-label') }}
-        </div>
-        <!-- ======================== End Email ======================== -->
+        {{ render_field(form.email) }}
 
         <!-- ======================== Name ======================== -->
-        <div class="input-group flex-nowrap">
-          <div class="flex-grow-1 position-relative">
-            {{ form.first_name(class='form-control', placeholder='') }}
-            <!--  -->
-            {{ form.first_name.label(class='form-control-label') }}
+        <div class="row">
+          <div class="col-6">
+            <!-- ======================== First Name ======================== -->
+            {{ render_field(form.first_name) }}
           </div>
-          <div class="flex-grow-1 ms-2 position-relative">
-            {{ form.last_name(class='form-control', placeholder='') }}
-            <!--  -->
-            {{ form.last_name.label(class='form-control-label') }}
+          <div class="col-6">
+            <!-- ======================== Last Name ======================== -->
+            {{ render_field(form.last_name) }}
           </div>
         </div>
-        <!-- ======================== End Name ======================== -->
-
         <!-- ======================== Citizen ID ======================== -->
-        <div class="input-group">
-          <!------------------------ Check errors -------------------------->
-          {% if form.citizen_id.errors %}
-          <!---->
-          {{ form.citizen_id(class='form-control is-invalid', placeholder='') }}
-          <div class="invalid-feedback">
-            {% for error in form.citizen_id.errors %}
-            <span>{{error}}</span>
-            {% endfor %}
-          </div>
-          {% else %}
-          <!--  -->
-          {{ form.citizen_id(class='form-control', placeholder='') }}
-          <!--  -->
-          {% endif %}
-          <!------------------------ End check errors -------------------------->
-          {{ form.citizen_id.label(class='form-control-label') }}
-        </div>
-        <!-- ======================== End Citizen ID ======================== -->
-
+        {{ render_field(form.citizen_id) }}
         <!-- ======================== Phone ======================== -->
-        <div class="input-group">
-          {{ form.phone(class='form-control', placeholder='') }}
-          <!--  -->
-          {{ form.phone.label(class='form-control-label') }}
-        </div>
-        <!-- ======================== End Phone ======================== -->
+        {{ render_field(form.phone) }}
 
         <!-- ======================== Password ======================== -->
-        <div class="input-group">
-          <!------------------------ Check errors -------------------------->
-          {% if form.password.errors %}
-          <!---->
-          {{ form.password(class='form-control is-invalid', placeholder='') }}
-          <div class="invalid-feedback">
-            {% for error in form.password.errors %}
-            <span>{{error}}</span>
-            {% endfor %}
-          </div>
-          {% else %}
-          <!--  -->
-          {{ form.password(class='form-control', placeholder='') }}
-          <!--  -->
-          {% endif %}
-          <!------------------------ End check errors -------------------------->
-          {{ form.password.label(class='form-control-label') }}
-        </div>
-        <!-- ======================== End Password ======================== -->
-
+        {{ render_field(form.password) }}
         <!-- ======================== Confirm Password ======================== -->
-        <div class="input-group">
-          <!------------------------ Check errors -------------------------->
-          {% if form.confirm_password.errors %}
-          <!---->
-          {{ form.confirm_password(class='form-control is-invalid',
-          placeholder='') }}
-          <div class="invalid-feedback">
-            {% for error in form.confirm_password.errors %}
-            <span>{{error}}</span>
-            {% endfor %}
-          </div>
-          {% else %}
-          <!--  -->
-          {{ form.confirm_password(class='form-control', placeholder='') }}
-          <!--  -->
-          {% endif %}
-          <!------------------------ End check errors -------------------------->
-          {{ form.confirm_password.label(class='form-control-label') }}
-        </div>
-        <!-- ======================== End Confirm Password ======================== -->
-
+        {{ render_field(form.confirm_password) }}
         {{ form.submit(class='btn col-12 btn-lg btn-primary') }}
       </form>
       <div class="hr-or my-3">

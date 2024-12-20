@@ -9,7 +9,7 @@ class UserRole(BaseEnum):
     ADMIN = 1
     FLIGHT_MANAGER = 2
     SALES_EMPLOYEE = 3
-    USER = 4
+    CUSTOMER = 4
 
     def __str__(self):
         return self.name.replace("_", " ").title()
@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     phone = Column(String(15), nullable=False)
-    role = Column(Enum(UserRole), default=UserRole.USER)
+    role = Column(Enum(UserRole), default=UserRole.CUSTOMER)
     avatar = Column(String(120), nullable=True)
     # reservations = relationship("Reservation", backref="user", lazy=True)
 
@@ -32,6 +32,3 @@ class User(db.Model, UserMixin):
         return (
             f"User('{self.id}', '{self.email}', '{self.role}, '{len(self.password)}')"
         )
-
-    def is_admin(self):
-        return self.role == UserRole.ADMIN

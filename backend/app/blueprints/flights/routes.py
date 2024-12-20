@@ -192,12 +192,6 @@ def schedule(id):
 #     return jsonify(message)
 
 
-def paginate_results(results, page, page_size):
-    start = (page - 1) * page_size
-    end = start + page_size
-    return results[start:end]
-
-
 @flights_bp.route("/search", methods=["GET"])
 def searchFlights():
     # Get params from request
@@ -220,7 +214,7 @@ def searchFlights():
     route = dao.get_route_by_airports(departure_airport_id, arrival_airport_id)
     if not route:
         # If the route does not exist, return an error message
-        flash("Couldn't find any flights for this route!", "info")
+        flash("This route doesn't exist!", "warning")
         return render_template("flights/search.html")
 
     # Get flights for the route
@@ -233,7 +227,7 @@ def searchFlights():
         return render_template(
             "flights/search.html", route=route, depart_date=depart_date
         )
-
+    print(route.id)
     return render_template(
         "flights/search.html",
         route=route,

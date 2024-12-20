@@ -20,12 +20,3 @@ def home():
 def about():
     print(current_user.role)
     return render_template("main/about.html", users=auth_dao.get_users())
-
-
-@main_bp.route("/manage-bookings")
-@login_required
-def manage_bookings():
-    reservations = Reservation.query.filter_by(user_id=current_user.id).all()
-    return render_template(
-        "managebookings/manage_bookings.html", reservations=reservations
-    )

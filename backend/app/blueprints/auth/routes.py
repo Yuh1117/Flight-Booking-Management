@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, session
+from flask import render_template, redirect, url_for, flash, session, request
 from flask_login import login_user, current_user, logout_user, login_required
 
 from app import login_manager, db
@@ -20,7 +20,9 @@ def login():
                 f"Welcome back, {user.first_name} {user.last_name}!",
                 category="success",
             )
-            return redirect(url_for("main.home"))
+            next_page = request.args.get("next")
+            return redirect(next_page) if next_page else redirect(url_for("main.home"))
+        flash("Login failed. Please check your email and password.", "danger")
     return render_template("auth/login.html", form=form)
 
 

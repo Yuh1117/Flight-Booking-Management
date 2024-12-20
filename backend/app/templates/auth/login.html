@@ -1,3 +1,6 @@
+{% from "layouts/field.html" import render_field with context%}
+
+
 {% extends "layouts/base.html" %} {% block content %}
 <div class="container d-flex justify-content-between align-items-center vh-100">
   <div class="card" style="width: 40rem">
@@ -6,47 +9,9 @@
       <form action="" method="post">
         {{ form.hidden_tag() }}
         <!-- =============== Email =============== -->
-        <div class="input-group">
-          <!------------------------ Check errors -------------------------->
-          {% if form.email.errors %}
-          <!---->
-          {{ form.email(class='form-control is-invalid', placeholder='') }}
-          <div class="invalid-feedback">
-            {% for error in form.email.errors %}
-            <span>{{error}}</span>
-            {% endfor %}
-          </div>
-          {% else %}
-          <!--  -->
-          {{ form.email(class='form-control', placeholder='') }}
-          <!--  -->
-          {% endif %}
-          <!------------------------ End check errors -------------------------->
-          {{ form.email.label(class='form-control-label') }}
-        </div>
-        <!-- =============== End Email =============== -->
-
+        {{ render_field(form.email) }}
         <!-- =============== Password =============== -->
-        <div class="input-group">
-          <!------------------------ Check errors -------------------------->
-          {% if form.password.errors %}
-          <!---->
-          {{ form.password(class='form-control is-invalid', placeholder='') }}
-          <div class="invalid-feedback">
-            {% for error in form.password.errors %}
-            <span>{{error}}</span>
-            {% endfor %}
-          </div>
-          {% else %}
-          <!--  -->
-          {{ form.password(class='form-control', placeholder='') }}
-          <!--  -->
-          {% endif %}
-          <!------------------------ End check errors -------------------------->
-          {{ form.password.label(class='form-control-label') }}
-        </div>
-        <!-- =============== End Password =============== -->
-
+        {{ render_field(form.password) }}
         {{ form.submit(class='btn col-12 btn-primary-invert') }}
         <div class="d-flex justify-content-between mt-3">
           <div class="col-6">

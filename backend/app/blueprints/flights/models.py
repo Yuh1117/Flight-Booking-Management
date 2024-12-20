@@ -12,6 +12,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
+
+from app.blueprints.bookings.models import Reservation, ReservationStatus
 from app import db
 
 
@@ -33,7 +35,13 @@ class Airport(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     code = Column(VARCHAR(5), unique=True, nullable=False)
-    country_id = Column(Integer, ForeignKey("countries.id"), nullable=True)
+    country_id = Column(
+        Integer,
+        ForeignKey(
+            "countries.id",
+        ),
+        nullable=True,
+    )
     country = relationship("Country", backref="airports", lazy=True)
 
     def __repr__(self):
@@ -66,8 +74,12 @@ class Aircraft(db.Model):
     __tablename__ = "aircrafts"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
-    airline_id = Column(Integer, ForeignKey("airlines.id"), nullable=False)
-    airline = relationship("Airline", backref="aircrafts", lazy=True)
+    airline_id = Column(
+        Integer, ForeignKey("airlines.id", ondelete="CASCADE"), nullable=False
+    )
+    airline = relationship(
+        "Airline", backref="aircrafts", lazy=True, passive_deletes=True
+    )
 
     def __repr__(self):
         return f"Aircraft({self.id}, '{self.airline.name}', '{self.name}')"
@@ -98,10 +110,14 @@ class SeatClass(db.Model):
 class AircraftSeat(db.Model):
     __tablename__ = "aircraft_seats"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=False)
+    aircraft_id = Column(
+        Integer, ForeignKey("aircrafts.id", ondelete="CASCADE"), nullable=False
+    )
     seat_class_id = Column(Integer, ForeignKey("seat_classes.id"), nullable=False)
     seat_name = Column(String(5), nullable=False)
-    aircraft = relationship("Aircraft", backref="seats", lazy=True)
+    aircraft = relationship(
+        "Aircraft", backref="seats", lazy=True, passive_deletes=True
+    )
     seat_class = relationship("SeatClass", backref="seats", lazy=True)
 
     def __repr__(self):
@@ -110,19 +126,31 @@ class AircraftSeat(db.Model):
 
 class FlightSeat(db.Model):
     __tablename__ = "flight_seats"
+    __table_args__ = (UniqueConstraint("flight_id", "aircraft_seat_id"),)
     id = Column(Integer, primary_key=True, autoincrement=True)
-    flight_id = Column(Integer, ForeignKey("flights.id"), nullable=False)
-    aircraft_seat_id = Column(Integer, ForeignKey("aircraft_seats.id"), nullable=False)
+    flight_id = Column(
+        Integer, ForeignKey("flights.id", ondelete="CASCADE"), nullable=False
+    )
+    aircraft_seat_id = Column(
+        Integer, ForeignKey("aircraft_seats.id", ondelete="CASCADE"), nullable=False
+    )
     price = Column(Double, nullable=False)
     currency = Column(VARCHAR(20), nullable=False)
-    flight = relationship("Flight", backref="seats", lazy=True)
-    aircraft_seat = relationship("AircraftSeat", backref="flight_seats", lazy=True)
+    flight = relationship("Flight", backref="seats", lazy=True, passive_deletes=True)
+    aircraft_seat = relationship(
+        "AircraftSeat", backref="flight_seats", lazy=True, passive_deletes=True
+    )
 
     def __repr__(self):
         return f"FlightSeat({self.id}, Flight-{self.flight_id}, '{self.aircraft_seat.seat_name}', '{self.aircraft_seat.seat_class.name}', {self.price}-{self.currency})"
 
     def is_sold(self):
-        return
+        return (
+            Reservation.query.filter_by(
+                flight_seat_id=self.id, status=ReservationStatus.PAID
+            ).first()
+            is not None
+        )
 
 
 class Route(db.Model):
@@ -138,10 +166,16 @@ class Route(db.Model):
         Integer, ForeignKey("airports.id", ondelete="CASCADE"), nullable=False
     )
     depart_airport = relationship(
-        "Airport", foreign_keys=[depart_airport_id], backref="depart_routes"
+        "Airport",
+        foreign_keys=[depart_airport_id],
+        backref="depart_routes",
+        passive_deletes=True,
     )
     arrive_airport = relationship(
-        "Airport", foreign_keys=[arrive_airport_id], backref="arrive_routes"
+        "Airport",
+        foreign_keys=[arrive_airport_id],
+        backref="arrive_routes",
+        passive_deletes=True,
     )
 
     def __repr__(self):
@@ -153,17 +187,16 @@ class Route(db.Model):
 
 class Flight(db.Model):
     __tablename__ = "flights"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    route_id = Column(Integer, ForeignKey("routes.id"), nullable=False)
-    depart_time = Column(DateTime, nullable=False)
-    arrive_time = Column(DateTime, nullable=False)
-    aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=False)
-    route = relationship("Route", backref=backref("flights", uselist=False), lazy=True)
-    aircraft = relationship("Aircraft", backref="flights", lazy=True)
-
     __table_args__ = (
         CheckConstraint("depart_time < arrive_time", name="check_depart_time"),
     )
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    route_id = Column(Integer, ForeignKey("routes.id"), nullable=True)
+    depart_time = Column(DateTime, nullable=False)
+    arrive_time = Column(DateTime, nullable=False)
+    aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=True)
+    route = relationship("Route", backref="flights", lazy=True)
+    aircraft = relationship("Aircraft", backref="flights", lazy=True)
 
     def __repr__(self):
         return f"Flight({self.id}, {self.route}, '{self.depart_time}', '{self.arrive_time}', {self.aircraft})"
@@ -171,7 +204,7 @@ class Flight(db.Model):
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-    def get_seatclasses_and_info(self):
+    def get_remaining_seatclasses_and_info(self):
         seat_classes_prices = {}
         for seat in self.seats:
             seat_class_id = seat.aircraft_seat.seat_class_id
@@ -182,31 +215,40 @@ class Flight(db.Model):
                     "currency": seat.currency,
                     "remaining": 0,
                 }
-            # if
-            seat_classes_prices[seat_class_id]["remaining"] += 1
+            if not seat.is_sold():
+                seat_classes_prices[seat_class_id]["remaining"] += 1
         return seat_classes_prices
 
 
-class IntermediateAirport(db.Model):
-    __tablename__ = "intermediate_airports"
+class Stopover(db.Model):
+    __tablename__ = "stopovers"
+    __table_args__ = (
+        CheckConstraint("arrival_time < departure_time", name="check_times"),
+        UniqueConstraint("flight_id", "order", name="unique_flight_order"),
+    )
 
     airport_id = Column(
         Integer, ForeignKey("airports.id"), primary_key=True, nullable=False
-    )  # Sân bay
+    )
     flight_id = Column(
-        Integer, ForeignKey("flights.id"), primary_key=True, nullable=False
-    )  # Chuyến bay
-    arrival_time = Column(DateTime, primary_key=True, nullable=False)  # Thời gian đến
+        Integer,
+        ForeignKey("flights.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False,
+    )
+    order = Column(Integer, primary_key=True, nullable=False)
+    arrival_time = Column(DateTime, nullable=False)  # Thời gian đến
     departure_time = Column(DateTime, nullable=False)  # Thời gian đi
-    order = Column(Integer, nullable=False)  # Thứ tự
 
     # Quan hệ
-    airport = relationship("Airport", backref="intermediate_airports", lazy=True)
-    flight = relationship("Flight", backref="intermediate_airports", lazy=True)
+    airport = relationship("Airport", backref="stopovers", lazy=True)
+    flight = relationship(
+        "Flight", backref="stopovers", lazy=True, passive_deletes=True
+    )
 
     def __repr__(self):
         return (
-            f"IntermediateAirport('{self.airport_id}', '{self.flight_id}', "
+            f"Stopover('{self.airport_id}', '{self.flight_id}', "
             f"'{self.arrival_time}', '{self.departure_time}', '{self.order}')"
         )
 

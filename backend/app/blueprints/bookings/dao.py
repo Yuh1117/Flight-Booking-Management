@@ -1,75 +1,39 @@
-from ..flights.models import Airport, Route, Flight, IntermediateAirport
+from sqlalchemy import or_
+
+from .models import *
 from app import app
-from datetime import datetime
 
 
-def get_route(from_value, to_value):
-    """Truy vấn tuyến đường theo sân bay đi và đến."""
-    return Route.query.filter_by(
-        depart_airport_id=from_value, arrive_airport_id=to_value
-    ).first()
+def get_reservation_by_id(reservation_id):
+    return Reservation.query.get(reservation_id)
 
 
-def get_flights_by_route(route_id, depart_date):
-    """Truy vấn các chuyến bay theo route_id và ngày khởi hành."""
-    return Flight.query.filter(
-        Flight.route_id == route_id,
-        Flight.depart_time >= datetime.combine(depart_date, datetime.min.time()),
-        Flight.depart_time < datetime.combine(depart_date, datetime.max.time()),
-    ).all()
+def user_has_booked_flight_seat(user_id, flight_seat_id):
+    return (
+        Reservation.query.filter_by(
+            user_id=user_id, flight_seat_id=flight_seat_id
+        ).first()
+        is not None
+    )
 
 
-def get_intermediate_airports(flights):
-    """Truy vấn danh sách các sân bay trung gian liên quan đến chuyến bay."""
-    intermediate_airports = []
-    for flight in flights:
-        intermediate_airport_list = IntermediateAirport.query.filter(
-            IntermediateAirport.flight_id == flight.id
-        ).all()
-        for intermediate_airport in intermediate_airport_list:
-            intermediate_airports.append(intermediate_airport)
-    return intermediate_airports
-
-
-def paginate_results(results, page, page_size):
-    """Phân trang kết quả."""
-    start = (page - 1) * page_size
-    end = start + page_size
-    return results[start:end]
-
-
-def find_route_with_data(data, page):
-    """Hàm chính xử lý yêu cầu."""
-    try:
-        from_value = int(data.get("from"))
-        to_value = int(data.get("to"))
-        depart_date_str = data.get("depart")
-        depart_date = datetime.strptime(depart_date_str, "%Y-%m-%d").date()
-        # Truy vấn tuyến đường
-        route = get_route(from_value, to_value)
-        if not route:
-            return {"success": False, "message": "Không tìm thấy tuyến đường"}
-        # Truy vấn chuyến bay
-        flights = get_flights_by_route(route.id, depart_date)
-        if not flights:
-            return {
-                "success": True,
-                "message": "Không tìm thấy chuyến bay nào",
-                "flights": [],
-            }
-        # Truy vấn sân bay trung gian
-        intermediate_airports = get_intermediate_airports(flights)
-        # Phân trang dữ liệu chuyến bay
-        page_size = app.config.get("PAGE_SIZE", 10)
-        flights_data = paginate_results(
-            [flight.to_dict() for flight in flights], page, page_size
+def get_user_reservations(user_id, page=1, per_page=app.config["PAGE_SIZE"]):
+    return (
+        Reservation.query.filter(
+            or_(Reservation.user_id == user_id, Reservation.author_id == user_id)
         )
-        return {
-            "success": True,
-            "flights": flights_data,
-            "route": route,
-            "intermediate_airports": intermediate_airports,
-            "total_flights": len(flights),
-        }
-    except Exception as e:
-        return {"success": False, "message": f"Lỗi hệ thống: {str(e)}"}
+        .order_by(Reservation.created_at.desc())
+        .paginate(page=page, per_page=per_page)
+    )
+
+
+def add_reservation(user_id, author_id, flight_seat_id, amount):
+    reservation = Reservation(
+        user_id=user_id,
+        author_id=author_id,
+        flight_seat_id=flight_seat_id,
+        amount=amount,
+    )
+    db.session.add(reservation)
+    db.session.commit()
+    return reservation

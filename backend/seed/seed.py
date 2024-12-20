@@ -18,7 +18,7 @@ from app.blueprints.flights.models import Aircraft
 from app.blueprints.flights.models import AircraftSeat
 from app.blueprints.flights.models import FlightSeat
 from app.blueprints.flights.models import SeatClass
-from app.blueprints.flights.models import IntermediateAirport
+from app.blueprints.flights.models import Stopover
 from app.blueprints.flights.models import Regulation
 
 
@@ -47,10 +47,10 @@ def seed_routes():
     print("Routes seeded successfully!")
 
 
-def seed_airports():
+def seed_airports(limit=10):
     with open("backend/seed/data/airports.json") as f:
         airports = json.load(f)
-    for airport in airports:
+    for airport in airports[:limit]:
         # Tạo đối tượng Airport mới
         db.session.add(Airport(**airport))  # Thêm vào session
 
@@ -114,7 +114,7 @@ def seed_intermediate_airport():
         stop["departure_time"] = dt.fromisoformat(
             stop.pop("depart_time").replace("Z", "+00:00")
         )
-        db.session.add(IntermediateAirport(**stop))  # Thêm vào session
+        db.session.add(Stopover(**stop))  # Thêm vào session
     print("Intermediate airports seeded successfully!")
 
 

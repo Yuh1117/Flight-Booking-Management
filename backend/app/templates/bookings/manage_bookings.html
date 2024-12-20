@@ -1,7 +1,8 @@
-{% extends "layouts/base.html" %}
+{% from "layouts/pagination.html" import render_pagination with context%}
 
+{% extends "layouts/base.html" %}
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 min-vh-100">
     <h2>Quản lý vé của bạn</h2>
     <table class="table">
         <thead>
@@ -13,7 +14,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for reservation in reservations %}
+            {% for reservation in reservations.items %}
                 <tr>
                     <td>{{ reservation.id }}</td>
                     <td>{{ reservation.flight_seat.aircraft_seat.seat_name }}</td>
@@ -25,5 +26,8 @@
             {% endfor %}
         </tbody>
     </table>
+    {% if reservations %}
+        {{ render_pagination(reservations, 'bookings.manage_bookings') }}
+    {% endif %}
 </div>
 {% endblock %}

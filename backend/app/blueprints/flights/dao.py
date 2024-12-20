@@ -29,6 +29,14 @@ def get_flight_by_id(id):
     return Flight.query.get(id)
 
 
+def get_flight_seat_by_id(id):
+    return FlightSeat.query.get(id)
+
+
+def get_seat_class_by_id(id):
+    return SeatClass.query.get(id)
+
+
 def add_route(depart_airport_id, arrive_airport_id):
     # Tạo đối tượng Route mới
     new_route = Route(
@@ -89,7 +97,7 @@ def add_flight(
 def add_intermediate_airport(
     airport_id, flight_id, arrival_time, departure_time, order
 ):
-    new_intermediate_airport = IntermediateAirport(
+    new_intermediate_airport = Stopover(
         airport_id=airport_id,
         flight_id=flight_id,
         arrival_time=arrival_time,
@@ -184,9 +192,7 @@ def count_flights(route_id=None):
 
 def find_intermediate_airport(flight_id):
     # Tìm tất cả sân bay trung gian của một chuyến bay cụ thể
-    intermediate_airports = IntermediateAirport.query.filter(
-        IntermediateAirport.flight_id == flight_id
-    ).all()
+    intermediate_airports = Stopover.query.filter(Stopover.flight_id == flight_id).all()
     # Trả về kết quả dưới dạng danh sách dictionary
     return [
         intermediate_airport.to_dict() for intermediate_airport in intermediate_airports
@@ -252,9 +258,9 @@ def get_flights_by_route_and_date(
         return None
     if not route.flights:
         return None
-    return route.flights.query.filter(
-        Flight.depart_time >= dt.combine(depart_date, dt.min.time()),
-        Flight.depart_time < dt.combine(depart_date, dt.max.time()),
+    return Flight.query.filter(
+        Flight.route_id == route_id,
+        db.func.date(Flight.depart_time) == depart_date,
     ).paginate(page=page, per_page=per_page)
 
 
