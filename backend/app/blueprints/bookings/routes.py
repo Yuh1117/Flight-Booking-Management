@@ -9,6 +9,7 @@ from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import UserRole
 from . import dao as booking_dao
 from .forms import BookingForm
+from .models import Reservation
 
 
 def validate_flight_seat_class(flight_id, seat_class_id):

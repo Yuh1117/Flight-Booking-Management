@@ -11,6 +11,7 @@ from app.config import *
 
 app = Flask(__name__)
 app.config.from_object(FlaskConfig)
+app.config.from_object(VNPayConfig)
 app.config["PAGE_SIZE"] = 20
 
 db = SQLAlchemy(app)
@@ -38,9 +39,12 @@ from app.blueprints.auth import auth_bp
 from app.blueprints.flights import flights_bp
 from app.blueprints.bookings import bookings_bp
 from app.blueprints.errors import errors
+from app.blueprints.payment import payment_bp
+
 
 app.register_blueprint(main_bp)
 app.register_blueprint(bookings_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(errors)
 app.register_blueprint(flights_bp)
+app.register_blueprint(payment_bp)

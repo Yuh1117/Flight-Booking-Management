@@ -47,3 +47,6 @@ def add_reservation(user_id, author_id, flight_seat_id, amount):
     db.session.add(reservation)
     db.session.commit()
     return reservation
+
+def get_reservation_by_id_and_user(id, user_id):
+    return Reservation.query.filter((Reservation.id == id) & ((Reservation.user_id == user_id) | (Reservation.author_id == user_id))).first()

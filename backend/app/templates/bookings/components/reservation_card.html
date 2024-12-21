@@ -14,7 +14,7 @@
                 {% if reservation.status.value == 1 %}
                     <a href="#" class="btn btn-success h-100 w-100 rounded-0" style="align-content: center;">Show ticket</a>
                 {% elif reservation.status.value == 2 %}
-                    <a href="#" class="btn btn-primary h-100 w-100 rounded-0" style="align-content: center;">Pay</a>
+                    <a href="/payment/{{ reservation.id }}" class="btn btn-primary h-100 w-100 rounded-0" style="align-content: center;">Pay</a>
                 {% elif reservation.status.value == 3 %}
                     <div class="bg-danger h-100 w-100 text-center" style="align-content: center;">Canceled</div>
                 {% endif %}

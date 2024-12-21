@@ -119,17 +119,17 @@ def schedule(id):
         arrive_time = depart_time + time_to_add
         aircraft_id = data["aircraft"]
 
-        # intermediate airport
-        intermediate_airport = data.getlist("intermediateAirport")
-        if intermediate_airport:
-            # intermediate time
-            intermediate_arrive_time = data.getlist("intermediateArrivalTime")
-            intermediate_duration = data.getlist("intermediateDuration")
-            # intermediate note
-            intermediate_notes = data.getlist("intermediateNotes")
+        # stopover airport
+        stopover_airport = data.getlist("stopoverAirport")
+        if stopover_airport:
+            # stopover time
+            stopover_arrive_time = data.getlist("stopoverArrivalTime")
+            stopover_duration = data.getlist("stopoverDuration")
+            # stopover note
+            stopover_notes = data.getlist("stopoverNotes")
 
             # add flight
-            for t in intermediate_duration:
+            for t in stopover_duration:
                 arrive_time += timedelta(minutes=int(t))
             flight = dao.add_flight(
                 route_id=data["route_id"],
@@ -139,20 +139,20 @@ def schedule(id):
             )
 
             if flight:
-                # add intermediate_airport
-                for i in range(len(intermediate_airport)):
-                    intermediate_arrive_time[i] = datetime.strptime(
-                        intermediate_arrive_time[i], "%Y-%m-%dT%H:%M"
+                # add stopover_airport
+                for i in range(len(stopover_airport)):
+                    stopover_arrive_time[i] = datetime.strptime(
+                        stopover_arrive_time[i], "%Y-%m-%dT%H:%M"
                     )
-                    intermediate_depart_time = intermediate_arrive_time[i] + timedelta(
-                        minutes=int(intermediate_duration[i])
+                    stopover_depart_time = stopover_arrive_time[i] + timedelta(
+                        minutes=int(stopover_duration[i])
                     )
 
                     dao.add_intermediate_airport(
-                        airport_id=intermediate_airport[i],
+                        airport_id=stopover_airport[i],
                         flight_id=flight.id,
-                        arrival_time=intermediate_arrive_time[i],
-                        departure_time=intermediate_depart_time,
+                        arrival_time=stopover_arrive_time[i],
+                        departure_time=stopover_depart_time,
                         order=(i + 1),
                     )
 
@@ -262,9 +262,9 @@ def validate():
     message = {
         "flight_duration": "",
         "depart_date_time": "",
-        "intermediate_airport": [],
-        "intermediate_duration": [],
-        "intermediate_arrival_time": [],
+        "stopover_airport": [],
+        "stopover_duration": [],
+        "stopover_arrival_time": [],
         "valid": False,
     }
     ##
@@ -290,58 +290,58 @@ def validate():
 
     ##
     duplicate = []
-    if data.get("intermediateAirport"):
-        for i in range(0, len(data.get("intermediateAirport"))):
-            message["intermediate_airport"].append("")
+    if data.get("stopoverAirport"):
+        for i in range(0, len(data.get("stopoverAirport"))):
+            message["stopover_airport"].append("")
             if i == 0:
-                duplicate.append(data.get("intermediateAirport")[i])
+                duplicate.append(data.get("stopoverAirport")[i])
                 continue
 
-            if data.get("intermediateAirport")[i] in duplicate:
-                message["intermediate_airport"][i] = "Duplicate Airport"
-            duplicate.append(data.get("intermediateAirport")[i])
+            if data.get("stopoverAirport")[i] in duplicate:
+                message["stopover_airport"][i] = "Duplicate Airport"
+            duplicate.append(data.get("stopoverAirport")[i])
 
     ##
     min_stopover_duration = dao.get_min_stopover_duration()
     max_stopover_duration = dao.get_max_stopover_duration()
 
-    if data.get("intermediateDuration"):
-        for i in range(0, len(data.get("intermediateDuration"))):
-            message["intermediate_duration"].append("")
+    if data.get("stopoverDuration"):
+        for i in range(0, len(data.get("stopoverDuration"))):
+            message["stopover_duration"].append("")
             if (
-                int(data.get("intermediateDuration")[i]) < min_stopover_duration
-                or int(data.get("intermediateDuration")[i]) > max_stopover_duration
+                int(data.get("stopoverDuration")[i]) < min_stopover_duration
+                or int(data.get("stopoverDuration")[i]) > max_stopover_duration
             ):
-                message["intermediate_duration"][
+                message["stopover_duration"][
                     i
                 ] = f"Value must be between {min_stopover_duration} - {max_stopover_duration}"
 
     ##
-    if data.get("intermediateArrivalTime"):
-        for i in range(0, len(data.get("intermediateArrivalTime"))):
-            message["intermediate_arrival_time"].append("")
-            intermediate_arrival_time = datetime.strptime(
-                data.get("intermediateArrivalTime")[i], "%Y-%m-%dT%H:%M"
+    if data.get("stopoverArrivalTime"):
+        for i in range(0, len(data.get("stopoverArrivalTime"))):
+            message["stopover_arrival_time"].append("")
+            stopover_arrival_time = datetime.strptime(
+                data.get("stopoverArrivalTime")[i], "%Y-%m-%dT%H:%M"
             )
-            if intermediate_arrival_time < depart_date_time:
-                message["intermediate_arrival_time"][i] = "Invalid arrival time"
+            if stopover_arrival_time < depart_date_time:
+                message["stopover_arrival_time"][i] = "Invalid arrival time"
 
     ####
-    intermediate_airport_valid = all(
-        item == "" for item in message["intermediate_airport"]
+    stopover_airport_valid = all(
+        item == "" for item in message["stopover_airport"]
     )
-    intermediate_duration_valid = all(
-        item == "" for item in message["intermediate_duration"]
+    stopover_duration_valid = all(
+        item == "" for item in message["stopover_duration"]
     )
-    intermediate_arrival_time_valid = all(
-        item == "" for item in message["intermediate_arrival_time"]
+    stopover_arrival_time_valid = all(
+        item == "" for item in message["stopover_arrival_time"]
     )
     if (
         message["depart_date_time"] == ""
         and message["flight_duration"] == ""
-        and intermediate_airport_valid
-        and intermediate_duration_valid
-        and intermediate_arrival_time_valid
+        and stopover_airport_valid
+        and stopover_duration_valid
+        and stopover_arrival_time_valid
     ):
         message["valid"] = True
 
