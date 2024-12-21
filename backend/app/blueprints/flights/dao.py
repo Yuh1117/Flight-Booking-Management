@@ -37,6 +37,10 @@ def get_seat_class_by_id(id):
     return SeatClass.query.get(id)
 
 
+def get_aircraft_by_id(id):
+    return Aircraft.query.get(id)
+
+
 def add_route(depart_airport_id, arrive_airport_id):
     # Tạo đối tượng Route mới
     new_route = Route(

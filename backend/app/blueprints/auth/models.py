@@ -32,3 +32,7 @@ class User(db.Model, UserMixin):
         return (
             f"User('{self.id}', '{self.email}', '{self.role}, '{len(self.password)}')"
         )
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"

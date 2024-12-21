@@ -2,6 +2,7 @@ from flask import redirect, flash, render_template, url_for, request
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
 from flask_admin import AdminIndexView, BaseView, Admin, expose
+from datetime import datetime as dt
 
 from app import app, db
 from app.blueprints.auth.models import User
@@ -130,11 +131,11 @@ class FlightAdmin(ModelView, AdminView):
         return super().create_model(form)
 
     def update_model(self, form, model):
-        updated_airport = flight_dao.get_airport_by_code(form.code.data)
-        if updated_airport and updated_airport.id != model.id:
-            form.code.errors.append("Country code already exists!")
-            return False
-        return super().update_model(form, model)
+        new_arrive_time = form.arrive_time.data
+        new_aircraft = flight_dao.get_aircraft_by_id(form.aircraft.data.id)
+
+        return False
+        # return super().update_model(form, model)
 
     @expose("/new", methods=["GET"])
     def create_view(self):
@@ -143,7 +144,7 @@ class FlightAdmin(ModelView, AdminView):
 
 class AirportAdmin(ModelView, AdminView):
     column_list = ("id", "name", "code", "country.name", "country.id")
-    form_excluded_columns = ["intermediate_airports", "depart_routes", "arrive_routes"]
+    form_excluded_columns = ["stopovers", "depart_routes", "arrive_routes"]
     column_searchable_list = ["code", "name", "country.name"]
     column_filters = ["country.name"]
     column_sortable_list = ["id", "name", "code", "country.name"]

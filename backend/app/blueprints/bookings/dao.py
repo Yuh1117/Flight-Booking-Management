@@ -17,10 +17,20 @@ def user_has_booked_flight_seat(user_id, flight_seat_id):
     )
 
 
-def get_user_reservations(user_id, page=1, per_page=app.config["PAGE_SIZE"]):
+def get_reservations_of_owned_user(user_id, page=1, per_page=app.config["PAGE_SIZE"]):
+    return (
+        Reservation.query.filter_by(user_id=user_id)
+        .order_by(Reservation.created_at.desc())
+        .paginate(page=page, per_page=per_page)
+    )
+
+
+def get_reservations_created_for_others(
+    author_id, page=1, per_page=app.config["PAGE_SIZE"]
+):
     return (
         Reservation.query.filter(
-            or_(Reservation.user_id == user_id, Reservation.author_id == user_id)
+            Reservation.author_id == author_id, Reservation.user_id != author_id
         )
         .order_by(Reservation.created_at.desc())
         .paginate(page=page, per_page=per_page)

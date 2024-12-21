@@ -10,12 +10,13 @@ load_dotenv()
 class FlaskConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "6789lacachbonanhsong")
     DEBUG = True
+    MYSQL_USER = os.getenv("MYSQL_USER", "root")
+    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "admin")
     MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
     MYSQL_HOST_PORT = os.getenv("MYSQL_HOST_PORT", "3306")
-    MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "flight_booking_system")
-    MYSQL_ROOT_PASSWORD = os.getenv("MYSQL_ROOT_PASSWORD", "admin")
+    MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "flight_booking")
     # SQLALCHEMY_DATABASE_URI = os.getenv("SQLITE_URI")
-    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://root:{quote(MYSQL_ROOT_PASSWORD)}@{MYSQL_HOST}:{MYSQL_HOST_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USER}:{quote(MYSQL_PASSWORD)}@{MYSQL_HOST}:{MYSQL_HOST_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 

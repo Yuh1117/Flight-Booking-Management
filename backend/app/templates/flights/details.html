@@ -8,8 +8,8 @@
         <div class="col-md-7">
             <div class="my-3">
                 <h5><i class="fa-solid fa-fingerprint me-1"></i>Flight ID: {{flight.id}}</h5>
-                <h5 class=""><i class="fa-solid fa-plane-departure me-1"></i>Departs on: {{flight.depart_time}}</h5>
-                <h5 class=""><i class="fa-solid fa-plane-arrival me-1"></i>Arrives on: {{flight.arrive_time}}</h5>
+                <h5 class=""><i class="fa-solid fa-plane-departure me-1"></i>Departs on: {{flight.depart_time.strftime('%d/%m/%Y - %H:%M')}}</h5>
+                <h5 class=""><i class="fa-solid fa-plane-arrival me-1"></i>Arrives on: {{flight.arrive_time.strftime('%d/%m/%Y - %H:%M')}}</h5>
                 <h5 class=""><i class="fa-solid fa-clock me-1"></i>Total duration: {{(flight.arrive_time - flight.depart_time)}}</h5>
             </div>
             <hr>
@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 {% set previous_departure_time = namespace(value = flight.depart_time) %}
-                {% for stop in flight.intermediate_airports|sort(attribute='order') %}
+                {% for stop in flight.stopovers|sort(attribute='order') %}
                     <div class="d-flex justify-content-center" style="line-height: 3;;">
                         <div class="vr me-3"></div>
                         <div><i class="fa-solid fa-stopwatch me-1"></i>Duration: {{stop.arrival_time - previous_departure_time.value}}</div>

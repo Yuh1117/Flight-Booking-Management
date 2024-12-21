@@ -58,19 +58,19 @@ def reserve_ticket():
         # Check if user has already booked this flight seat whether it is paid or not
         if booking_dao.user_has_booked_flight_seat(user.id, flight_seat_id):
             flash("You have already booked this flight seat", "danger")
-            return redirect(url_for("bookings.manage_bookings"))
+            return redirect(url_for("bookings.manage_own_bookings"))
 
         # Check if flight seat is valid
         flight_seat = flight_dao.get_flight_seat_by_id(flight_seat_id)
         if not flight_seat or flight_seat.is_sold():
-            flash("Invalid flight seat", "danger")
+            flash("Invalid flight seat or this seat is sold", "danger")
             return redirect(url_for("main.home"))
 
         flight = flight_seat.flight
         # Check if flight is departed
         if flight.depart_time <= dt.now():
             flash("Flight has already departed", "danger")
-            return flight_routes.showFlight(flight.id)
+            return redirect(url_for("flights.showFlight", id=flight.id))
 
         # Check if user can book this flight seat
         if current_user.role != UserRole.CUSTOMER:
@@ -83,14 +83,14 @@ def reserve_ticket():
         ).total_seconds() / 60
         if remaining_time_to_book < min_booking_time:
             flash("You are not allowed to book this flight seat", "danger")
-            return flight_routes.showFlight(flight.id)
+            return redirect(url_for("flights.showFlight", id=flight.id))
 
         # Add reservation
         reservation = booking_dao.add_reservation(
             user.id, current_user.id, flight_seat_id, flight_seat.price
         )
         flash("Reservation created", "success")
-        return redirect(url_for("bookings.manage_bookings"))
+        return redirect(url_for("bookings.manage_own_bookings"))
 
     return render_template(
         "bookings/index.html",
@@ -117,9 +117,19 @@ def confirmation(reservation_id):
     )
 
 
-@bookings_bp.route("/manage-bookings")
+@bookings_bp.route("/manage-bookings/own")
 @login_required
-def manage_bookings():
-    page = request.args.get("page", default=1, type=int)
-    reservations = booking_dao.get_user_reservations(current_user.id, page)
-    return render_template("bookings/manage_bookings.html", reservations=reservations)
+def manage_own_bookings():
+    page_num = request.args.get("page", default=1, type=int)
+    reservations = booking_dao.get_reservations_of_owned_user(current_user.id, page_num)
+    return render_template("bookings/manage_bookings.html", page=reservations)
+
+
+@bookings_bp.route("/manage-bookings/created-for-others")
+@login_required
+def manage_bookings_created_for_others():
+    page_num = request.args.get("page", default=1, type=int)
+    reservations = booking_dao.get_reservations_created_for_others(
+        current_user.id, page_num
+    )
+    return render_template("bookings/manage_bookings.html", page=reservations)

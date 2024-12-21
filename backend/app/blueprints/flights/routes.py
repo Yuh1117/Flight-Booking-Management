@@ -245,7 +245,6 @@ def showFlight(id):
     if not flight:
         flash("Flight not found!", "info")
         return redirect("/")
-
     return render_template(
         "flights/details.html",
         flight=flight,
