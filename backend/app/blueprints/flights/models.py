@@ -122,6 +122,9 @@ class AircraftSeat(db.Model):
 
     def __repr__(self):
         return f"AircraftSeat({self.id}, {self.aircraft}, '{self.seat_class.name}', '{self.seat_name}')"
+    
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class FlightSeat(db.Model):

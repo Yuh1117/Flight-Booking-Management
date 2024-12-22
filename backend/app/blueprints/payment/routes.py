@@ -35,7 +35,7 @@ def payment(id):
             if reservation.status == ReservationStatus.PAID:
                 message = 'THIS TICKET HAS BEEN PAID'
             else:
-                order_id = str(reservation.id) + 'PAY' + re.sub(r'[-:. ]', '', str(datetime.now()))
+                order_id = str(reservation.id)
         else:
                 message = 'TICKET NOT FOUND'
 
@@ -76,7 +76,6 @@ def payment(id):
 
 
 @payment_bp.route('/payment_return', methods=['GET'])
-@decorators.login_required
 def payment_return():
     inputData = request.args
     if inputData:
@@ -95,8 +94,7 @@ def payment_return():
         if vnp.validate_response(app.config['VNPAY_HASH_SECRET_KEY']):
             if vnp_ResponseCode == "00":
                 #reservation
-                index = order_id.find("PAY")
-                reservation_id = order_id[:index]
+                reservation_id = order_id
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
                 reservation.status = ReservationStatus.PAID
                 db.session.commit()
@@ -115,8 +113,7 @@ def payment_return():
                                         flight_seat=flight_seat)
             elif vnp_ResponseCode == "24":
                 #reservation
-                index = order_id.find("PAY")
-                reservation_id = order_id[:index]
+                reservation_id = order_id
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
                 
                 return render_template("bookings/confirmation.html", title="Payment result", 
