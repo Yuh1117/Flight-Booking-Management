@@ -1,5 +1,7 @@
 {% set colors = ['white', '#e0a623', '#223a60', '#C96868', '#118B50', '#FF7F3E'] %}
-{% macro price_part(flight, search_time, role = current_user.role.value if current_user.role) %}
+{% macro price_part(endpoint, role = current_user.role.value if current_user.role) %}
+    <!-- Access the kwargs once -->
+    {% if False %}{{ kwargs }}{% endif %}
     <!--  -->
     {% set remain_time_to_depart = (flight.depart_time - search_time).total_seconds()/60 %}
     <!-- If the the flight has departed -->
@@ -33,7 +35,7 @@
         <!-- Loop through all seatclasses of the flight -->
         {% for id, class in flight.get_remaining_seatclasses_and_info().items() %}
             {% if class['remaining'] > 0 %}
-                <a href="{{ url_for('bookings.reserve_ticket', flight=flight.id, seat_class=id) }}" 
+                <a href="{{ url_for(endpoint, seat_class=id, **kwargs) }}" 
                 class="flex-grow-1 d-flex flex-column align-items-center text-white text-decoration-none p-1" 
                 style="background-color: {{colors[id]}};"
                 >

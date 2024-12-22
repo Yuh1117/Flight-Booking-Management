@@ -36,3 +36,8 @@ class User(db.Model, UserMixin):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+    def get_reservation_by_flight_seat_id(self, flight_seat_id):
+        return next(
+            (r for r in self.reservations if r.flight_seat.id == flight_seat_id), None
+        )

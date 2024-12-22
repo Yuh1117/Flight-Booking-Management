@@ -6,7 +6,7 @@
             <p class="mb-2" title="{{flight.route.depart_airport}}">
             {{flight.route.depart_airport.code}}
             </p>
-            <p class="mb-0">{{flight.depart_time.strftime("%d/%m/%Y")}}</p>
+            <small class="mb-0">{{flight.depart_time.strftime("%d/%m/%Y")}}</small>
         </div>
         <div class="d-flex align-items-center flex-grow-1">
             <div class="dotted-underline"></div>
@@ -31,7 +31,7 @@
             <p class="mb-2" title="{{flight.route.arrive_airport}}">
             {{flight.route.arrive_airport.code}}
             </p>
-            <p class="mb-0">{{flight.arrive_time.strftime("%d/%m/%Y")}}</p>
+            <small class="mb-0">{{flight.arrive_time.strftime("%d/%m/%Y")}}</small>
         </div>
     </div>
 </div>

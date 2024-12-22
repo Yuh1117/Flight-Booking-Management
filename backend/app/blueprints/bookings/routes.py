@@ -4,7 +4,6 @@ from datetime import datetime as dt
 
 from . import bookings_bp
 from app.blueprints.flights import dao as flight_dao
-from app.blueprints.flights import routes as flight_routes
 from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import UserRole
 from . import dao as booking_dao
@@ -12,22 +11,24 @@ from .forms import BookingForm
 from .models import Reservation
 
 
-def validate_flight_seat_class(flight_id, seat_class_id):
+def validate_flight_seat_class(flight, seat_class):
     """
     1. Check if flight and seat class are valid
-    2. Check if flight has the seat class
-    3. Check if there are available seats for the seat class
+    2. Check if this flight is bookable now
+    3. Check if flight has the seat class
+    4. Check if there are available seats for the seat class
     """
-    flight = flight_dao.get_flight_by_id(flight_id)
-    seat_class = flight_dao.get_seat_class_by_id(seat_class_id)
     if not flight or not seat_class:
         flash("Invalid flight or seat class", "danger")
         return False
+    if not flight.is_bookable_now():
+        flash("You are not allowed to book this flight", "danger")
+        return False
     remaining_seatclasses_and_info = flight.get_remaining_seatclasses_and_info()
-    if seat_class_id not in remaining_seatclasses_and_info:
+    if seat_class.id not in remaining_seatclasses_and_info:
         flash("Flight doesn't have this seat class", "danger")
         return False
-    if remaining_seatclasses_and_info[seat_class_id]["remaining"] == 0:
+    if remaining_seatclasses_and_info[seat_class.id]["remaining"] == 0:
         flash("No available seats", "danger")
         return False
     return True
@@ -37,15 +38,12 @@ def validate_flight_seat_class(flight_id, seat_class_id):
 @login_required
 def reserve_ticket():
     form = BookingForm()
-    flight_id = request.args.get("flight", type=int)
-    seat_class_id = request.args.get("seat_class", type=int)
+    flight = request.args.get("flight", type=flight_dao.get_flight_by_id)
+    seat_class = request.args.get("seat_class", type=flight_dao.get_seat_class_by_id)
 
     # Check params are valid
-    if not validate_flight_seat_class(flight_id, seat_class_id):
+    if not validate_flight_seat_class(flight, seat_class):
         return redirect(url_for("main.home"))
-
-    flight = flight_dao.get_flight_by_id(flight_id)
-    seat_class = flight_dao.get_seat_class_by_id(seat_class_id)
 
     # Fill form with user info if user is customer
     if current_user.role == UserRole.CUSTOMER:
@@ -53,42 +51,23 @@ def reserve_ticket():
 
     # if method is POST and form is valid
     if form.validate_on_submit():
-        user = auth_dao.get_user_by_citizen_id(form.citizen_id.data)
+        owner = auth_dao.get_user_by_citizen_id(form.citizen_id.data)
         flight_seat_id = request.form.get("flight_seat_id", type=int)
 
-        # Check if user has already booked this flight seat whether it is paid or not
-        if booking_dao.user_has_booked_flight_seat(user.id, flight_seat_id):
-            flash("You have already booked this flight seat", "danger")
-            return redirect(url_for("bookings.manage_own_bookings"))
-
         # Check if flight seat is valid
-        flight_seat = flight_dao.get_flight_seat_by_id(flight_seat_id)
+        flight_seat = flight.get_seat_by_id(flight_seat_id)
         if not flight_seat or flight_seat.is_sold():
-            flash("Invalid flight seat or this seat is sold", "danger")
-            return redirect(url_for("main.home"))
+            flash("Invalid flight seat or sold!", "danger")
+            return redirect(request.referrer)
 
-        flight = flight_seat.flight
-        # Check if flight is departed
-        if flight.depart_time <= dt.now():
-            flash("Flight has already departed", "danger")
-            return redirect(url_for("flights.showFlight", id=flight.id))
-
-        # Check if user can book this flight seat
-        if current_user.role != UserRole.CUSTOMER:
-            min_booking_time = flight_dao.get_staff_min_booking_time()
-        else:
-            min_booking_time = flight_dao.get_customer_min_booking_time()
-
-        remaining_time_to_book = (
-            flight_seat.flight.depart_time - dt.now()
-        ).total_seconds() / 60
-        if remaining_time_to_book < min_booking_time:
-            flash("You are not allowed to book this flight seat", "danger")
-            return redirect(url_for("flights.showFlight", id=flight.id))
+        # Check if user has already booked this flight seat whether it is paid or not
+        if owner.get_reservation_by_flight_seat_id(flight_seat_id):
+            flash(f"This user has already booked this flight seat!", "danger")
+            return redirect(request.referrer)
 
         # Add reservation
         reservation = booking_dao.add_reservation(
-            user.id, current_user.id, flight_seat_id, flight_seat.price
+            owner.id, current_user.id, flight_seat_id
         )
         flash("Reservation created", "success")
         return redirect(url_for("bookings.manage_own_bookings"))
@@ -121,6 +100,9 @@ def confirmation(reservation_id):
 @bookings_bp.route("/manage-bookings/own")
 @login_required
 def manage_own_bookings():
+    """
+    Only the user who owns the reservation can see it.
+    """
     page_num = request.args.get("page", default=1, type=int)
     reservations = booking_dao.get_reservations_of_owned_user(current_user.id, page_num)
     return render_template("bookings/manage_bookings.html", page=reservations)
@@ -129,8 +111,85 @@ def manage_own_bookings():
 @bookings_bp.route("/manage-bookings/created-for-others")
 @login_required
 def manage_bookings_created_for_others():
+    """
+    Only the user who created the reservation can see it.
+    """
     page_num = request.args.get("page", default=1, type=int)
     reservations = booking_dao.get_reservations_created_for_others(
         current_user.id, page_num
     )
     return render_template("bookings/manage_bookings.html", page=reservations)
+
+
+@bookings_bp.route(
+    "/booking/edit-reservation/<int:reservation_id>", methods=["GET", "POST"]
+)
+@login_required
+def edit_reservation(reservation_id):
+    """
+    Only the user and author of the reservation can edit it.
+    The user can't edit the reservation once paid.
+    """
+    reservation = booking_dao.get_reservation_by_id_and_user(
+        reservation_id, current_user.id
+    )
+    if not reservation:
+        flash("Reservation not found", "danger")
+        return redirect(url_for("bookings.manage_own_bookings"))
+
+    if not reservation.is_editable():
+        flash("You can't edit this reservation", "danger")
+        return redirect(request.referrer)
+
+    flight = reservation.flight_seat.flight
+    seat_class = request.args.get(
+        "seat_class",
+        type=flight_dao.get_seat_class_by_id,
+        default=reservation.flight_seat.aircraft_seat.seat_class,
+    )
+    if not validate_flight_seat_class(flight, seat_class):
+        flash("Invalid flight or seat class", "danger")
+        return redirect(request.referrer)
+
+    if request.method == "POST":
+        flight_seat_id = request.form.get("flight_seat_id", type=int)
+
+        # Check if flight seat is valid
+        flight_seat = flight.get_seat_by_id(flight_seat_id)
+        if not flight_seat or flight_seat.is_sold():
+            flash("Invalid flight seat or sold!", "danger")
+            return redirect(request.referrer)
+
+        # Check if owner has already booked this flight seat whether it is paid or not
+        if reservation.owner.get_reservation_by_flight_seat_id(flight_seat_id):
+            flash(f"This user has already booked this flight seat!", "danger")
+            return redirect(request.referrer)
+
+        # Edit reservation
+        reservation = booking_dao.update_reservation_seat(reservation, flight_seat_id)
+        return redirect(url_for("bookings.manage_own_bookings"))
+
+    return render_template(
+        "bookings/change_seat.html",
+        reservation=reservation,
+        seat_class=seat_class,
+        search_time=dt.now(),
+        staff_min_booking_time=flight_dao.get_staff_min_booking_time(),
+        customer_min_booking_time=flight_dao.get_customer_min_booking_time(),
+    )
+
+
+@bookings_bp.route("/manage-bookings/delete/<int:reservation_id>", methods=["POST"])
+@login_required
+def delete_reservation(reservation_id):
+    """
+    Only the user who owns the reservation can delete it.
+    Even author of the reservation can't delete it.
+    """
+    if booking_dao.delete_reservation_of_user(current_user.id, reservation_id):
+        flash("Reservation deleted", "success")
+    else:
+        flash("Reservation not found", "danger")
+
+    response = redirect(request.referrer)
+    return response

@@ -1,5 +1,6 @@
 from flask import render_template, jsonify, request, redirect, flash
-from datetime import datetime, timedelta
+from datetime import datetime as dt
+from datetime import timedelta
 import math
 
 
@@ -114,7 +115,7 @@ def schedule(id):
         message = None
 
         # flight
-        depart_time = datetime.strptime(data["departureDateTime"], "%Y-%m-%dT%H:%M")
+        depart_time = dt.strptime(data["departureDateTime"], "%Y-%m-%dT%H:%M")
         time_to_add = timedelta(minutes=int(data["flightDuration"]))
         arrive_time = depart_time + time_to_add
         aircraft_id = data["aircraft"]
@@ -141,7 +142,7 @@ def schedule(id):
             if flight:
                 # add stopover_airport
                 for i in range(len(stopover_airport)):
-                    stopover_arrive_time[i] = datetime.strptime(
+                    stopover_arrive_time[i] = dt.strptime(
                         stopover_arrive_time[i], "%Y-%m-%dT%H:%M"
                     )
                     stopover_depart_time = stopover_arrive_time[i] + timedelta(
@@ -189,7 +190,10 @@ def schedule(id):
 #     if(int(data.get('flightDuration')) < min_flight_duration or int(data.get('flightDuration')) > max_flight_duration):
 #         message['flight_duration'] = f"Flight duration must be between {min_flight_duration} - {max_flight_duration} minutes!"
 
+
 #     return jsonify(message)
+def to_date(date_str):
+    return dt.strptime(date_str, "%Y-%m-%d").date()
 
 
 @flights_bp.route("/search", methods=["GET"])
@@ -197,17 +201,10 @@ def searchFlights():
     # Get params from request
     departure_airport_id = request.args.get("from", type=int)
     arrival_airport_id = request.args.get("to", type=int)
-    depart_date_str = request.args.get("depart")
+    depart_date = request.args.get("depart", type=to_date)
 
-    if not all([departure_airport_id, arrival_airport_id, depart_date_str]):
+    if not all([departure_airport_id, arrival_airport_id, depart_date]):
         # If user first access the page, return the plain search page
-        return render_template("flights/search.html")
-    try:
-        # Check if the date is in the correct format
-        depart_date = datetime.strptime(depart_date_str, "%Y-%m-%d").date()
-    except ValueError:
-        # If the date is not in the correct format, return an error message
-        flash("Invalid date format!", "info")
         return render_template("flights/search.html")
 
     # Get the route
@@ -227,13 +224,13 @@ def searchFlights():
         return render_template(
             "flights/search.html", route=route, depart_date=depart_date
         )
-    print(route.id)
+
     return render_template(
         "flights/search.html",
         route=route,
         flights=flights,
         depart_date=depart_date,
-        search_time=datetime.now(),
+        search_time=dt.now(),
         staff_min_booking_time=dao.get_staff_min_booking_time(),
         customer_min_booking_time=dao.get_customer_min_booking_time(),
     )
@@ -248,7 +245,7 @@ def showFlight(id):
     return render_template(
         "flights/details.html",
         flight=flight,
-        search_time=datetime.now(),
+        search_time=dt.now(),
         staff_min_booking_time=dao.get_staff_min_booking_time(),
         customer_min_booking_time=dao.get_customer_min_booking_time(),
         title="Flight Details",
@@ -280,10 +277,8 @@ def validate():
         )
 
     ##
-    now = datetime.strptime(str(datetime.now()), "%Y-%m-%d %H:%M:%S.%f")
-    depart_date_time = datetime.strptime(
-        data.get("departureDateTime"), "%Y-%m-%dT%H:%M"
-    )
+    now = dt.strptime(str(dt.now()), "%Y-%m-%d %H:%M:%S.%f")
+    depart_date_time = dt.strptime(data.get("departureDateTime"), "%Y-%m-%dT%H:%M")
 
     if depart_date_time < now:
         message["depart_date_time"] = "Invalid date time"
@@ -320,19 +315,15 @@ def validate():
     if data.get("stopoverArrivalTime"):
         for i in range(0, len(data.get("stopoverArrivalTime"))):
             message["stopover_arrival_time"].append("")
-            stopover_arrival_time = datetime.strptime(
+            stopover_arrival_time = dt.strptime(
                 data.get("stopoverArrivalTime")[i], "%Y-%m-%dT%H:%M"
             )
             if stopover_arrival_time < depart_date_time:
                 message["stopover_arrival_time"][i] = "Invalid arrival time"
 
     ####
-    stopover_airport_valid = all(
-        item == "" for item in message["stopover_airport"]
-    )
-    stopover_duration_valid = all(
-        item == "" for item in message["stopover_duration"]
-    )
+    stopover_airport_valid = all(item == "" for item in message["stopover_airport"])
+    stopover_duration_valid = all(item == "" for item in message["stopover_duration"])
     stopover_arrival_time_valid = all(
         item == "" for item in message["stopover_arrival_time"]
     )

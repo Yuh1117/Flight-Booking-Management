@@ -12,9 +12,13 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import backref
+from datetime import datetime as dt
+from flask_login import current_user
 
-from app.blueprints.bookings.models import Reservation, ReservationStatus
+from app.blueprints.auth.models import UserRole
+from app.blueprints.bookings.models import Reservation, PaymentStatus
 from app import db
+from . import dao
 
 
 class Country(db.Model):
@@ -146,8 +150,9 @@ class FlightSeat(db.Model):
 
     def is_sold(self):
         return (
-            Reservation.query.filter_by(
-                flight_seat_id=self.id, status=ReservationStatus.PAID
+            Reservation.query.filter(
+                Reservation.flight_seat_id == self.id,
+                Reservation.payment.has(status=PaymentStatus.SUCCESS),
             ).first()
             is not None
         )
@@ -219,6 +224,26 @@ class Flight(db.Model):
                 seat_classes_prices[seat_class_id]["remaining"] += 1
         return seat_classes_prices
 
+    def is_bookable_now(self):
+        # Check if flight is departed
+        if self.depart_time <= dt.now():
+            return False
+
+        # Check if user can book this flight seat
+        if current_user.role != UserRole.CUSTOMER:
+            min_booking_time = dao.get_staff_min_booking_time()
+        else:
+            min_booking_time = dao.get_customer_min_booking_time()
+
+        remaining_time_to_book = (self.depart_time - dt.now()).total_seconds() / 60
+        if remaining_time_to_book < min_booking_time:
+            return False
+
+        return True
+
+    def get_seat_by_id(self, seat_id):
+        return next((fs for fs in self.seats if fs.id == seat_id), None)
+
 
 class Stopover(db.Model):
     __tablename__ = "stopovers"
@@ -239,6 +264,7 @@ class Stopover(db.Model):
     order = Column(Integer, primary_key=True, nullable=False)
     arrival_time = Column(DateTime, nullable=False)  # Thời gian đến
     departure_time = Column(DateTime, nullable=False)  # Thời gian đi
+    note = Column(Text, nullable=True)
 
     # Quan hệ
     airport = relationship("Airport", backref="stopovers", lazy=True)

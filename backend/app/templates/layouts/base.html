@@ -55,7 +55,7 @@
   <body>
     {% include 'layouts/navbar.html' %}
     {% from "layouts/toasts.html" import render_toasts with context %}
-    {{ render_toasts() }}
+    {% include 'layouts/toasts.html' %}
     <main class="">
       {% block content %}
       <!--  -->

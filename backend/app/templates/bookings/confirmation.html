@@ -28,9 +28,9 @@
 
             <div class="bg-light mt-3 p-2 rounded">
                 <h3>Booking Information</h3>
-                <p><b>Name:</b> {{ reservation.user.first_name }} {{ reservation.user.last_name }}</p>
-                <p><b>Email:</b> {{ reservation.user.email }}</p>
-                <p><b>Phone number:</b> {{ reservation.user.phone }}</p>
+                <p><b>Name:</b> {{ reservation.owner.first_name }} {{ reservation.owner.last_name }}</p>
+                <p><b>Email:</b> {{ reservation.owner.email }}</p>
+                <p><b>Phone number:</b> {{ reservation.owner.phone }}</p>
             </div>
 
             <div class="alert alert-success mt-3" role="alert">

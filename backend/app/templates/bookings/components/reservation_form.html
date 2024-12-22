@@ -1,6 +1,6 @@
-{% from "bookings/components/seat_pick.html" import render_seat_pick with context%}
-{% from "flights/components/price_part.html" import price_part with context%}
-{% from "layouts/field.html" import render_field with context%}
+{% from "flights/components/price_part.html" import price_part with context %}
+{% from "bookings/components/seat_pick.html" import render_seat_pick %}
+{% from "layouts/field.html" import render_field %}
 
 {% macro render_reservation_form(flight, seat_class) %}
 <form method="POST" action="" class="row my-5">
@@ -10,7 +10,7 @@
         {{ render_seat_pick(flight.seats, seat_class) }}
         <div class="card mt-3 overflow-hidden">
             <div class="card-header text-center">Classes</div>
-            <div class="card-body d-flex flex-wrap p-0">{{price_part(flight, search_time)}}</div>
+            <div class="card-body d-flex flex-wrap p-0">{{price_part(endpoint='bookings.reserve_ticket',flight=flight.id)}}</div>
         </div>
     </div>
     <!--  -->
@@ -24,7 +24,7 @@
                 <div><b>To:</b> {{ flight.route.arrive_airport }}</div>
                 <div><b>Depart time:</b> {{ flight.depart_time.strftime('%d/%m/%Y - %H:%M') }}</div>
                 <div><b>Arrive time:</b> {{ flight.arrive_time.strftime('%d/%m/%Y - %H:%M') }}</div>
-                <div id="selected_seat_info"></div>
+                <div class="selected_seat_info"></div>
             </div>
 
             <div class="card-body">

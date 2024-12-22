@@ -1,7 +1,6 @@
 from datetime import datetime as dt
 
 from .models import *
-from app.blueprints.bookings.models import ReservationStatus
 from app import app
 
 
@@ -31,6 +30,10 @@ def get_flight_by_id(id):
 
 def get_flight_seat_by_id(id):
     return FlightSeat.query.get(id)
+
+
+def get_flight_seat_of_flight(flight: Flight, flight_seat_id: int):
+    return next((fs for fs in flight.seats if fs.id == flight_seat_id), None)
 
 
 def get_seat_class_by_id(id):

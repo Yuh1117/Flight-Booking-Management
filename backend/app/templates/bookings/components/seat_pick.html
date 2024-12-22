@@ -1,5 +1,5 @@
-{% macro render_seat_pick(flight_seats, seat_class) %}
-<div class="shadow card">
+{% macro render_seat_pick(flight_seats, seat_class, class="") %}
+<div class="shadow card {{class}}">
     <div class="card-header mb-2">
         <p class="text-center m-0">Choose seat</p>
     </div>
@@ -25,7 +25,7 @@
 <script>
     function selectSeat(seatName, seatPrice, currency) {
         // Cập nhật thông tin ghế đã chọn
-        document.getElementById('selected_seat_info').innerHTML = `
+        document.querySelector('.selected_seat_info').innerHTML = `
             <div>
                 <span><b>Seat: </b>${seatName}</span>
             </div>

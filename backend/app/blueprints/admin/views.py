@@ -10,7 +10,7 @@ from app.blueprints.auth.models import UserRole
 from app.blueprints.auth.routes import logout_process
 from app.blueprints.flights.models import *
 from app.blueprints.flights import dao as flight_dao
-from app.blueprints.bookings.models import Reservation
+from app.blueprints.bookings.models import Payment, Reservation
 
 
 class AuthenticatedView(BaseView):
@@ -130,12 +130,12 @@ class FlightAdmin(ModelView, AdminView):
         # Create seats for flight
         return super().create_model(form)
 
-    def update_model(self, form, model):
-        new_arrive_time = form.arrive_time.data
-        new_aircraft = flight_dao.get_aircraft_by_id(form.aircraft.data.id)
+    # def update_model(self, form, model):
+    #     new_arrive_time = form.arrive_time.data
+    #     new_aircraft = flight_dao.get_aircraft_by_id(form.aircraft.data.id)
 
-        return False
-        # return super().update_model(form, model)
+    #     return False
+    #     # return super().update_model(form, model)
 
     @expose("/new", methods=["GET"])
     def create_view(self):
@@ -230,7 +230,17 @@ class RegulationView(ModelView, AdminView):
 
 
 class ReservationView(ModelView, AdminView):
-    pass
+    column_list = ("id", "owner", "author", "flight_seat", "payment")
+
+
+class PaymentView(ModelView, AdminView):
+    column_list = (
+        "id",
+        "reservation_id",
+        "amount",
+        "status",
+        "created_at",
+    )
 
 
 class LogoutView(AuthenticatedView):
@@ -262,6 +272,7 @@ admin.add_view(RouteAdmin(Route, db.session, name="Routes"))
 admin.add_view(FlightAdmin(Flight, db.session, name="Flights"))
 admin.add_view(FlightSeatAdmin(FlightSeat, db.session, name="FlightSeats"))
 admin.add_view(ReservationView(Reservation, db.session, name="Reservations"))
+admin.add_view(PaymentView(Payment, db.session, name="Payments"))
 admin.add_view(RegulationView(Regulation, db.session, name="Regulations"))
 admin.add_view(HomeView(name="Home", menu_class_name="bg-success"))
 admin.add_view(LogoutView(name="Logout", menu_class_name="bg-danger"))

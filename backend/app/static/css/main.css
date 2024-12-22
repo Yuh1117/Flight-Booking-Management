@@ -84,11 +84,12 @@ footer hr {
 .btn-primary {
   background-color: #223a60;
   transition: background-color 0.3s ease; /* Smooth transition for the color change */
-  border: none;
+  border: 2px solid #223a60;
 }
 
 .btn-primary:hover {
   background-color: #223a60ad;
+  border-color: transparent;
 }
 .btn-primary-invert {
   background-color: transparent;
@@ -127,7 +128,6 @@ footer hr {
 }
 
 .navbar-home {
-  background-color: rgba(255, 255, 255, 0.4);
   /* position: absolute;
   top: 30px;
   left: 20px;
@@ -138,6 +138,7 @@ footer hr {
 }
 
 .navbar-home.fixed {
+  background-color: white;
   position: fixed;
   top: 0;
   left: 0;
@@ -146,6 +147,7 @@ footer hr {
 }
 
 .navbar-home.not-fixed {
+  background-color: rgba(255, 255, 255, 0.4);
   position: absolute;
   top: 10px;
   left: 20px;
@@ -183,6 +185,11 @@ footer hr {
 
 .noti-panel {
   top: 100px;
+}
+
+.noti-panel > .toast-container{
+  transition: right .5s; /* only transition top property */
+  right: -100%;
 }
 
 .noti-panel .toast-header.alert-danger {

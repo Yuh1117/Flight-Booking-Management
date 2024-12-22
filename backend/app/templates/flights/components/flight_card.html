@@ -1,8 +1,8 @@
-{% from "flights/components/price_part.html" import price_part with context %}
 {% from "flights/components/flight_route.html" import render_flight_route %}
 {% from "flights/components/flight_info.html" import render_flight_info %}
 
 {% macro render_flight_card(flight, search_time) %}
+{% from "flights/components/price_part.html" import price_part with context %}
 <div class="card my-4 shadow-sm overflow-hidden">
     <div class="row g-0">
         <!--  -->
@@ -16,8 +16,8 @@
         <!--  -->
         <!--  -->
         <!--  -->
-        <div class="col-md-4 d-flex flex-wrap">
-            {{ price_part(flight, search_time) }}
+        <div class="col-md-4 d-flex flex-wrap flex-fill">
+            {{ price_part(endpoint='bookings.reserve_ticket',flight=flight.id) }}
         </div>
     </div>
 </div>
