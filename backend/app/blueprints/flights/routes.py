@@ -36,6 +36,10 @@ def get_routes():
 def get_countries():
     return jsonify([country.to_dict() for country in dao.get_countries()])
 
+@flights_bp.route("/api/aircraft_seats/<id>")
+def get_aircraft_seates(id):
+    return jsonify([aircraft_seat.to_dict() for aircraft_seat in dao.get_aircraft_seats_by_aircraft(id)])
+
 
 @flights_bp.route("/schedule", methods=["GET"])
 @decorators.admin_or_flight_manager_required
@@ -119,6 +123,11 @@ def schedule(id):
         time_to_add = timedelta(minutes=int(data["flightDuration"]))
         arrive_time = depart_time + time_to_add
         aircraft_id = data["aircraft"]
+        
+        #aircraft seat
+        aircraft_seats_id = data.getlist("flightSeat")
+        aircraft_seats_price = data.getlist("price")
+        aircraft_seats_currency = data.getlist("currency")
 
         # stopover airport
         stopover_airport = data.getlist("stopoverAirport")
@@ -132,6 +141,7 @@ def schedule(id):
             # add flight
             for t in stopover_duration:
                 arrive_time += timedelta(minutes=int(t))
+                
             flight = dao.add_flight(
                 route_id=data["route_id"],
                 depart_time=depart_time,
@@ -140,6 +150,11 @@ def schedule(id):
             )
 
             if flight:
+                #add aircraft seat
+                for i in range(len(aircraft_seats_id)):
+                    dao.add_flight_seat(flight_id=flight.id, aircraft_seat_id=aircraft_seats_id[i],
+                                        price=aircraft_seats_price[i], currency=aircraft_seats_currency[i])
+                    
                 # add stopover_airport
                 for i in range(len(stopover_airport)):
                     stopover_arrive_time[i] = dt.strptime(
@@ -162,12 +177,18 @@ def schedule(id):
                 message = "Schedule fail"
 
         else:
-            if dao.add_flight(
+            flight =  dao.add_flight(
                 route_id=data["route_id"],
                 depart_time=depart_time,
                 arrive_time=arrive_time,
                 aircraft_id=aircraft_id,
-            ):
+            )
+            
+            if flight:
+                for i in range(len(aircraft_seats_id)):
+                    dao.add_flight_seat(flight_id=flight.id, aircraft_seat_id=aircraft_seats_id[i],
+                                        price=aircraft_seats_price[i], currency=aircraft_seats_currency[i])
+                
                 message = "Schedule success"
             else:
                 message = "Schedule fail"

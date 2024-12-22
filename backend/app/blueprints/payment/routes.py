@@ -107,8 +107,7 @@ def payment_return():
         if vnp.validate_response(app.config["VNPAY_HASH_SECRET_KEY"]):
             if vnp_ResponseCode == "00":
                 # reservation
-                index = order_id.find("PAY")
-                reservation_id = order_id[:index]
+                reservation_id = order_id
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
                 reservation.payment.status = PaymentStatus.SUCCESS
                 db.session.commit()
@@ -130,8 +129,7 @@ def payment_return():
                 )
             elif vnp_ResponseCode == "24":
                 # reservation
-                index = order_id.find("PAY")
-                reservation_id = order_id[:index]
+                reservation_id = order_id
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
 
                 return render_template(

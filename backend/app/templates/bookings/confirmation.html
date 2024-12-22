@@ -23,7 +23,7 @@
             <div class="bg-light mt-3 p-2 rounded">
                 <h3>Seat Information</h3>
                 <p><b>Seat:</b> {{ flight_seat.aircraft_seat.seat_name }}</p>
-                <p><b>Price:</b> {{ flight_seat.price }} {{ flight_seat.currency }}</p>
+                <p><b>Price:</b> {{ "{:,.0f}".format(flight_seat.price) }} {{ flight_seat.currency }}</p>
             </div>
 
             <div class="bg-light mt-3 p-2 rounded">

@@ -43,6 +43,9 @@ def get_seat_class_by_id(id):
 def get_aircraft_by_id(id):
     return Aircraft.query.get(id)
 
+def get_aircraft_seats_by_aircraft(aircraft_id):
+    return AircraftSeat.query.filter(AircraftSeat.aircraft_id == aircraft_id).all()
+
 
 def add_route(depart_airport_id, arrive_airport_id):
     # Tạo đối tượng Route mới
@@ -297,3 +300,20 @@ def get_max_stopover_duration():
     return (
         Regulation.query.filter(Regulation.key == "max_stopover_duration").first().value
     )
+
+def add_flight_seat(flight_id, aircraft_seat_id, price, currency):
+    new_flight_seat = FlightSeat(
+        flight_id=flight_id,
+        aircraft_seat_id=aircraft_seat_id,
+        price=price,
+        currency=currency
+    )
+
+    db.session.add(new_flight_seat)
+
+    try:
+        db.session.commit()
+        return new_flight_seat
+    except Exception as e:
+        db.session.rollback()
+        return None
