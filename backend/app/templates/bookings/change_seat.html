@@ -3,6 +3,7 @@
 {% from 'bookings/components/seat_pick.html' import render_seat_pick %}
 {% from 'bookings/components/reservation_info.html' import render_reservation_info %}
 {% from "flights/components/price_part.html" import price_part with context%}
+{% from "flights/components/flight_route.html" import render_flight_route %}
 
 {% extends 'layouts/base.html' %}
 {% block content %}
@@ -37,6 +38,9 @@
                     <h5 class="card-title"><b>Current reservation</b></h5>
                     <div><b>Current seat:</b> {{reservation.flight_seat.aircraft_seat.seat_name}}</div>
                     <div><b>Current class:</b> {{reservation.flight_seat.aircraft_seat.seat_class.name}}</div>
+                </div>
+                <div class="card-body border-bottom">
+                    {{ render_flight_route(flight) }}
                 </div>
                 {{ render_reservation_info(reservation, class='card-body') }}
                 <div class="card-footer">

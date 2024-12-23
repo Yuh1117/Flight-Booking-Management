@@ -7,16 +7,30 @@ from pathlib import Path
 load_dotenv()
 
 
-class FlaskConfig:
-    SECRET_KEY = os.getenv("SECRET_KEY", "6789lacachbonanhsong")
-    DEBUG = True
+class MySQLConfig:
     MYSQL_USER = os.getenv("MYSQL_USER", "root")
     MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "admin")
     MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
     MYSQL_HOST_PORT = os.getenv("MYSQL_HOST_PORT", "3306")
     MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "flight_booking")
+    DB_URI = f"mysql+pymysql://{MYSQL_USER}:{quote(MYSQL_PASSWORD)}@{MYSQL_HOST}:{MYSQL_HOST_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
+
+
+class PostgresConfig:
+    # use for deployment on render.com
+    POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
+    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "admin")
+    POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+    POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+    POSTGRES_DATABASE = os.getenv("POSTGRES_DATABASE", "flight_booking")
+    DB_URI = f"postgresql+psycopg2://{POSTGRES_USER}:{quote(POSTGRES_PASSWORD)}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DATABASE}"
+
+
+class FlaskConfig:
+    SECRET_KEY = os.getenv("SECRET_KEY", "6789lacachbonanhsong")
+    DEBUG = True
     # SQLALCHEMY_DATABASE_URI = os.getenv("SQLITE_URI")
-    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USER}:{quote(MYSQL_PASSWORD)}@{MYSQL_HOST}:{MYSQL_HOST_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
+    SQLALCHEMY_DATABASE_URI = PostgresConfig.DB_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
@@ -39,7 +53,8 @@ class GoogleAuthConfig:
         "openid",
     ]
     REDIRECT_URI = CLIENT_CONFIG["web"]["redirect_uris"][0]
-    
+
+
 class VNPayConfig:
     VNPAY_RETURN_URL = os.getenv("VNPAY_RETURN_URL")
     VNPAY_PAYMENT_URL = os.getenv("VNPAY_PAYMENT_URL")

@@ -160,8 +160,8 @@ document.addEventListener("DOMContentLoaded", function () {
   //       toSelect.appendChild(option);
   //   });
   // }
+  let noti_panel = document.querySelector('.noti-panel > .toast-container')
   setTimeout(() => {
-    noti_panel = document.querySelector('.noti-panel > .toast-container')
     noti_panel.style = 'right: 0;'
-  },10)
+  }, 10)
 });

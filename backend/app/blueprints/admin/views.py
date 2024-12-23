@@ -98,14 +98,14 @@ class FlightAdmin(ModelView, AdminView):
         "arrive_time",
         "aircraft.id",
         "aircraft.name",
-        "aircraft.airline_name",
+        "aircraft.airline.name",
     )
     column_labels = {
         "route.depart_airport.name": "Depart Airport",
         "route.arrive_airport.name": "Arrive Airport",
         "aircraft.id": "Aircraft ID",
         "aircraft.name": "Aircraft Name",
-        "aircraft.airline_name": "Airline Name",
+        "aircraft.airline.name": "Airline Name",
     }
     column_searchable_list = [
         "id",
@@ -143,7 +143,7 @@ class FlightAdmin(ModelView, AdminView):
 
 
 class AirportAdmin(ModelView, AdminView):
-    column_list = ("id", "name", "code", "country.name", "country.id")
+    column_list = ("id", "name", "code", "country")
     form_excluded_columns = ["stopovers", "depart_routes", "arrive_routes"]
     column_searchable_list = ["code", "name", "country.name"]
     column_filters = ["country.name"]
@@ -164,7 +164,7 @@ class AirportAdmin(ModelView, AdminView):
 
 
 class AircraftAdmin(ModelView, AdminView):
-    # Hiển thị thêm airline_name
+    # Hiển thị thêm airline.name
     column_list = ("id", "name", "airline.name")
     form_excluded_columns = ["flights"]
     column_searchable_list = [

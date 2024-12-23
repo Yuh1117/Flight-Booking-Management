@@ -68,6 +68,7 @@ def load_user(user_id):
 @auth_bp.route("/logout")
 def logout_process():
     logout_user()
+    session.clear()
     return redirect("/login")
 
 

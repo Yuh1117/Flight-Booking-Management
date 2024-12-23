@@ -1,5 +1,5 @@
 from enum import Enum as BaseEnum
-from sqlalchemy import Column, Integer, Enum, ForeignKey, DateTime, Double, String
+from sqlalchemy import Column, Integer, Enum, ForeignKey, DateTime, Double, Boolean
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime as dt
@@ -15,6 +15,7 @@ class Reservation(db.Model):
     author_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     flight_seat_id = Column(Integer, ForeignKey("flight_seats.id"), nullable=False)
     created_at = Column(DateTime, nullable=False, default=dt.now)
+    is_deleted = Column(Boolean, nullable=False, default=False)
 
     owner = relationship(
         "User",
@@ -32,7 +33,6 @@ class Reservation(db.Model):
         uselist=False,
         backref="reservation",
         lazy=True,
-        cascade="all, delete-orphan",
     )
 
     def __repr__(self):
@@ -45,9 +45,9 @@ class Reservation(db.Model):
         """
         Reservation is editable if it is unpaid and the flight is bookable
         """
-        if not self.flight_seat.flight.is_bookable_now():
+        if self.is_deleted or self.is_paid():
             return False
-        return not self.is_paid()
+        return self.flight_seat.flight.is_bookable_now()
 
 
 class PaymentStatus(BaseEnum):

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_flight_booking
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+
+    ports:
+      - ${MYSQL_HOST_PORT}:${MYSQL_PORT}
+    # healthcheck:
+    #   test: ["CMD", "mysqladmin", "ping", "-h", "mysql"]
+    #   timeout: 10s
+    #   retries: 10
+
+  # backend:
+  #   build:
+  #     context: backend
+  #     dockerfile: Dockerfile
+  #   container_name: website
+  #   env_file:
+  #     - backend/.env
+  #   ports:
+  #     - 127.0.0.1:5000:5000
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy

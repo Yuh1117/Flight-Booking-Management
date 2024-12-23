@@ -188,7 +188,7 @@ footer hr {
 }
 
 .noti-panel > .toast-container{
-  transition: right .5s; /* only transition top property */
+  transition: right .5s ease; /* only transition top property */
   right: -100%;
 }
 

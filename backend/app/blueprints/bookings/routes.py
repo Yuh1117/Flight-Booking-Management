@@ -1,4 +1,4 @@
-from flask import request, render_template, redirect, url_for, flash
+from flask import request, render_template, redirect, url_for, flash, session
 from flask_login import login_required, current_user
 from datetime import datetime as dt
 
@@ -65,12 +65,14 @@ def reserve_ticket():
             flash(f"This user has already booked this flight seat!", "danger")
             return redirect(request.referrer)
 
-        # Add reservation
-        reservation = booking_dao.add_reservation(
-            owner.id, current_user.id, flight_seat_id
-        )
-        flash("Reservation created", "success")
-        return redirect(url_for("bookings.manage_own_bookings"))
+        # Store reservation details in session
+        session["pending_reservation"] = {
+            "owner_id": owner.id,
+            "author_id": current_user.id,
+            "flight_seat_id": flight_seat_id,
+        }
+
+        return redirect(url_for("bookings.confirmation"))
 
     return render_template(
         "bookings/index.html",
@@ -83,17 +85,54 @@ def reserve_ticket():
     )
 
 
-@bookings_bp.route("/booking/confirmation/<int:reservation_id>", methods=["GET"])
+@bookings_bp.route("/booking/confirmation", methods=["GET", "POST"])
 @login_required
-def confirmation(reservation_id):
-    reservation = Reservation.query.get_or_404(reservation_id)
-    flight_seat = reservation.flight_seat
-    flight = flight_seat.flight
+def confirmation():
+    """
+    Confirm the reservation and store it in the database.
+    If the user is staff, the reservation is created along with payment (Staff sells ticket offline).
+    """
+    # Retrieve reservation details from session
+    reservation_details = session.get("pending_reservation", None)
+    if not reservation_details:
+        flash("No reservation to confirm", "danger")
+        return redirect(url_for("bookings.manage_own_bookings"))
+
+    owner = auth_dao.get_user_by_id(reservation_details["owner_id"])
+    author = auth_dao.get_user_by_id(reservation_details["author_id"])
+    seat = flight_dao.get_flight_seat_by_id(reservation_details["flight_seat_id"])
+    flight = seat.flight
+
+    # Check if flight is still bookable
+    if not flight.is_bookable_now() or seat.is_sold():
+        session.pop("reservation_details", None)
+        flash("Flight is no longer bookable", "danger")
+        return redirect(request.referrer)
+
+    # Clear the reservation details from session
+    if request.method == "POST":
+        session.pop("pending_reservation", None)
+        # Get payment type if user is staff
+        if current_user.role != UserRole.CUSTOMER:
+            payment_type = request.form.get("payment_type")
+        else:
+            payment_type = "card"
+
+        # Create reservation
+        if payment_type == "cash":
+            booking_dao.add_reservation(owner.id, author.id, seat.id, is_paid=True)
+        elif payment_type == "card":
+            booking_dao.add_reservation(owner.id, author.id, seat.id)
+
+        flash("Reservation created!", "success")
+        return redirect(url_for("bookings.manage_own_bookings"))
+
     return render_template(
         "bookings/confirmation.html",
-        reservation=reservation,
+        owner=owner,
+        author=author,
+        seat=seat,
         flight=flight,
-        flight_seat=flight_seat,
     )
 
 
@@ -139,7 +178,7 @@ def edit_reservation(reservation_id):
 
     if not reservation.is_editable():
         flash("You can't edit this reservation", "danger")
-        return redirect(request.referrer)
+        return redirect(url_for("bookings.manage_own_bookings"))
 
     flight = reservation.flight_seat.flight
     seat_class = request.args.get(
@@ -148,7 +187,6 @@ def edit_reservation(reservation_id):
         default=reservation.flight_seat.aircraft_seat.seat_class,
     )
     if not validate_flight_seat_class(flight, seat_class):
-        flash("Invalid flight or seat class", "danger")
         return redirect(request.referrer)
 
     if request.method == "POST":
@@ -186,7 +224,7 @@ def delete_reservation(reservation_id):
     Only the user who owns the reservation can delete it.
     Even author of the reservation can't delete it.
     """
-    if booking_dao.delete_reservation_of_user(current_user.id, reservation_id):
+    if booking_dao.delete_reservation_of_owner(current_user.id, reservation_id):
         flash("Reservation deleted", "success")
     else:
         flash("Reservation not found", "danger")

@@ -55,13 +55,14 @@ document.addEventListener("DOMContentLoaded", function () {
   // Append airports to select elements
   Promise.all([airports, countries]).then((values) => {
     let airports = values[0];
+    console.log(airports);
+    
     let countries = values[1];
     airports.forEach((airport) => {
       let option = document.createElement("option");
       option.value = airport.id;
-      option.text = `${airport.name} (${airport.code}) - ${
-        getCountryByID(countries, airport.country_id).name
-      }`;
+      country_name = getCountryByID(countries, airport.country_id).name;
+      option.text = `${airport.name} (${airport.code}) - ${country_name}`;
       departAirportSelect.appendChild(option);
 
       // Clone option and append to arriveAirportSelect

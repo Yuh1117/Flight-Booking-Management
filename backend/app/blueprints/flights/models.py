@@ -26,6 +26,9 @@ class Country(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     code = Column(VARCHAR(5), unique=True, nullable=False)
+    airports = relationship(
+        "Airport", back_populates="country", lazy=True, cascade="all, delete"
+    )
 
     def __repr__(self):
         return f"Country({self.id}, '{self.name}', '{self.code}')"
@@ -44,19 +47,15 @@ class Airport(db.Model):
         ForeignKey(
             "countries.id",
         ),
-        nullable=True,
+        nullable=False,
     )
-    country = relationship("Country", backref="airports", lazy=True)
+    country = relationship("Country", back_populates="airports", lazy=True)
 
     def __repr__(self):
         return f"Airport({self.id}, '{self.name}', '{self.code}', '{self.country_id}')"
 
     def __str__(self):
         return f"{self.name} ({self.code}) - {self.country.name}"
-
-    @property
-    def country_name(self):
-        return self.country.name if self.country else None
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -66,6 +65,9 @@ class Airline(db.Model):
     __tablename__ = "airlines"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
+    aircrafts = relationship(
+        "Aircraft", backref="airline", lazy=True, cascade="all, delete"
+    )
 
     def __repr__(self):
         return f"Airline({self.id}, '{self.name}')"
@@ -78,11 +80,9 @@ class Aircraft(db.Model):
     __tablename__ = "aircrafts"
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
-    airline_id = Column(
-        Integer, ForeignKey("airlines.id", ondelete="CASCADE"), nullable=False
-    )
-    airline = relationship(
-        "Airline", backref="aircrafts", lazy=True, passive_deletes=True
+    airline_id = Column(Integer, ForeignKey("airlines.id"), nullable=False)
+    seats = relationship(
+        "AircraftSeat", backref="aircraft", lazy=True, cascade="all, delete"
     )
 
     def __repr__(self):
@@ -93,10 +93,6 @@ class Aircraft(db.Model):
             if flight.depart_time < arrive_time and flight.arrive_time > depart_time:
                 return False
         return True
-
-    @property
-    def airline_name(self):
-        return self.airline.name if self.airline else "N/A"
 
 
 class SeatClass(db.Model):
@@ -114,19 +110,16 @@ class SeatClass(db.Model):
 class AircraftSeat(db.Model):
     __tablename__ = "aircraft_seats"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    aircraft_id = Column(
-        Integer, ForeignKey("aircrafts.id", ondelete="CASCADE"), nullable=False
-    )
+    aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=False)
     seat_class_id = Column(Integer, ForeignKey("seat_classes.id"), nullable=False)
     seat_name = Column(String(5), nullable=False)
-    aircraft = relationship(
-        "Aircraft", backref="seats", lazy=True, passive_deletes=True
-    )
+
     seat_class = relationship("SeatClass", backref="seats", lazy=True)
+    flight_seats = relationship("FlightSeat", backref="aircraft_seat", lazy=True)
 
     def __repr__(self):
         return f"AircraftSeat({self.id}, {self.aircraft}, '{self.seat_class.name}', '{self.seat_name}')"
-    
+
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
@@ -135,30 +128,16 @@ class FlightSeat(db.Model):
     __tablename__ = "flight_seats"
     __table_args__ = (UniqueConstraint("flight_id", "aircraft_seat_id"),)
     id = Column(Integer, primary_key=True, autoincrement=True)
-    flight_id = Column(
-        Integer, ForeignKey("flights.id", ondelete="CASCADE"), nullable=False
-    )
-    aircraft_seat_id = Column(
-        Integer, ForeignKey("aircraft_seats.id", ondelete="CASCADE"), nullable=False
-    )
+    flight_id = Column(Integer, ForeignKey("flights.id"), nullable=False)
+    aircraft_seat_id = Column(Integer, ForeignKey("aircraft_seats.id"), nullable=True)
     price = Column(Double, nullable=False)
     currency = Column(VARCHAR(20), nullable=False)
-    flight = relationship("Flight", backref="seats", lazy=True, passive_deletes=True)
-    aircraft_seat = relationship(
-        "AircraftSeat", backref="flight_seats", lazy=True, passive_deletes=True
-    )
 
     def __repr__(self):
         return f"FlightSeat({self.id}, Flight-{self.flight_id}, '{self.aircraft_seat.seat_name}', '{self.aircraft_seat.seat_class.name}', {self.price}-{self.currency})"
 
     def is_sold(self):
-        return (
-            Reservation.query.filter(
-                Reservation.flight_seat_id == self.id,
-                Reservation.payment.has(status=PaymentStatus.SUCCESS),
-            ).first()
-            is not None
-        )
+        return next((r for r in self.reservations if r.is_paid()), None) is not None
 
 
 class Route(db.Model):
@@ -167,12 +146,8 @@ class Route(db.Model):
         UniqueConstraint("depart_airport_id", "arrive_airport_id", name="unique_route"),
     )
     id = Column(Integer, primary_key=True, autoincrement=True)
-    depart_airport_id = Column(
-        Integer, ForeignKey("airports.id", ondelete="CASCADE"), nullable=False
-    )
-    arrive_airport_id = Column(
-        Integer, ForeignKey("airports.id", ondelete="CASCADE"), nullable=False
-    )
+    depart_airport_id = Column(Integer, ForeignKey("airports.id"), nullable=False)
+    arrive_airport_id = Column(Integer, ForeignKey("airports.id"), nullable=False)
     depart_airport = relationship(
         "Airport",
         foreign_keys=[depart_airport_id],
@@ -205,6 +180,12 @@ class Flight(db.Model):
     aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=True)
     route = relationship("Route", backref="flights", lazy=True)
     aircraft = relationship("Aircraft", backref="flights", lazy=True)
+    seats = relationship(
+        "FlightSeat", backref="flight", lazy=True, cascade="all, delete"
+    )
+    stopovers = relationship(
+        "Stopover", backref="flight", lazy=True, cascade="all, delete"
+    )
 
     def __repr__(self):
         return f"Flight({self.id}, {self.route}, '{self.depart_time}', '{self.arrive_time}', {self.aircraft})"
@@ -232,7 +213,7 @@ class Flight(db.Model):
         if self.depart_time <= dt.now():
             return False
 
-        # Check if user can book this flight seat
+        # Check if user can book this flight
         if current_user.role != UserRole.CUSTOMER:
             min_booking_time = dao.get_staff_min_booking_time()
         else:
@@ -260,7 +241,7 @@ class Stopover(db.Model):
     )
     flight_id = Column(
         Integer,
-        ForeignKey("flights.id", ondelete="CASCADE"),
+        ForeignKey("flights.id"),
         primary_key=True,
         nullable=False,
     )
@@ -271,9 +252,6 @@ class Stopover(db.Model):
 
     # Quan hệ
     airport = relationship("Airport", backref="stopovers", lazy=True)
-    flight = relationship(
-        "Flight", backref="stopovers", lazy=True, passive_deletes=True
-    )
 
     def __repr__(self):
         return (

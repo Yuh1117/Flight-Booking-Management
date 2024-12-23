@@ -1,9 +1,0 @@
-services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql_flight_booking
-    env_file:
-      - path: backend/.env
-        required: true
-    ports:
-      - ${MYSQL_HOST_PORT}:${MYSQL_PORT}

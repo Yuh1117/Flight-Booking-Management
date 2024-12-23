@@ -6,7 +6,7 @@
 <form method="POST" action="" class="row my-5">
     {{ form.hidden_tag() }}
     <!-- Sơ đồ ghế -->
-    <div class="d-flex flex-column col-4">
+    <div class="d-flex flex-column col-sm-4 col-12">
         {{ render_seat_pick(flight.seats, seat_class) }}
         <div class="card mt-3 overflow-hidden">
             <div class="card-header text-center">Classes</div>
@@ -16,8 +16,8 @@
     <!--  -->
     <!--  -->
     <!--  -->
-    <div class="col-8">
-        <div class="shadow card">
+    <div class="col-sm-8 col-12">
+        <div class="shadow card mt-sm-0 mt-3">
             <div class="card-header">
                 <div><b>Flight ID: </b>{{flight.id}}</div>
                 <div><b>From:</b> {{ flight.route.depart_airport }}</div>
@@ -29,13 +29,6 @@
 
             <div class="card-body">
                 {{ render_field(form.citizen_id) }}
-                <div class="alert alert-success d-flex align-items-center" role="alert">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-check-circle me-2" viewBox="0 0 16 16">
-                        <path d="M15.854 8a7.854 7.854 0 1 1-15.708 0 7.854 7.854 0 0 1 15.708 0zM8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                        <path d="M10.97 5.97a.235.235 0 0 1 .017.022L6.477 10.514 4.354 8.39a.5.5 0 1 1 .707-.707L6.477 9.1l4.243-4.243a.5.5 0 0 1 .707.707l-4.243 4.243-.07.07a.235.235 0 0 1-.017-.022z"/>
-                    </svg>
-                    <div>You will soon receive reservation info via email.</div>
-                </div>
             </div>
             
             <!-- Nút xác nhận đặt vé -->
