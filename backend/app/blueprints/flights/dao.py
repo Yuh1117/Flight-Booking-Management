@@ -105,7 +105,7 @@ def add_flight(
 
 
 def add_intermediate_airport(
-    airport_id, flight_id, arrival_time, departure_time, order
+    airport_id, flight_id, arrival_time, departure_time, order, note
 ):
     new_intermediate_airport = Stopover(
         airport_id=airport_id,
@@ -113,6 +113,7 @@ def add_intermediate_airport(
         arrival_time=arrival_time,
         departure_time=departure_time,
         order=order,
+        note=note
     )
 
     db.session.add(new_intermediate_airport)

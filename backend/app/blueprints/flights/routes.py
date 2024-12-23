@@ -88,7 +88,7 @@ def schedule(id):
             total_elements = None
 
         aircrafts = dao.load_aircarfts()
-
+        
         airports = dao.load_airports(route.depart_airport_id, route.arrive_airport_id)
 
         # regulation
@@ -170,6 +170,7 @@ def schedule(id):
                         arrival_time=stopover_arrive_time[i],
                         departure_time=stopover_depart_time,
                         order=(i + 1),
+                        note=stopover_notes[i]
                     )
 
                 message = "Schedule success"
@@ -197,22 +198,6 @@ def schedule(id):
         return redirect(f"/schedule/{data['route_id']}")
 
 
-# @flights_bp.route("/api/schedule/validate", methods=['POST'])
-# @decorators.flight_manager_required
-# def validate():
-#     data = request.json
-#     message = {
-#         "flight_duration":'',
-
-#     }
-#     max_flight_duration = dao.get_max_flight_duration()
-#     min_flight_duration = dao.get_min_flight_duration()
-
-#     if(int(data.get('flightDuration')) < min_flight_duration or int(data.get('flightDuration')) > max_flight_duration):
-#         message['flight_duration'] = f"Flight duration must be between {min_flight_duration} - {max_flight_duration} minutes!"
-
-
-#     return jsonify(message)
 def to_date(date_str):
     return dt.strptime(date_str, "%Y-%m-%d").date()
 
@@ -280,6 +265,8 @@ def validate():
     message = {
         "flight_duration": "",
         "depart_date_time": "",
+        "aircraft": "",
+        "flight_seat": [],
         "stopover_airport": [],
         "stopover_duration": [],
         "stopover_arrival_time": [],
@@ -303,9 +290,26 @@ def validate():
 
     if depart_date_time < now:
         message["depart_date_time"] = "Invalid date time"
+        
+    ##
+    if(data.get("aircraft") != ''):
+        message["aircraft"] = data.get("aircraft")
 
     ##
     duplicate = []
+    if data.get('flightSeats'):
+        for i in range(0, len(data.get('flightSeats'))):
+            message["flight_seat"].append("")
+            if i == 0:
+                duplicate.append(data.get("flightSeats")[i])
+                continue
+
+            if data.get("flightSeats")[i] in duplicate:
+                message["flight_seat"][i] = "Duplicate Seat"
+            duplicate.append(data.get("flightSeats")[i])
+
+    ##
+    duplicate.clear()
     if data.get("stopoverAirport"):
         for i in range(0, len(data.get("stopoverAirport"))):
             message["stopover_airport"].append("")
@@ -333,14 +337,22 @@ def validate():
                 ] = f"Value must be between {min_stopover_duration} - {max_stopover_duration}"
 
     ##
+    previous_time = depart_date_time
+    remaining_flight_duration = int(data.get("flightDuration"))
+    
     if data.get("stopoverArrivalTime"):
         for i in range(0, len(data.get("stopoverArrivalTime"))):
             message["stopover_arrival_time"].append("")
             stopover_arrival_time = dt.strptime(
                 data.get("stopoverArrivalTime")[i], "%Y-%m-%dT%H:%M"
             )
-            if stopover_arrival_time < depart_date_time:
+            
+            tmp = (stopover_arrival_time - previous_time).total_seconds() / 60
+            if stopover_arrival_time < previous_time or tmp >= remaining_flight_duration:
                 message["stopover_arrival_time"][i] = "Invalid arrival time"
+                
+            previous_time = stopover_arrival_time + timedelta(minutes=int(data.get("stopoverDuration")[i]))
+            remaining_flight_duration -= tmp
 
     ####
     stopover_airport_valid = all(item == "" for item in message["stopover_airport"])
@@ -348,13 +360,35 @@ def validate():
     stopover_arrival_time_valid = all(
         item == "" for item in message["stopover_arrival_time"]
     )
+    flight_seats_valid = all(item == "" for item in message["flight_seat"])
+    
     if (
         message["depart_date_time"] == ""
         and message["flight_duration"] == ""
+        and message["aircraft"] == ""
         and stopover_airport_valid
         and stopover_duration_valid
         and stopover_arrival_time_valid
+        and flight_seats_valid
     ):
         message["valid"] = True
 
     return jsonify(message)
+
+
+@flights_bp.route("/api/schedule/validate-aircraft", methods=["POST"])
+@decorators.admin_or_flight_manager_required
+def validate_aircraft():
+    data = request.json
+    message = ''
+    aircraft = dao.get_aircraft_by_id(data.get("aircraftId"))
+    
+    depart_date_time = dt.strptime(data.get("departureDateTime"), "%Y-%m-%dT%H:%M")
+
+    
+    if(not aircraft.is_available(depart_date_time, 
+                             depart_date_time + timedelta(minutes=int(data.get("flightDuration"))))):
+        message = "This aircraft is not available"
+        
+    return jsonify(message)
+    
