@@ -42,17 +42,19 @@
                         <div class="col-md-3">
                             <label for="flightDuration" class="form-label">Flight Duration</label>
                             <input type="number" id="flightDuration" class="form-control" placeholder="minutes"
-                                name="flightDuration" required>
+                                name="flightDuration" min="0" required>
                             <span class="error" id="flightDurationError"></span>
                         </div>
                         <div class="col-md-6">
                             <label for="aircraft" class="form-label">Aircraft</label>
-                            <select class="form-select" id="aircraft" name="aircraft" required>
+                            <select class="form-select" id="aircraft" name="aircraft" required disabled>
                                 <option value="" disabled selected>Select aircraft</option>
                                 {% for a in aircrafts %}
-                                <option value="{{ a.id }}">{{ a.name }}</option>
+                                <option value="{{ a.id }}">{{ a.name }} ({{ a.id }}) - ({{ a.seats | length }} seats)
+                                </option>
                                 {% endfor %}
                             </select>
+                            <span class="error" id="aircraftError"></span>
                         </div>
                     </div>
 
@@ -203,31 +205,81 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        function canSelectAircraft() {
+            if (departureDateTime.value && flightDuration.value) {
+                aircraftSelect.disabled = false;
+            } else {
+                aircraftSelect.disabled = true;
+            }
+        }
+
+        function validateAircraft() {
+            const aircraftId = parseInt(aircraftSelect.value)
+
+            if(departureDateTime.value === '' || flightDuration.value === '' || aircraftSelect.value === '') return
+
+            fetch("/api/schedule/validate-aircraft", {
+                method: "post",
+                body: JSON.stringify({
+                    "aircraftId": aircraftId,
+                    "departureDateTime": departureDateTime.value,
+                    "flightDuration": flightDuration.value
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then(res => res.json()).then(data => {
+                console.log(1)
+                aircraftSeatRemaining = document.getElementById("aircraftSeatRemaining")
+
+                if (data != '') {
+                    aircraftSelect.classList.add("is-invalid")
+                    document.getElementById('addFlightSeat').classList.add('regulation')
+                    aircraftSeatRemaining.innerHTML = '0'
+
+                } else {
+                    aircraftSelect.classList.remove("is-invalid")
+                    aircraftSeats = fetchAircraftSeats(aircraftId)
+
+                    Promise.all([aircraftSeats]).then((values) => {
+                        aircraftSeats = values[0]
+                        document.getElementById('addFlightSeat').classList.remove('regulation')
+                        document.getElementById("flightSeats").innerHTML = `<h6>Flight Seats</h6>`;
+                        aircraftSeatRemaining.innerHTML = aircraftSeats.length
+                        numberOfAircraftSeat = aircraftSeats.length
+                    })
+                }
+
+                document.getElementById("aircraftError").innerHTML = data
+            })
+        }
+
+        const departureDateTime = document.getElementById("departureDateTime")
+        const flightDuration = document.getElementById("flightDuration")
+        const aircraftSelect = document.getElementById("aircraft");
+
+        departureDateTime.addEventListener("input", canSelectAircraft);
+        departureDateTime.addEventListener("input", validateAircraft);
+        
+        flightDuration.addEventListener("input", canSelectAircraft);
+        flightDuration.addEventListener("blur", validateAircraft);
 
         //// Flight seats
         let numberOfAircraftSeat
         let aircraftSeatRemaining
         let aircraftSeats
 
-        document.getElementById("aircraft").addEventListener("change", function () {
-            const aircraftId = parseInt(document.getElementById("aircraft").value)
-            aircraftSeats = fetchAircraftSeats(aircraftId)
-
-            Promise.all([aircraftSeats]).then((values) => {
-                aircraftSeats = values[0]
-
-                document.getElementById("flightSeats").innerHTML = `<h6>Flight Seats</h6>`;
-                aircraftSeatRemaining = document.getElementById("aircraftSeatRemaining")
-                aircraftSeatRemaining.innerHTML = aircraftSeats.length
-                numberOfAircraftSeat = aircraftSeats.length
-            })
-        })
+        aircraftSelect.addEventListener("change", validateAircraft)
 
         // Add button
         let flightSeatCount = 0;
 
+        if (!numberOfAircraftSeat) {
+            document.getElementById('addFlightSeat').classList.add('regulation')
+        }
+
         document.getElementById("addFlightSeat").addEventListener("click", function () {
-            if (!numberOfAircraftSeat) return
+            if (!numberOfAircraftSeat || parseInt(aircraftSeatRemaining.innerText) <= 0) return
 
             flightSeatCount++;
             aircraftSeatRemaining.innerText = numberOfAircraftSeat - flightSeatCount
@@ -284,6 +336,7 @@
             }
 
         });
+
         ////
 
 
@@ -292,6 +345,8 @@
             e.preventDefault()
             const flightDuration = parseInt(document.getElementById("flightDuration").value)
             const departureDateTime = document.getElementById("departureDateTime").value
+            const aircraft = document.getElementById("aircraftError").innerText
+            const flightSeats = Array.from(document.querySelectorAll("#flightSeat")).map(seat => seat.value);
 
             let stopoverAirport = []
             let stopoverDuration = []
@@ -318,6 +373,8 @@
                 body: JSON.stringify({
                     "flightDuration": flightDuration,
                     "departureDateTime": departureDateTime,
+                    "aircraft": aircraft,
+                    "flightSeats": flightSeats,
                     "stopoverAirport": stopoverAirport,
                     "stopoverDuration": stopoverDuration,
                     "stopoverArrivalTime": stopoverArrivalTime
@@ -341,7 +398,30 @@
                 }
 
                 //
+                if (data.aircraft !== '') {
+                    document.getElementById("aircraft").classList.add("is-invalid")
+                } else {
+                    document.getElementById("aircraft").classList.remove("is-invalid")
+                }
+
+                //
                 let count = 0
+                const flightSeatRows = document.querySelectorAll('.flightSeatRow');
+                flightSeatRows.forEach(row => {
+                    //
+                    if (data.flight_seat[count] !== '') {
+                        row.querySelector('#flightSeat').classList.add("is-invalid")
+                    } else {
+                        row.querySelector('#flightSeat').classList.remove("is-invalid")
+                    }
+
+                    row.querySelector("#flightSeatError").innerHTML = data.flight_seat[count]
+
+                    count++
+                })
+
+                //
+                count = 0
                 if (numberOfAirports !== parseInt(remaining.innerText)) {
                     const stopoverRows = document.querySelectorAll('.stopoverRow');
                     stopoverRows.forEach(row => {
@@ -376,6 +456,7 @@
 
                 document.getElementById("flightDurationError").innerHTML = data.flight_duration
                 document.getElementById("departureDateTimeError").innerHTML = data.depart_date_time
+                document.getElementById("aircraftError").innerHTML = data.aircraft
 
                 if (data.valid == true) {
                     document.getElementById("formSchedule").submit()
@@ -392,7 +473,16 @@
         // Add button
         let stopoverCount = 0;
 
+
+        if (numberOfAirports <= 0) {
+            document.getElementById('addStopover').classList.add('regulation')
+        }
+
         document.getElementById("addStopover").addEventListener("click", function () {
+            if (parseInt(remaining.innerText) <= 0) {
+                return
+            }
+
             stopoverCount++;
             remaining.innerText = numberOfAirports - stopoverCount
             const stopoverDiv = document.createElement("div");
