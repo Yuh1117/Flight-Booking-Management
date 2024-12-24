@@ -49,10 +49,6 @@ def reserve_ticket():
     if not validate_flight_seat_class(flight, seat_class):
         return redirect(url_for("main.home"))
 
-    # Fill form with user info if user is customer
-    if current_user.role == UserRole.CUSTOMER:
-        form.citizen_id.data = current_user.citizen_id
-
     # if method is POST and form is valid
     if form.validate_on_submit():
         owner = auth_dao.get_user_by_citizen_id(form.citizen_id.data)
@@ -235,6 +231,7 @@ def delete_reservation(reservation_id):
 
     response = redirect(request.referrer)
     return response
+
 
 def get_client_ip(request):
     x_forwarded_for = request.headers.get("X-Forwarded-For")

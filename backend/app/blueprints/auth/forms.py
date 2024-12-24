@@ -70,3 +70,21 @@ class UpdateAccountForm(FlaskForm):
                 raise ValidationError(
                     "That email is taken. Please choose a different one."
                 )
+
+
+class RequestResetForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Request Password Reset")
+
+    def validate_email(self, email):
+        user = dao.get_user_by_email(email.data)
+        if user is None:
+            raise ValidationError("There is no account with that email!")
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField("Password", validators=[DataRequired()])
+    confirm_password = PasswordField(
+        "Confirm Password", validators=[DataRequired(), EqualTo("password")]
+    )
+    submit = SubmitField("Reset Password")

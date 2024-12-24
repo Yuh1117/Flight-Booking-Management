@@ -33,6 +33,12 @@ class FlaskConfig:
     SQLALCHEMY_DATABASE_URI = PostgresConfig.DB_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.googlemail.com")
+    MAIL_PORT = os.getenv("MAIL_PORT", 587)
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", True)
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
 
 class CloudinaryConfig:
     CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")

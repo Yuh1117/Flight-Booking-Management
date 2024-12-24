@@ -1,8 +1,8 @@
 from enum import Enum as BaseEnum
 from sqlalchemy import Column, Integer, String, Enum
-from sqlalchemy.orm import relationship
+from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask_login import UserMixin
-from app import db
+from app import db, app
 
 
 class UserRole(BaseEnum):
@@ -41,3 +41,7 @@ class User(db.Model, UserMixin):
         return next(
             (r for r in self.reservations if r.flight_seat.id == flight_seat_id), None
         )
+
+    def get_reset_token(self):
+        s = Serializer(app.config["SECRET_KEY"], salt="something")
+        return s.dumps({"user_id": self.id})

@@ -20,7 +20,7 @@
             {{ form.remember.label(class='form-check-label') }}
           </div>
           <div class="col-6 text-end">
-            <a href="#">Forgot password?</a>
+            <a href="{{url_for('auth.reset_request')}}">Forgot password?</a>
           </div>
         </div>
       </form>

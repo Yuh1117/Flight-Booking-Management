@@ -1,8 +1,14 @@
 from flask import render_template, redirect, url_for, flash, session, request
 from flask_login import login_user, current_user, logout_user, login_required
 
-from app import login_manager, db
-from .forms import SignUpForm, LogInForm, UpdateAccountForm
+from app import login_manager, db, bcrypt
+from .forms import (
+    SignUpForm,
+    LogInForm,
+    UpdateAccountForm,
+    RequestResetForm,
+    ResetPasswordForm,
+)
 from . import auth_bp, google_auth, dao
 from . import decorators
 
@@ -136,3 +142,32 @@ def google_authorize():
             "An error occurred while trying to log you in. Please try again.", "danger"
         )
     return redirect(url_for("main.home"))
+
+
+@auth_bp.route("/reset_password", methods=["GET", "POST"])
+@decorators.anonymous_user
+def reset_request():
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = dao.get_user_by_email(form.email.data)
+        dao.send_reset_email(user)
+        flash(
+            "An email has been sent with instructions to reset your password.", "info"
+        )
+        return redirect(url_for("auth.login"))
+    return render_template("auth/reset_request.html", form=form, title="Reset Password")
+
+
+@auth_bp.route("/reset_password/<token>", methods=["GET", "POST"])
+@decorators.anonymous_user
+def reset_token(token):
+    user = dao.verify_reset_token(token)
+    if user is None:
+        flash("That is an invalid or expired token", "warning")
+        return redirect(url_for("auth.reset_request"))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        dao.change_password(user, form.password.data)
+        flash("Your password has been updated! You are now able to log in", "success")
+        return redirect(url_for("auth.login"))
+    return render_template("auth/reset_token.html", form=form, title="Reset Password")

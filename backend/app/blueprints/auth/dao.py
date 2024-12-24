@@ -4,12 +4,15 @@ import cloudinary
 import cloudinary.uploader
 from pathlib import Path
 import requests
-from flask import request
+from flask import request, render_template
 from pip._vendor import cachecontrol
 from google.oauth2 import id_token
 import google.auth.transport.requests
+from itsdangerous import URLSafeTimedSerializer as Serializer
+from flask_mail import Message
 
-from app import db, bcrypt
+
+from app import db, bcrypt, app, mail
 from app import CloudinaryConfig
 from .models import User, UserRole
 from . import google_auth
@@ -132,3 +135,28 @@ def get_user_oauth():
         clock_skew_in_seconds=10,
     )
     return user_oauth
+
+
+def verify_reset_token(token, expires_sec=300):
+    s = Serializer(app.config["SECRET_KEY"])
+    try:
+        user_id = s.loads(token, max_age=expires_sec, salt="something")["user_id"]
+    except:
+        return None
+    return User.query.get(user_id)
+
+
+def send_reset_email(user):
+    token = user.get_reset_token()
+    message = Message(
+        subject="Password Reset Request",
+        sender="noreply@6789lacachbonanhsong.com",
+        recipients=[user.email],
+        html=render_template("auth/reset_email.html", user=user, token=token),
+    )
+    mail.send(message)
+
+
+def change_password(user, password):
+    user.password = bcrypt.generate_password_hash(password).decode("utf-8")
+    db.session.commit()

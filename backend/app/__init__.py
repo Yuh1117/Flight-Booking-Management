@@ -4,8 +4,9 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 import cloudinary
 from authlib.integrations.flask_client import OAuth
-import os
+from flask_mail import Mail
 
+import os
 from app.config import *
 
 
@@ -16,6 +17,7 @@ app.config["PAGE_SIZE"] = 20
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+mail = Mail(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = "auth.login"
