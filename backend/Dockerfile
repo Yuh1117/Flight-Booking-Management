@@ -16,4 +16,4 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 5000
 
-CMD ["flask", "run"]
+CMD ["python", "run.py"]

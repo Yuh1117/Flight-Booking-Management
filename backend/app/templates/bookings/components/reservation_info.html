@@ -12,7 +12,8 @@
             </div>
         </div>
         <div class="d-flex align-items-center">
-            <span><b>Passenger:</b> {{reservation.owner.full_name}}</span>
+            {% set owner_censored_citizen_id = ("*" * 9) + reservation.owner.citizen_id[-3:] %}
+            <span><b>Passenger:</b> {{reservation.owner.full_name}} ({{owner_censored_citizen_id}})</span>
         </div>
         <!-- If user didnt reservate on their own -->
         {% if reservation.owner_id != reservation.author_id %}

@@ -150,8 +150,7 @@ def seed_regulations():
     print("Regulations seeded successfully!")
 
 
-if __name__ == "__main__":
-
+def seed():
     with app.app_context():
         db.create_all()
         try:
@@ -173,3 +172,7 @@ if __name__ == "__main__":
             db.session.rollback()
             print(f"Failed to seed data: {e}")
             print("Rolling back changes...")
+
+
+if __name__ == "__main__":
+    seed()
