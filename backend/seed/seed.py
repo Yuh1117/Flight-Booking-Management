@@ -21,9 +21,11 @@ from app.blueprints.flights.models import SeatClass
 from app.blueprints.flights.models import Stopover
 from app.blueprints.flights.models import Regulation
 
+seed_data_path = os.path.dirname(__file__) + "/data"
+
 
 def seed_users():
-    with open("backend/seed/data/users.json") as f:
+    with open(f"{seed_data_path}/users.json") as f:
         users = json.load(f)
     for user in users:
         user["role"] = UserRole(user["role"])
@@ -39,7 +41,7 @@ def seed_users():
 
 
 def seed_routes():
-    with open("backend/seed/data/routes.json") as f:
+    with open(f"{seed_data_path}/routes.json") as f:
         routes = json.load(f)
     for route in routes:
         db.session.add(Route(**route))
@@ -48,7 +50,7 @@ def seed_routes():
 
 
 def seed_airports(limit=10):
-    with open("backend/seed/data/airports.json") as f:
+    with open(f"{seed_data_path}/airports.json") as f:
         airports = json.load(f)
     for airport in airports[:limit]:
         # Tạo đối tượng Airport mới
@@ -58,7 +60,7 @@ def seed_airports(limit=10):
 
 
 def seed_countries():
-    with open("backend/seed/data/countries.json") as f:
+    with open(f"{seed_data_path}/countries.json") as f:
         countries = json.load(f)
     for country in countries:
         # Rename the key "CountryCode" to "code"
@@ -70,7 +72,7 @@ def seed_countries():
 
 
 def seed_flights():
-    with open("backend/seed/data/flights.json") as f:
+    with open(f"{seed_data_path}/flights.json") as f:
         flights = json.load(f)
     for flight in flights:
         # Chuyển đổi thời gian từ định dạng chuỗi sang đối tượng datetime
@@ -87,7 +89,7 @@ def seed_flights():
 
 
 def seed_airlines():
-    with open("backend/seed/data/airlines.json") as f:
+    with open(f"{seed_data_path}/airlines.json") as f:
         airlines = json.load(f)
     for airline in airlines:
         db.session.add(Airline(**airline))  # Thêm vào session
@@ -95,7 +97,7 @@ def seed_airlines():
 
 
 def seed_aircrafts():
-    with open("backend/seed/data/aircrafts.json") as f:
+    with open(f"{seed_data_path}/aircrafts.json") as f:
         aircrafts = json.load(f)
     for aircraft in aircrafts:
         aircraft["airline_id"] = aircraft.pop("airline")
@@ -105,7 +107,7 @@ def seed_aircrafts():
 
 
 def seed_intermediate_airport():
-    with open("backend/seed/data/stops.json") as f:
+    with open(f"{seed_data_path}/stops.json") as f:
         stops = json.load(f)
     for stop in stops:
         stop["arrival_time"] = dt.fromisoformat(
@@ -119,7 +121,7 @@ def seed_intermediate_airport():
 
 
 def seed_seat_classes():
-    with open("backend/seed/data/seatclasses.json") as f:
+    with open(f"{seed_data_path}/seatclasses.json") as f:
         seat_classes = json.load(f)
     for seat_class in seat_classes:
         db.session.add(SeatClass(**seat_class))
@@ -127,7 +129,7 @@ def seed_seat_classes():
 
 
 def seed_aircarft_seats():
-    with open("backend/seed/data/aircraft_seats.json") as f:
+    with open(f"{seed_data_path}/aircraft_seats.json") as f:
         aircraft_seats = json.load(f)
     for aircraft_seat in aircraft_seats:
         db.session.add(AircraftSeat(**aircraft_seat))
@@ -135,7 +137,7 @@ def seed_aircarft_seats():
 
 
 def seed_flight_seats():
-    with open("backend/seed/data/flight_seats.json") as f:
+    with open(f"{seed_data_path}/flight_seats.json") as f:
         flight_seats = json.load(f)
     for flight_seat in flight_seats:
         db.session.add(FlightSeat(**flight_seat))
@@ -143,7 +145,7 @@ def seed_flight_seats():
 
 
 def seed_regulations():
-    with open("backend/seed/data/regulations.json") as f:
+    with open(f"{seed_data_path}/regulations.json") as f:
         regulations = json.load(f)
     for regulation in regulations:
         db.session.add(Regulation(**regulation))
