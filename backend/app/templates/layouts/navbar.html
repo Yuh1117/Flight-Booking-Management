@@ -16,7 +16,7 @@
         class="navbar-toggler collapsed"
         type="button"
         data-bs-toggle="collapse"
-        data-bs-target="#navbarsExample09"
+        data-bs-target="#navbarsExample09 , #adminSidebarMenu"
         aria-controls="navbarsExample09"
         aria-expanded="false"
         aria-label="Toggle navigation"
@@ -32,16 +32,31 @@
             <a class="nav-link active" aria-current="page" href="/">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/booking"
+            <a
+              class="nav-link"
+              aria-current="page"
+              href="{{url_for('flights.searchFlights')}}"
               >Book Flights</a
             >
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="#">Manage Bookings</a>
+            <a
+              class="nav-link"
+              aria-current="page"
+              href="{{url_for('bookings.manage_own_bookings')}}"
+              >Manage Bookings</a
+            >
           </li>
+          {% if current_user.is_authenticated and current_user.role.value == 1 %}
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="#">Search Flights</a>
+            <a
+              class="nav-link"
+              aria-current="page"
+              href="{{url_for('admin.index')}}"
+              >{{current_user.role}}</a
+            >
           </li>
+          {% endif %}
           <li class="nav-item">
             <a
               class="nav-link"
@@ -50,6 +65,14 @@
               >About</a
             >
           </li>
+          {% if current_user.is_authenticated and (current_user.role.value == 1 or current_user.role.value == 2)
+          %}
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/schedule"
+              >Flight Scheduling</a
+            >
+          </li>
+          {% endif %}
         </ul>
         {% if current_user.is_authenticated %}
         <ul class="navbar-nav col-lg-3">

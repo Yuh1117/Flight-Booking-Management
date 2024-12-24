@@ -1,6 +1,12 @@
 // JavaScript scripts
+
+const navbar = document.querySelector(".navbar-home");
+if (window.location.pathname === "/") {
+  navbar.classList.add("not-fixed");
+  navbar.classList.add("rounded-2");
+}
+
 window.addEventListener("scroll", function () {
-  const navbar = document.querySelector(".navbar-home");
   // Kiểm tra nếu đang ở trang chủ
   if (window.location.pathname === "/") {
     if (window.scrollY > navbar.clientHeight) {
@@ -18,9 +24,6 @@ window.addEventListener("scroll", function () {
     navbar.classList.remove("not-fixed");
   }
 });
-
-const navbar = document.querySelector(".navbar-home");
-console.log(navbar.clientHeight);
 
 navbar_toggle_btn = navbar.querySelector(".navbar-toggler");
 navbar_toggle_btn.addEventListener("click", function () {
@@ -89,20 +92,19 @@ counters.forEach((counter) => {
   const interval = setInterval(updateCounter, 50);
 });
 
-
 // animation
 document.addEventListener("DOMContentLoaded", () => {
   const fadeElements = document.querySelectorAll(
-      ".fade-left, .fade-right, .fade-opacity, .fade-translate"
+    ".fade-left, .fade-right, .fade-opacity, .fade-translate"
   );
 
   const handleScroll = () => {
-      fadeElements.forEach((el) => {
-          const rect = el.getBoundingClientRect();
-          if (rect.top < window.innerHeight && rect.bottom > 0) {
-              el.classList.add("visible"); // Thêm class 'visible' khi phần tử vào viewport
-          }
-      });
+    fadeElements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        el.classList.add("visible"); // Thêm class 'visible' khi phần tử vào viewport
+      }
+    });
   };
 
   window.addEventListener("scroll", handleScroll);
@@ -110,3 +112,56 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // end animation
+
+function validateRadio() {
+  document.querySelectorAll('input[name="tripType"]').forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const returnInput = document.getElementById("return");
+      if (this.value === "oneway") {
+        returnInput.disabled = true;
+        returnInput.value = ""; // Reset giá trị
+      } else {
+        returnInput.disabled = false;
+      }
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  // validateRadio()
+  // const fromSelect = document.getElementById("from");
+  // const toSelect = document.getElementById("to");
+  // fromSelect.addEventListener("change", handleFromSelectChange);
+  // function handleFromSelectChange() {
+  //     clearToSelectOptions();
+  //     const selectedFrom = parseInt(fromSelect.value);
+  //     fetchRoutes(selectedFrom);
+  // }
+  // function clearToSelectOptions() {
+  //   toSelect.innerHTML = "";
+  //   toSelect.innerHTML = `<option value="" disabled selected>Select destination airport</option>`
+  // }
+  // function fetchRoutes(selectedFrom) {
+  //     fetch("/api/routes")
+  //         .then(response => response.json())
+  //         .then(routes => {
+  //             const filteredAirports = filterRoutesByDepartAirport(routes, selectedFrom);
+  //             populateToSelectOptions(filteredAirports);
+  //         });
+  // }
+  // function filterRoutesByDepartAirport(routes, selectedFrom) {
+  //   return routes.filter(route => route.depart_airport_id == selectedFrom);
+  // }
+  // function populateToSelectOptions(filteredAirports) {
+  //   filteredAirports.forEach(airport => {
+  //       const option = document.createElement("option");
+  //       option.value = airport.arrive_airport_id;
+  //       option.textContent = airport.arrive_airport;
+  //       toSelect.appendChild(option);
+  //   });
+  // }
+  let noti_panel = document.querySelector('.noti-panel > .toast-container')
+  setTimeout(() => {
+    noti_panel.style = 'right: 0;'
+  }, 10)
+});
