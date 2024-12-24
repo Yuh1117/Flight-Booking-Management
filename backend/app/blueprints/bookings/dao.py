@@ -74,3 +74,19 @@ def update_reservation_seat(reservation, flight_seat_id):
     reservation.flight_seat_id = flight_seat_id
     db.session.commit()
     return reservation
+
+def add_payment(reservation_id, amount, status=PaymentStatus.PENDING):
+    new_payment = Payment(
+        reservation_id=reservation_id,
+        amount=amount,
+        status=status
+    )
+
+    db.session.add(new_payment)
+
+    try:
+        db.session.commit()
+        return new_payment
+    except Exception as e:
+        db.session.rollback()
+        return None

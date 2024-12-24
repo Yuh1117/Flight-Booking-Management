@@ -10,7 +10,7 @@ from app.blueprints.auth.models import UserRole
 from flask_login import current_user
 from . import dao
 from app import app
-
+    
 
 @flights_bp.route("/api/airlines", methods=["GET"])
 def get_airlines():

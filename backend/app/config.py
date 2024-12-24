@@ -30,6 +30,7 @@ class FlaskConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "6789lacachbonanhsong")
     DEBUG = True
     # SQLALCHEMY_DATABASE_URI = os.getenv("SQLITE_URI")
+    # SQLALCHEMY_DATABASE_URI = PostgresConfig.DB_URI
     SQLALCHEMY_DATABASE_URI = PostgresConfig.DB_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
@@ -38,6 +39,8 @@ class FlaskConfig:
     MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", True)
     MAIL_USERNAME = os.getenv("MAIL_USERNAME")
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+
+    FLASK_ADMIN_SWATCH = "lux"
 
 
 class CloudinaryConfig:
