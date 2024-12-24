@@ -251,7 +251,6 @@ def payment(id):
     if request.method == "GET":
         # ...
         reservation = booking_dao.get_reservation_by_id_and_user(id, current_user.id)
-        print(reservation)  
         order_id = ""
         message = ""
 
@@ -302,7 +301,6 @@ def payment(id):
         vnpay_payment_url = vnp.get_payment_url(
             app.config["VNPAY_PAYMENT_URL"], app.config["VNPAY_HASH_SECRET_KEY"]
         )
-        print(vnpay_payment_url)
         return redirect(vnpay_payment_url)
 
 
@@ -325,30 +323,16 @@ def payment_return():
         if vnp.validate_response(app.config["VNPAY_HASH_SECRET_KEY"]):
             if vnp_ResponseCode == "00":
                 # reservation
-                # reservation_id = order_id
-                # reservation = booking_dao.get_reservation_by_id(reservation_id)
-                # reservation.payment.status = PaymentStatus.SUCCESS
-                # db.session.commit()
-                # flight_seat = reservation.flight_seat
-                # flight = flight_seat.flight
-                 # Lấy thông tin reservation
                 reservation_id = order_id
+                booking_dao.add_payment(reservation_id=reservation_id, amount=amount, status=PaymentStatus.SUCCESS)
+
+                
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
-                print(reservation)
-
-                payment = Payment(amount=amount, status=PaymentStatus.SUCCESS)
-                print(payment)
-                reservation.payment = payment
-
-                db.session.add(payment)
-                db.session.commit()
-
                 flight_seat = reservation.flight_seat
                 flight = flight_seat.flight
-
-
+                
                 return render_template(
-                    "bookings/confirmation.html",
+                    "bookings/payment_return.html",
                     title="Payment result",
                     result="Success",
                     order_id=order_id,
@@ -366,7 +350,7 @@ def payment_return():
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
 
                 return render_template(
-                    "bookings/confirmation.html",
+                    "bookings/payment_return.html",
                     title="Payment result",
                     result="Canceled",
                     order_id=order_id,
@@ -378,7 +362,7 @@ def payment_return():
                 )
             else:
                 return render_template(
-                    "bookings/confirmation.html",
+                    "bookings/payment_return.html",
                     title="Payment result",
                     result="Error",
                     order_id=order_id,
@@ -389,7 +373,7 @@ def payment_return():
                 )
         else:
             return render_template(
-                "bookings/confirmation.html",
+                "bookings/payment_return.html",
                 title="Payment result",
                 result="Error",
                 order_id=order_id,
@@ -400,5 +384,5 @@ def payment_return():
                 msg="Invalid checksum",
             )
     return render_template(
-        "bookings/confirmation.html", title="Payment result", result=""
+        "bookings/payment_return.html", title="Payment result", result=""
     )
