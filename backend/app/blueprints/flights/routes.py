@@ -150,7 +150,7 @@ def schedule(id):
             )
 
             if flight:
-                #add aircraft seat
+                #add flight seat
                 for i in range(len(aircraft_seats_id)):
                     dao.add_flight_seat(flight_id=flight.id, aircraft_seat_id=aircraft_seats_id[i],
                                         price=aircraft_seats_price[i], currency=aircraft_seats_currency[i])
@@ -292,8 +292,19 @@ def validate():
         message["depart_date_time"] = "Invalid date time"
         
     ##
-    if(data.get("aircraft") != ''):
-        message["aircraft"] = data.get("aircraft")
+    if data.get('aircraft'):
+        aircraft = dao.get_aircraft_by_id(data.get("aircraft"))
+        depart_date_time = dt.strptime(data.get("departureDateTime"), "%Y-%m-%dT%H:%M")
+        arrive_time = depart_date_time + timedelta(minutes=int(data.get("flightDuration")))
+        if not data.get("stopoverDuration"):
+            if(not aircraft.is_available(depart_date_time, arrive_time)):
+                message["aircraft"] = "This aircraft is not available"
+        else:
+            for t in data.get("stopoverDuration"):
+                arrive_time += timedelta(minutes=int(t))
+                
+            if(not aircraft.is_available(depart_date_time, arrive_time)):
+                message["aircraft"] = "This aircraft is not available"
 
     ##
     duplicate = []
@@ -374,21 +385,3 @@ def validate():
         message["valid"] = True
 
     return jsonify(message)
-
-
-@flights_bp.route("/api/schedule/validate-aircraft", methods=["POST"])
-@decorators.admin_or_flight_manager_required
-def validate_aircraft():
-    data = request.json
-    message = ''
-    aircraft = dao.get_aircraft_by_id(data.get("aircraftId"))
-    
-    depart_date_time = dt.strptime(data.get("departureDateTime"), "%Y-%m-%dT%H:%M")
-
-    
-    if(not aircraft.is_available(depart_date_time, 
-                             depart_date_time + timedelta(minutes=int(data.get("flightDuration"))))):
-        message = "This aircraft is not available"
-        
-    return jsonify(message)
-    

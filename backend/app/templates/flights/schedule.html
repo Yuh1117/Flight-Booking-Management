@@ -45,9 +45,9 @@
                                 name="flightDuration" min="0" required>
                             <span class="error" id="flightDurationError"></span>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label for="aircraft" class="form-label">Aircraft</label>
-                            <select class="form-select" id="aircraft" name="aircraft" required disabled>
+                            <select class="form-select" id="aircraft" name="aircraft" required>
                                 <option value="" disabled selected>Select aircraft</option>
                                 {% for a in aircrafts %}
                                 <option value="{{ a.id }}">{{ a.name }} ({{ a.id }}) - ({{ a.seats | length }} seats)
@@ -55,6 +55,10 @@
                                 {% endfor %}
                             </select>
                             <span class="error" id="aircraftError"></span>
+                        </div>
+                        <div class="col-md-1">
+                            <label for="aircraft" class="form-label">Check</label>
+                            <button type="button" class="btn btn-outline-success w-100" id="btnCheck">&#10004;</button>
                         </div>
                     </div>
 
@@ -205,23 +209,16 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        function canSelectAircraft() {
-            if (departureDateTime.value && flightDuration.value) {
-                aircraftSelect.disabled = false;
-            } else {
-                aircraftSelect.disabled = true;
-            }
-        }
 
         function validateAircraft() {
-            const aircraftId = parseInt(aircraftSelect.value)
+            const aircraft = aircraftSelect.value
 
             if(departureDateTime.value === '' || flightDuration.value === '' || aircraftSelect.value === '') return
 
-            fetch("/api/schedule/validate-aircraft", {
+            fetch("/api/schedule/validate", {
                 method: "post",
                 body: JSON.stringify({
-                    "aircraftId": aircraftId,
+                    "aircraft": aircraft,
                     "departureDateTime": departureDateTime.value,
                     "flightDuration": flightDuration.value
                 }),
@@ -229,17 +226,16 @@
                     "Content-Type": "application/json"
                 }
             }).then(res => res.json()).then(data => {
-                console.log(1)
                 aircraftSeatRemaining = document.getElementById("aircraftSeatRemaining")
 
-                if (data != '') {
+                if (data.aircraft != '') {
                     aircraftSelect.classList.add("is-invalid")
                     document.getElementById('addFlightSeat').classList.add('regulation')
                     aircraftSeatRemaining.innerHTML = '0'
 
                 } else {
                     aircraftSelect.classList.remove("is-invalid")
-                    aircraftSeats = fetchAircraftSeats(aircraftId)
+                    aircraftSeats = fetchAircraftSeats(aircraft)
 
                     Promise.all([aircraftSeats]).then((values) => {
                         aircraftSeats = values[0]
@@ -247,10 +243,11 @@
                         document.getElementById("flightSeats").innerHTML = `<h6>Flight Seats</h6>`;
                         aircraftSeatRemaining.innerHTML = aircraftSeats.length
                         numberOfAircraftSeat = aircraftSeats.length
+                        flightSeatCount = 0
                     })
                 }
 
-                document.getElementById("aircraftError").innerHTML = data
+                document.getElementById("aircraftError").innerHTML = data.aircraft
             })
         }
 
@@ -258,18 +255,12 @@
         const flightDuration = document.getElementById("flightDuration")
         const aircraftSelect = document.getElementById("aircraft");
 
-        departureDateTime.addEventListener("input", canSelectAircraft);
-        departureDateTime.addEventListener("input", validateAircraft);
-        
-        flightDuration.addEventListener("input", canSelectAircraft);
-        flightDuration.addEventListener("blur", validateAircraft);
-
         //// Flight seats
         let numberOfAircraftSeat
         let aircraftSeatRemaining
         let aircraftSeats
 
-        aircraftSelect.addEventListener("change", validateAircraft)
+        document.getElementById("btnCheck").addEventListener("click", validateAircraft)
 
         // Add button
         let flightSeatCount = 0;
@@ -343,9 +334,9 @@
         //// Schedule
         document.getElementById("formSchedule").addEventListener("submit", function (e) {
             e.preventDefault()
-            const flightDuration = parseInt(document.getElementById("flightDuration").value)
+            const flightDuration = document.getElementById("flightDuration").value
             const departureDateTime = document.getElementById("departureDateTime").value
-            const aircraft = document.getElementById("aircraftError").innerText
+            const aircraft = document.getElementById("aircraft").value
             const flightSeats = Array.from(document.querySelectorAll("#flightSeat")).map(seat => seat.value);
 
             let stopoverAirport = []
