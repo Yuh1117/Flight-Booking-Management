@@ -55,6 +55,8 @@
         ">
         <th class="px-4 py-2">STT</th>
         <th class="px-4 py-2">Tuyến bay</th>
+        <th class="px-4 py-2">Revenue</th>
+        
         <th class="px-4 py-2">Số lượt bay</th>
         <th class="px-4 py-2">Ti le</th>
     </tr>
@@ -63,6 +65,7 @@
         <tr class="border-b-2 border-gray-800">
             <td class="px-4 py-2">{{ loop.index }}</td>
             <td class="px-4 py-2">{{ s.depart_airport_name }} => {{ s.arrive_airport_name }}</td>
+            <td class="px-4 py-2">${{ s.revenue }}</td>  <!-- Hiển thị doanh thu -->
             <td class="px-4 py-2">{{ s.flight_count }}</td>
             <td class="px-4 py-2">{{ s.ti_le }}%</td>  <!-- Hiển thị tỷ lệ -->
         </tr>

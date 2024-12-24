@@ -1,9 +1,11 @@
 from sqlalchemy import or_
-
+from flask import render_template
 from .models import *
 from app.blueprints.flights import dao as flight_dao
 from app import app
-
+from app import app, db, mail
+from flask_mail import Mail, Message
+from flask_login import current_user
 
 def get_reservation_by_id(reservation_id):
     return Reservation.query.get(reservation_id)
@@ -35,6 +37,27 @@ def get_reservations_created_for_others(
     )
 
 
+
+def send_booking_confirmation(reservation, email ):
+    msg_title = "Your Bus Ticket Confirmation"
+    sender = "duongxummo@gmail.com"
+    msg = Message(msg_title, sender=sender, recipients=[email])
+    msg_body = "Here is your ticket:"
+    data = {
+        'app_name': "TICKET",
+        'title': msg_title,
+        'body': msg_body,
+        'reservation' : reservation
+    }
+    msg.html = render_template("bookings/ticket_detail.html", data=data)
+    try:
+        mail.send(msg)
+        return "Email sent with the ticket!"
+    except Exception as e:
+        print(e)
+        return f"The email was not sent: {e}"
+
+
 def add_reservation(owner_id, author_id, flight_seat_id, is_paid=False):
     reservation = Reservation(
         owner_id=owner_id,
@@ -44,8 +67,11 @@ def add_reservation(owner_id, author_id, flight_seat_id, is_paid=False):
     if is_paid:
         price = flight_dao.get_flight_seat_by_id(flight_seat_id).price
         reservation.payment = Payment(amount=price, status=PaymentStatus.SUCCESS)
+
     db.session.add(reservation)
     db.session.commit()
+    if is_paid:    
+        send_booking_confirmation(reservation, reservation.owner.email )
     return reservation
 
 
