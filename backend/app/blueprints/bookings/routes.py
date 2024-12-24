@@ -8,7 +8,7 @@ from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import UserRole
 from . import dao as booking_dao
 from .forms import BookingForm
-from .models import Reservation, PaymentStatus
+from .models import Reservation, PaymentStatus, Payment
 import re
 from app.blueprints.auth import decorators
 from app.blueprints.bookings.vnpay import vnpay
@@ -251,6 +251,7 @@ def payment(id):
     if request.method == "GET":
         # ...
         reservation = booking_dao.get_reservation_by_id_and_user(id, current_user.id)
+        print(reservation)  
         order_id = ""
         message = ""
 
@@ -301,7 +302,7 @@ def payment(id):
         vnpay_payment_url = vnp.get_payment_url(
             app.config["VNPAY_PAYMENT_URL"], app.config["VNPAY_HASH_SECRET_KEY"]
         )
-        # print(vnpay_payment_url)
+        print(vnpay_payment_url)
         return redirect(vnpay_payment_url)
 
 
@@ -324,12 +325,27 @@ def payment_return():
         if vnp.validate_response(app.config["VNPAY_HASH_SECRET_KEY"]):
             if vnp_ResponseCode == "00":
                 # reservation
+                # reservation_id = order_id
+                # reservation = booking_dao.get_reservation_by_id(reservation_id)
+                # reservation.payment.status = PaymentStatus.SUCCESS
+                # db.session.commit()
+                # flight_seat = reservation.flight_seat
+                # flight = flight_seat.flight
+                 # Lấy thông tin reservation
                 reservation_id = order_id
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
-                reservation.payment.status = PaymentStatus.SUCCESS
+                print(reservation)
+
+                payment = Payment(amount=amount, status=PaymentStatus.SUCCESS)
+                print(payment)
+                reservation.payment = payment
+
+                db.session.add(payment)
                 db.session.commit()
+
                 flight_seat = reservation.flight_seat
                 flight = flight_seat.flight
+
 
                 return render_template(
                     "bookings/confirmation.html",

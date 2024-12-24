@@ -20,7 +20,6 @@ from app.blueprints.bookings.models import Reservation, PaymentStatus
 from app import db
 from . import dao
 
-
 class Country(db.Model):
     __tablename__ = "countries"
     id = Column(Integer, primary_key=True, autoincrement=True)

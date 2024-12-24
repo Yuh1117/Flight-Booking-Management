@@ -29,10 +29,10 @@ class PostgresConfig:
 class FlaskConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "6789lacachbonanhsong")
     DEBUG = True
-    # SQLALCHEMY_DATABASE_URI = os.getenv("SQLITE_URI")
-    SQLALCHEMY_DATABASE_URI = PostgresConfig.DB_URI
+    SQLALCHEMY_DATABASE_URI = os.getenv("SQLITE_URI")
+    # SQLALCHEMY_DATABASE_URI = PostgresConfig.DB_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-
+    FLASK_ADMIN_SWATCH = 'lux'
 
 class CloudinaryConfig:
     CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")

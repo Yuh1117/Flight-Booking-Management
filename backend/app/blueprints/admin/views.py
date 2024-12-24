@@ -24,8 +24,13 @@ class AdminView(AuthenticatedView):
 
 
 class DashboardAdmin(AdminIndexView, AdminView):
-    pass
-
+    @expose("/", methods=["GET", "POST"])
+    def index(self):
+        year = request.args.get('year', type=int, default=2024)  
+        month = request.args.get('month', type=int, default=12)  
+        flight_stats = flight_dao.get_flight_count_by_route(year, month)
+        
+        return self.render('admin/dashboard.html', stats=flight_stats, year=year, month=month)
 
 class CountryAdmin(ModelView, AdminView):
     column_list = ("id", "name", "code")
