@@ -28,9 +28,10 @@ class DashboardAdmin(AdminIndexView, AdminView):
     def index(self):
         year = request.args.get('year', type=int, default=2024)  
         month = request.args.get('month', type=int, default=12)  
-        flight_stats = flight_dao.get_flight_count_by_route(year, month)
+        flight_stats = flight_dao.revenue_stats_route_by_time(year, month)
+        sum = dao.revenue_sum(flight_stats)
         
-        return self.render('admin/dashboard.html', stats=flight_stats, year=year, month=month)
+        return self.render('admin/dashboard.html', stats=flight_stats, year=year, month=month, sum=sum)
 
 class CountryAdmin(ModelView, AdminView):
     column_list = ("id", "name", "code")

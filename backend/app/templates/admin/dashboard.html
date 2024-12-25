@@ -12,7 +12,6 @@
         <option value="2024" {% if year == 2024 %}selected{% endif %}>2024</option>
         <option value="2023" {% if year == 2023 %}selected{% endif %}>2023</option>
         <option value="2022" {% if year == 2022 %}selected{% endif %}>2022</option>
-        <!-- Thêm các năm khác nếu cần -->
     </select>
     
     <label for="month">Month:</label>
@@ -41,22 +40,18 @@
         <canvas id="flightCountChart" width="400" height="400"></canvas>
     </div>
     
-    <!-- Biểu đồ Tròn - Tỷ lệ -->
+    <!-- Biểu đồ Cột - Doanh thu -->
     <div style="width: 48%;">
-        <canvas id="ratioChart" width="400" height="400"></canvas>
+        <canvas id="revenueChart" width="400" height="400"></canvas>
     </div>
 </div>
 
-<!-- Hiển thị bảng thống kê với viền đậm -->
+<!-- Hiển thị bảng thống kê -->
 <table class="table border-2 border-solid border-gray-800">
-    <tr class="border-b-2 border-gray-800 bg-gray-200" style="
-            background-color: gray;
-            color: white;
-        ">
+    <tr class="border-b-2 border-gray-800 bg-gray-200" style="background-color: gray; color: white;">
         <th class="px-4 py-2">STT</th>
         <th class="px-4 py-2">Tuyến bay</th>
         <th class="px-4 py-2">Revenue</th>
-        
         <th class="px-4 py-2">Số lượt bay</th>
         <th class="px-4 py-2">Ti le</th>
     </tr>
@@ -64,54 +59,34 @@
     {% for s in stats %}
         <tr class="border-b-2 border-gray-800">
             <td class="px-4 py-2">{{ loop.index }}</td>
-            <td class="px-4 py-2">{{ s.depart_airport_name }} => {{ s.arrive_airport_name }}</td>
-            <td class="px-4 py-2">${{ s.revenue }}</td>  <!-- Hiển thị doanh thu -->
-            <td class="px-4 py-2">{{ s.flight_count }}</td>
-            <td class="px-4 py-2">{{ s.ti_le }}%</td>  <!-- Hiển thị tỷ lệ -->
+            <td class="px-4 py-2">{{ s[0] }}</td>
+            <td class="px-4 py-2">${{ s[1] }}</td>
+            <td class="px-4 py-2">{{ s[2] }}</td>
+            <td class="px-4 py-2">{{ ((s[1] / sum) * 100) | round(2) }} %</td>
         </tr>
     {% endfor %}
+    <tr class="border-b-2 border-gray-800">
+        <td colspan="4" class="px-4 py-2 font-bold"> Total Revenue</td>
+        <td class="px-4 py-2 font-bold">${{ sum }}</td>
+    </tr>
 </table>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Dữ liệu từ template
-    const labels = [{% for s in stats %}"{{ s.depart_airport_name }} => {{ s.arrive_airport_name }}"{% if not loop.last %}, {% endif %}{% endfor %}];
-    const flightCounts = [{% for s in stats %}{{ s.flight_count }}{% if not loop.last %}, {% endif %}{% endfor %}];
-    const ratios = [{% for s in stats %}{{ s.ti_le }}{% if not loop.last %}, {% endif %}{% endfor %}];
+    const labels = [{% for s in stats %}"{{ s[0] }}"{% if not loop.last %}, {% endif %}{% endfor %}];
+    const flightCounts = [{% for s in stats %}{{ s[2] }}{% if not loop.last %}, {% endif %}{% endfor %}];
+    const revenues = [{% for s in stats %}{{ s[1] }}{% if not loop.last %}, {% endif %}{% endfor %}];
 
     // Biểu đồ Cột - Số lượt bay
     const ctx1 = document.getElementById('flightCountChart').getContext('2d');
     const flightCountChart = new Chart(ctx1, {
-        type: 'bar',  // Biểu đồ cột (Bar chart)
+        type: 'bar',
         data: {
-            labels: labels,  // Các nhãn cho biểu đồ (tên các tuyến bay)
+            labels: labels,
             datasets: [{
                 label: 'Số lượt bay',
-                data: flightCounts,  // Dữ liệu số lượt bay cho các tuyến bay
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',  // Màu sắc cho các phần của biểu đồ
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',  // Vị trí của chú thích
-                }
-            }
-        }
-    });
-
-    // Biểu đồ Tròn - Tỷ lệ
-    const ctx2 = document.getElementById('ratioChart').getContext('2d');
-    const ratioChart = new Chart(ctx2, {
-        type: 'pie',  // Biểu đồ tròn (Pie chart)
-        data: {
-            labels: labels,  // Các nhãn cho biểu đồ (tên các tuyến bay)
-            datasets: [{
-                label: 'Tỷ lệ (%)',
-                data: ratios,  // Dữ liệu tỷ lệ cho các tuyến bay
+                data: flightCounts,
                 backgroundColor: [
                     'rgba(54, 162, 235, 0.2)',  // Màu sắc cho các phần của biểu đồ
                     'rgba(255, 99, 132, 0.2)',
@@ -132,16 +107,41 @@
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    position: 'top',  // Vị trí của chú thích
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            return tooltipItem.label + ': ' + tooltipItem.raw.toFixed(2) + '%';  // Hiển thị tỷ lệ với 2 chữ số thập phân
-                        }
-                    }
-                }
+                legend: { position: 'top' }
+            }
+        }
+    });
+
+    // Biểu đồ Cột - Doanh thu
+    const ctx2 = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Doanh thu',
+                data: revenues,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.2)',  // Màu sắc cho các phần của biểu đồ
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' }
             }
         }
     });
