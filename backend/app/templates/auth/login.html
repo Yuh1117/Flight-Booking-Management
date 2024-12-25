@@ -1,4 +1,4 @@
-{% from "layouts/field.html" import render_field with context%}
+{% from "layouts/field.html" import render_text_field with context%}
 
 
 {% extends "layouts/base.html" %} {% block content %}
@@ -9,9 +9,9 @@
       <form action="" method="post">
         {{ form.hidden_tag() }}
         <!-- =============== Email =============== -->
-        {{ render_field(form.email) }}
+        {{ render_text_field(form.email) }}
         <!-- =============== Password =============== -->
-        {{ render_field(form.password) }}
+        {{ render_text_field(form.password) }}
         {{ form.submit(class='btn col-12 btn-primary-invert') }}
         <div class="d-flex justify-content-between mt-3">
           <div class="col-6">

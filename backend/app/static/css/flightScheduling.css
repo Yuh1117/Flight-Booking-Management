@@ -1,0 +1,28 @@
+.selectpicker ~  .dropdown-toggle{
+    border: 1px solid gray !important;
+    height: 46px;
+    background-color: white;
+}
+
+.dropdown.bootstrap-select{
+    width: 100% !important;
+}
+
+.filter-option{
+    align-content: center;
+}
+
+.stopover-label{
+    background-color: white;
+    z-index: 10;
+    left:20px;
+    font-size:12px;
+    font-weight:bold;
+    color:#999;
+    padding:0 10px;
+}
+
+.form-control{
+    height: 46px;
+    border: 1px solid gray;
+}

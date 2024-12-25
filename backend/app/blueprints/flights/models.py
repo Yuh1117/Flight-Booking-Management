@@ -20,6 +20,7 @@ from app.blueprints.bookings.models import Reservation, PaymentStatus
 from app import db
 from . import dao
 
+
 class Country(db.Model):
     __tablename__ = "countries"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -87,6 +88,9 @@ class Aircraft(db.Model):
     def __repr__(self):
         return f"Aircraft({self.id}, '{self.airline.name}', '{self.name}')"
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     def is_available(self, depart_time, arrive_time):
         for flight in self.flights:
             if flight.depart_time < arrive_time and flight.arrive_time > depart_time:
@@ -149,15 +153,13 @@ class Route(db.Model):
     arrive_airport_id = Column(Integer, ForeignKey("airports.id"), nullable=False)
     depart_airport = relationship(
         "Airport",
-        foreign_keys=[depart_airport_id],
+        foreign_keys="Route.depart_airport_id",
         backref="depart_routes",
-        passive_deletes=True,
     )
     arrive_airport = relationship(
         "Airport",
-        foreign_keys=[arrive_airport_id],
+        foreign_keys="Route.arrive_airport_id",
         backref="arrive_routes",
-        passive_deletes=True,
     )
 
     def __repr__(self):
@@ -174,6 +176,7 @@ class Flight(db.Model):
     )
     id = Column(Integer, primary_key=True, autoincrement=True)
     route_id = Column(Integer, ForeignKey("routes.id"), nullable=True)
+    code = Column(String(20), nullable=False)
     depart_time = Column(DateTime, nullable=False)
     arrive_time = Column(DateTime, nullable=False)
     aircraft_id = Column(Integer, ForeignKey("aircrafts.id"), nullable=True)

@@ -5,8 +5,13 @@ from app import app
 from sqlalchemy import func, extract
 from sqlalchemy.orm import aliased
 
+
 def get_airports():
     return Airport.query.all()
+
+
+def get_aircrafts():
+    return Aircraft.query.all()
 
 
 def get_routes():
@@ -29,6 +34,10 @@ def get_flight_by_id(id):
     return Flight.query.get(id)
 
 
+def get_aircraft_seat_by_id(id):
+    return AircraftSeat.query.get(id)
+
+
 def get_flight_seat_by_id(id):
     return FlightSeat.query.get(id)
 
@@ -43,6 +52,7 @@ def get_seat_class_by_id(id):
 
 def get_aircraft_by_id(id):
     return Aircraft.query.get(id)
+
 
 def get_aircraft_seats_by_aircraft(aircraft_id):
     return AircraftSeat.query.filter(AircraftSeat.aircraft_id == aircraft_id).all()
@@ -72,6 +82,7 @@ def add_route(depart_airport_id, arrive_airport_id):
 
 def add_flight(
     route_id,
+    code,
     depart_time: dt,
     arrive_time: dt,
     aircraft_id,
@@ -79,16 +90,17 @@ def add_flight(
     if depart_time >= arrive_time:
         raise ValueError("Depart time must be less than arrive time")
     # Check flight duration
-    flight_minutes = (arrive_time - depart_time).seconds // 60
+    flight_minutes = (arrive_time - depart_time).total_seconds() // 60
     min_f_duration = get_min_flight_duration()
     max_f_duration = get_max_flight_duration()
-    if not min_f_duration <= flight_minutes <= max_f_duration:
+    if not (min_f_duration <= flight_minutes <= max_f_duration):
         raise ValueError(
             f"Flight duration must be between {min_f_duration} - {max_f_duration} minutes!"
         )
 
     new_flight = Flight(
         route_id=route_id,
+        code=code,
         depart_time=depart_time,
         arrive_time=arrive_time,
         aircraft_id=aircraft_id,
@@ -101,27 +113,26 @@ def add_flight(
         db.session.commit()
         return new_flight
     except Exception as e:
+        print(f"Failed to add new flight: {e}")
         db.session.rollback()
         return None
 
 
-def add_intermediate_airport(
-    airport_id, flight_id, arrival_time, departure_time, order, note
-):
-    new_intermediate_airport = Stopover(
+def add_stopover(airport_id, flight_id, arrival_time, departure_time, order, note):
+    stopover = Stopover(
         airport_id=airport_id,
         flight_id=flight_id,
         arrival_time=arrival_time,
         departure_time=departure_time,
         order=order,
-        note=note
+        note=note,
     )
 
-    db.session.add(new_intermediate_airport)
+    db.session.add(stopover)
 
     try:
         db.session.commit()
-        return new_intermediate_airport
+        return stopover
     except Exception as e:
         db.session.rollback()
         return None
@@ -221,10 +232,6 @@ def find_intermediate_airport(flight_id):
 #     return airport_ids
 
 
-def load_aircarfts():
-    return Aircraft.query.all()
-
-
 def get_min_flight_duration():
     return (
         Regulation.query.filter(Regulation.key == "min_flight_duration").first().value
@@ -303,54 +310,53 @@ def get_max_stopover_duration():
         Regulation.query.filter(Regulation.key == "max_stopover_duration").first().value
     )
 
-def add_flight_seat(flight_id, aircraft_seat_id, price, currency):
+
+def add_flight_seat(flight_id, aircraft_seat_id, price, currency="VND"):
     new_flight_seat = FlightSeat(
         flight_id=flight_id,
         aircraft_seat_id=aircraft_seat_id,
         price=price,
-        currency=currency
+        currency=currency,
     )
 
     db.session.add(new_flight_seat)
+    return new_flight_seat
 
-    try:
-        db.session.commit()
-        return new_flight_seat
-    except Exception as e:
-        db.session.rollback()
-        return None
-    
 
 def get_flight_count_by_route(year, month):
     depart_airport = aliased(Airport)
     arrive_airport = aliased(Airport)
-    
+
     # Lọc theo năm và tháng
-    stats = db.session.query(
-            depart_airport.name.label('depart_airport_name'),
-            arrive_airport.name.label('arrive_airport_name'),
-            func.count(Flight.id).label('flight_count')
-        )\
-        .join(Route, Route.id == Flight.route_id)\
-        .join(depart_airport, depart_airport.id == Route.depart_airport_id)\
-        .join(arrive_airport, arrive_airport.id == Route.arrive_airport_id)\
+    stats = (
+        db.session.query(
+            depart_airport.name.label("depart_airport_name"),
+            arrive_airport.name.label("arrive_airport_name"),
+            func.count(Flight.id).label("flight_count"),
+        )
+        .join(Route, Route.id == Flight.route_id)
+        .join(depart_airport, depart_airport.id == Route.depart_airport_id)
+        .join(arrive_airport, arrive_airport.id == Route.arrive_airport_id)
         .filter(
-            extract('year', Flight.depart_time) == year, 
-            extract('month', Flight.depart_time) == month  
-        )\
-        .group_by(depart_airport.name, arrive_airport.name)\
+            extract("year", Flight.depart_time) == year,
+            extract("month", Flight.depart_time) == month,
+        )
+        .group_by(depart_airport.name, arrive_airport.name)
         .all()
-    
+    )
+
     total_flights = sum(s.flight_count for s in stats)
-    
+
     result = []
     for s in stats:
         ti_le = (s.flight_count / total_flights) * 100 if total_flights > 0 else 0
-        result.append({
-            'depart_airport_name': s.depart_airport_name,
-            'arrive_airport_name': s.arrive_airport_name,
-            'flight_count': s.flight_count,
-            'ti_le': round(ti_le, 2)  
-        })
+        result.append(
+            {
+                "depart_airport_name": s.depart_airport_name,
+                "arrive_airport_name": s.arrive_airport_name,
+                "flight_count": s.flight_count,
+                "ti_le": round(ti_le, 2),
+            }
+        )
 
     return result
