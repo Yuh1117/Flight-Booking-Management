@@ -8,6 +8,7 @@ from .forms import (
     UpdateAccountForm,
     RequestResetForm,
     ResetPasswordForm,
+    ChangePasswordForm,
 )
 from . import auth_bp, google_auth, dao
 from . import decorators
@@ -88,11 +89,18 @@ def profile():
 @login_required
 def update_account():
     form = UpdateAccountForm()
+    if request.method == "GET":
+        form.email.data = current_user.email
+        form.first_name.data = current_user.first_name
+        form.last_name.data = current_user.last_name
+        form.phone.data = current_user.phone
+        form.citizen_id.data = current_user.citizen_id
     if form.validate_on_submit():
         current_user.email = form.email.data
         current_user.first_name = form.first_name.data
         current_user.last_name = form.last_name.data
         current_user.phone = form.phone.data
+        current_user.citizen_id = form.citizen_id.data
         if form.picture.data:
             dao.update_user_avatar(current_user, form.picture.data)
             flash("It's gonna take a while to update your avatar!", "info")
@@ -171,3 +179,18 @@ def reset_token(token):
         flash("Your password has been updated! You are now able to log in", "success")
         return redirect(url_for("auth.login"))
     return render_template("auth/reset_token.html", form=form, title="Reset Password")
+
+
+@auth_bp.route("/change_password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if bcrypt.check_password_hash(current_user.password, form.old_password.data):
+            dao.change_password(current_user, form.new_password.data)
+            flash("Your password has been updated!", "success")
+            return redirect(url_for("auth.profile"))
+        flash("Wrong input. Please try again.", "danger")
+    return render_template(
+        "user/change_password.html", form=form, title="Change Password"
+    )
