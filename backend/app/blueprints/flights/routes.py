@@ -1,13 +1,12 @@
 from flask import render_template, jsonify, request, redirect, flash, url_for
 from datetime import datetime as dt
-from datetime import timedelta
 
 
-from app import app, db
+from app import db
 from . import flights_bp
 from app.blueprints.auth import decorators
 from . import dao
-from .forms import FlightSchedulingForm
+from .forms import FlightSchedulingForm, SearchFlightForm
 
 
 @flights_bp.route("/api/airlines", methods=["GET"])
@@ -215,23 +214,25 @@ def to_date(date_str):
     return dt.strptime(date_str, "%Y-%m-%d").date()
 
 
-@flights_bp.route("/search", methods=["GET"])
+@flights_bp.route("/search/flight", methods=["GET"])
 def searchFlights():
     # Get params from request
-    departure_airport_id = request.args.get("from", type=int)
-    arrival_airport_id = request.args.get("to", type=int)
-    depart_date = request.args.get("depart", type=to_date)
+    form = SearchFlightForm()
+
+    departure_airport_id = request.args.get("departure_airport", type=int)
+    arrival_airport_id = request.args.get("arrival_airport", type=int)
+    depart_date = request.args.get("departure_date", type=to_date)
 
     if not all([departure_airport_id, arrival_airport_id, depart_date]):
         # If user first access the page, return the plain search page
-        return render_template("flights/search.html")
+        return render_template("flights/search.html", form=form)
 
     # Get the route
     route = dao.get_route_by_airports(departure_airport_id, arrival_airport_id)
     if not route:
         # If the route does not exist, return an error message
         flash("This route doesn't exist!", "warning")
-        return render_template("flights/search.html")
+        return render_template("flights/search.html", form=form)
 
     # Get flights for the route
     page = request.args.get("page", default=1, type=int)
@@ -241,7 +242,7 @@ def searchFlights():
         # If there are no flights for the route, return an error message
         flash("Couldn't find any flights for this route!", "info")
         return render_template(
-            "flights/search.html", route=route, depart_date=depart_date
+            "flights/search.html", form=form, route=route, depart_date=depart_date
         )
 
     return render_template(
@@ -252,6 +253,7 @@ def searchFlights():
         search_time=dt.now(),
         staff_min_booking_time=dao.get_staff_min_booking_time(),
         customer_min_booking_time=dao.get_customer_min_booking_time(),
+        form=form,
     )
 
 

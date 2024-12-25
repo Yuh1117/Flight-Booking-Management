@@ -10,8 +10,7 @@ from .forms import (
     ResetPasswordForm,
     ChangePasswordForm,
 )
-from . import auth_bp, google_auth, dao
-from . import decorators
+from . import auth_bp, google_auth, dao, utils, decorators
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -90,6 +89,7 @@ def profile():
 def update_account():
     form = UpdateAccountForm()
     if request.method == "GET":
+        # Fill the form with the current user's information
         form.email.data = current_user.email
         form.first_name.data = current_user.first_name
         form.last_name.data = current_user.last_name
@@ -127,8 +127,7 @@ def google_authorize():
     If the user is not in the database, save their information and redirect them to the signup page with their gg info.
     """
     try:
-        user_oauth = dao.get_user_oauth()
-        print(user_oauth)
+        user_oauth = utils.get_user_oauth()
         user = dao.get_user_by_email(user_oauth["email"])
         if user is None:
             flash(
@@ -158,7 +157,7 @@ def reset_request():
     form = RequestResetForm()
     if form.validate_on_submit():
         user = dao.get_user_by_email(form.email.data)
-        dao.send_reset_email(user)
+        utils.send_reset_email(user)
         flash(
             "An email has been sent with instructions to reset your password.", "info"
         )

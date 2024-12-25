@@ -1,6 +1,8 @@
 {% from "flights/components/flight_card.html" import render_flight_card with context %}
 
-{% extends "layouts/base.html" %} {% block content %}
+{% extends "layouts/base.html" %} 
+{% set active_page = 'search' %}
+{% block content %}
 <div class="container mt-5 min-vh-100">
   <!--  -->
   <!-- ============================= Find panel ============================= -->
@@ -134,6 +136,4 @@
   {% endif %}
 </div>
 
-{% endblock content %} {% block scripts %}
-<script src="{{ url_for('static', filename='js/searchBox.js') }}"></script>
-{% endblock %}
+{% endblock content %}

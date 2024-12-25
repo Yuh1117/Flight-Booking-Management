@@ -1,20 +1,72 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField
+from wtforms import DateField
 from wtforms import DateTimeLocalField
 from wtforms import SubmitField
-from wtforms import BooleanField
-from wtforms import TelField
-from wtforms import HiddenField
 from wtforms import SelectField
 from wtforms import ValidationError
 from wtforms.validators import DataRequired
-from wtforms.validators import Length
-from wtforms.validators import Email
-from wtforms.validators import EqualTo
 from datetime import datetime as dt
-from flask_login import current_user
-from flask import flash
 from . import dao
+
+
+class SearchFlightForm(FlaskForm):
+    departure_airport = SelectField(
+        "Departure Airport",
+        validators=[DataRequired()],
+        render_kw={
+            "class": "selectpicker",
+            "data-live-search": "true",
+        },
+    )
+    arrival_airport = SelectField(
+        "Arrival Airport",
+        validators=[DataRequired()],
+        render_kw={
+            "class": "selectpicker",
+            "data-live-search": "true",
+            "data-hide-disabled": "true",
+        },
+    )
+    departure_date = DateField("Departure Date", validators=[DataRequired()])
+    submit = SubmitField("Search ✈")
+
+    def __init__(self, formdata=None, **kwargs):
+        super().__init__(formdata, **kwargs)
+        self.fill_airport_selects()
+
+    def fill_airport_selects(self):
+        airports = dao.get_airports()
+        self.departure_airport.choices = [
+            (airport.id, f"{airport.name} ({airport.code}) - {airport.country.name}")
+            for airport in airports
+        ]
+        self.arrival_airport.choices = [
+            (airport.id, f"{airport.name} ({airport.code}) - {airport.country.name}")
+            for airport in airports
+        ]
+
+    def validate(self, extra_validators=None):
+        if not super().validate():
+            return False
+        if self.departure_airport.data == self.arrival_airport.data:
+            self.departure_airport.errors.append(
+                "Departure airport must be different from arrival airport!"
+            )
+            self.arrival_airport.errors.append(
+                "Arrival airport must be different from departure airport!"
+            )
+            return False
+        route = dao.get_route_by_airports(
+            self.departure_airport.data, self.arrival_airport.data
+        )
+        if not route:
+            self.departure_airport.errors.append(
+                "Route not found for selected airports!"
+            )
+            self.arrival_airport.errors.append("Route not found for selected airports!")
+            return False
+        return True
 
 
 class FlightSchedulingForm(FlaskForm):

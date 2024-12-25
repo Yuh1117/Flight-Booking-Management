@@ -42,10 +42,6 @@ def get_flight_seat_by_id(id):
     return FlightSeat.query.get(id)
 
 
-def get_flight_seat_of_flight(flight: Flight, flight_seat_id: int):
-    return next((fs for fs in flight.seats if fs.id == flight_seat_id), None)
-
-
 def get_seat_class_by_id(id):
     return SeatClass.query.get(id)
 
@@ -54,8 +50,40 @@ def get_aircraft_by_id(id):
     return Aircraft.query.get(id)
 
 
-def get_aircraft_seats_by_aircraft(aircraft_id):
-    return AircraftSeat.query.filter(AircraftSeat.aircraft_id == aircraft_id).all()
+def get_country_by_code(code):
+    return Country.query.filter(Country.code.ilike(code)).first()
+
+
+def get_airport_by_code(code):
+    return Airport.query.filter(Airport.code.ilike(code)).first()
+
+
+def get_route_by_id(id):
+    return Route.query.get(id)
+
+
+def get_route_by_airports(depart_airport_id, arrive_airport_id):
+    return Route.query.filter_by(
+        depart_airport_id=depart_airport_id, arrive_airport_id=arrive_airport_id
+    ).first()
+
+
+def get_max_stopover_airports():
+    return (
+        Regulation.query.filter(Regulation.key == "max_stopover_airports").first().value
+    )
+
+
+def get_min_flight_duration():
+    return (
+        Regulation.query.filter(Regulation.key == "min_flight_duration").first().value
+    )
+
+
+def get_max_flight_duration():
+    return (
+        Regulation.query.filter(Regulation.key == "max_flight_duration").first().value
+    )
 
 
 def add_route(depart_airport_id, arrive_airport_id):
@@ -87,17 +115,6 @@ def add_flight(
     arrive_time: dt,
     aircraft_id,
 ):
-    if depart_time >= arrive_time:
-        raise ValueError("Depart time must be less than arrive time")
-    # Check flight duration
-    flight_minutes = (arrive_time - depart_time).total_seconds() // 60
-    min_f_duration = get_min_flight_duration()
-    max_f_duration = get_max_flight_duration()
-    if not (min_f_duration <= flight_minutes <= max_f_duration):
-        raise ValueError(
-            f"Flight duration must be between {min_f_duration} - {max_f_duration} minutes!"
-        )
-
     new_flight = Flight(
         route_id=route_id,
         code=code,
@@ -138,65 +155,6 @@ def add_stopover(airport_id, flight_id, arrival_time, departure_time, order, not
         return None
 
 
-def load_routes(kw_depart_airport=None, kw_arrive_airport=None, page=None):
-    query = Route.query
-    if kw_depart_airport:
-        query = query.filter(Route.depart_airport_id == int(kw_depart_airport))
-
-    if kw_arrive_airport:
-        query = query.filter(Route.arrive_airport_id == int(kw_arrive_airport))
-
-    page_size = app.config["PAGE_SIZE"]
-    start = (page - 1) * page_size
-    query = query.slice(start, start + page_size)
-
-    return query.all()
-
-
-def get_country_by_code(code):
-    return Country.query.filter(Country.code.ilike(code)).first()
-
-
-def get_airport_by_code(code):
-    return Airport.query.filter(Airport.code.ilike(code)).first()
-
-
-def get_route_by_airports(depart_airport_id, arrive_airport_id):
-    return Route.query.filter_by(
-        depart_airport_id=depart_airport_id, arrive_airport_id=arrive_airport_id
-    ).first()
-
-
-def count_routes(kw_depart_airport=None, kw_arrive_airport=None):
-    query = Route.query
-    if kw_depart_airport and kw_arrive_airport:
-        return query.filter(
-            Route.depart_airport_id == int(kw_depart_airport),
-            Route.arrive_airport_id == int(kw_arrive_airport),
-        ).count()
-    elif kw_depart_airport:
-        return query.filter(Route.depart_airport_id == int(kw_depart_airport)).count()
-    elif kw_arrive_airport:
-        return query.filter(Route.arrive_airport_id == int(kw_arrive_airport)).count()
-
-    return Route.query.count()
-
-
-def get_route_by_id(id):
-    return Route.query.get(id)
-
-
-# not stopover airport
-def load_stopover_airport():
-    return Airport.query.all()
-
-
-def load_airports(id_depart_airport=None, id_arrive_airport=None):
-    return Airport.query.filter(
-        Airport.id != id_depart_airport, Airport.id != id_arrive_airport
-    ).all()
-
-
 def load_flights(page=None, route_id=None):
     query = Flight.query
     query = query.filter(Flight.route_id == route_id)
@@ -209,10 +167,6 @@ def load_flights(page=None, route_id=None):
     return query.all()
 
 
-def count_flights(route_id=None):
-    return Flight.query.filter(Flight.route_id == route_id).count()
-
-
 def find_intermediate_airport(flight_id):
     # Tìm tất cả sân bay trung gian của một chuyến bay cụ thể
     intermediate_airports = Stopover.query.filter(Stopover.flight_id == flight_id).all()
@@ -220,28 +174,6 @@ def find_intermediate_airport(flight_id):
     return [
         intermediate_airport.to_dict() for intermediate_airport in intermediate_airports
     ]
-
-
-# def find_airport(kw):
-#     airport_ids = [
-#         airport_id[0]
-#         for airport_id in Airport.query.filter(Airport.name.contains(kw))
-#         .with_entities(Airport.id)
-#         .all()
-#     ]
-#     return airport_ids
-
-
-def get_min_flight_duration():
-    return (
-        Regulation.query.filter(Regulation.key == "min_flight_duration").first().value
-    )
-
-
-def get_max_flight_duration():
-    return (
-        Regulation.query.filter(Regulation.key == "max_flight_duration").first().value
-    )
 
 
 def add_aircraft(name, airline_id, seat_data: dict):
@@ -261,12 +193,6 @@ def add_aircraft(name, airline_id, seat_data: dict):
     db.session.add(new_aircraft)
     db.session.commit()
     return new_aircraft
-
-
-def get_max_stopover_airports():
-    return (
-        Regulation.query.filter(Regulation.key == "max_stopover_airports").first().value
-    )
 
 
 def get_flights_by_route_and_date(

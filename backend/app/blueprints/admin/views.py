@@ -82,6 +82,7 @@ class UserView(ModelView, AdminView):
             form.last_name.data,
             form.phone.data,
             form.role.data,
+            form.avatar.data,
         )
         return True
 
@@ -95,7 +96,7 @@ class UserView(ModelView, AdminView):
             form.citizen_id.errors.append("Citizen ID already exists!")
             return False
         # Update password
-        if not bcrypt.check_password_hash(model.password, form.password.data):
+        if form.password.data != model.password:
             form.password.data = bcrypt.generate_password_hash(
                 form.password.data
             ).decode("utf-8")

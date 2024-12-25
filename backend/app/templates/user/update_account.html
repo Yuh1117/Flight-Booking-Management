@@ -4,71 +4,72 @@
 {% extends "user/account.html" %}
 <!--  -->
 {% block main_col %}
-<div class="card mb-2">
+<form action="" method="post" enctype="multipart/form-data" class="card mb-2">
   <div class="card-header fs-3">Update account</div>
   <div class="card-body">
-    <form action="" method="post" enctype="multipart/form-data">
-      {{ form.hidden_tag() }}
-      {{ render_text_field(form.email) }}
+    {{ form.hidden_tag() }}
+    {{ render_text_field(form.email, class='mb-3') }}
 
-      <div class="row">
-        <div class="col-md-6">
-          {{ render_text_field(form.first_name) }}
-        </div>
-        <div class="col-md-6">
-          {{ render_text_field(form.last_name) }}
-        </div>
+    <div class="row">
+      <div class="col-md-6">
+        {{ render_text_field(form.first_name, class='mb-3') }}
       </div>
-
-      <div class="row">
-        <div class="col-md-6">
-          {{ render_text_field(form.citizen_id) }}
-        </div>
-        <div class="col-md-6">
-          {{ render_text_field(form.phone) }}
-        </div>
+      <div class="col-md-6">
+        {{ render_text_field(form.last_name, class='mb-3') }}
       </div>
+    </div>
 
-
-      <!-- ======================== Avatar ======================== -->
-      <div class="input-group">
-        <!------------------------ Check errors -------------------------->
-        {% if form.picture.errors %}
-        <!--  -->
-        {{ form.picture(class="form-control
-        is-invalid",accept=".jpg,.png,.svg,.jpeg") }}
-        <!--  -->
-        <div class="invalid-feedback">
-          {% for error in form.picture.errors %}
-          <span>{{error}}</span>
-          {% endfor %}
-        </div>
-        {% else %}
-        <!--  -->
-        {{ form.picture(class="form-control",accept=".jpg,.png,.svg,.jpeg") }}
-        <!--  -->
-        {% endif %}
-        <!--  -->
-        {{ form.picture.label(class='input-group-text top-0 border-0') }}
-        <!------------------------ End check errors -------------------------->
+    <div class="row">
+      <div class="col-md-6">
+        {{ render_text_field(form.citizen_id, class='mb-3') }}
       </div>
-      <!-- ======================== End Avatar ======================== -->
-
-      <div class="input-group flex-nowrap">
-        {{ form.submit(class='btn flex-grow-1 btn-lg btn-primary') }}
-        <input
-          type="reset"
-          value="Reset"
-          class="btn btn-primary-invert btn-lg flex-grow-1 ms-1"
-        />
-        <a
-          href="{{url_for('auth.profile')}}"
-          class="btn btn-secondary btn-lg flex-grow-1 ms-1 rounded-1"
-          >Cancel</a
-        >
+      <div class="col-md-6">
+        {{ render_text_field(form.phone, class='mb-3') }}
       </div>
-    </form>
+    </div>
+
+
+    <!-- ======================== Avatar ======================== -->
+    <div class="input-group mb-3">
+      <!------------------------ Check errors -------------------------->
+      {% if form.picture.errors %}
+      <!--  -->
+      {{ form.picture(class="form-control
+      is-invalid",accept=".jpg,.png,.svg,.jpeg") }}
+      <!--  -->
+      <div class="invalid-feedback">
+        {% for error in form.picture.errors %}
+        <span>{{error}}</span>
+        {% endfor %}
+      </div>
+      {% else %}
+      <!--  -->
+      {{ form.picture(class="form-control",accept=".jpg,.png,.svg,.jpeg") }}
+      <!--  -->
+      {% endif %}
+      <!--  -->
+      {{ form.picture.label(class='input-group-text top-0 border-0') }}
+      <!------------------------ End check errors -------------------------->
+    </div>
+    <!-- ======================== End Avatar ======================== -->
   </div>
+
+  <div class="card-footer">
+    <div class="input-group flex-nowrap">
+      {{ form.submit(class='btn flex-grow-1 btn-lg btn-primary') }}
+      <input
+        type="reset"
+        value="Reset"
+        class="btn btn-primary-invert btn-lg flex-grow-1 ms-1"
+      />
+      <a
+        href="{{url_for('auth.profile')}}"
+        class="btn btn-secondary btn-lg flex-grow-1 ms-1 rounded-1"
+        >Cancel</a
+      >
+    </div>
+  </div>
+</form>
 </div>
 
 {% endblock main_col %}
