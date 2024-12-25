@@ -34,14 +34,18 @@ class FlaskConfig:
     SQLALCHEMY_DATABASE_URI = MySQLConfig.DB_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
-    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.googlemail.com")
-    MAIL_PORT = os.getenv("MAIL_PORT", 587)
-    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", True)
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 
-    FLASK_ADMIN_SWATCH = "lux"
+    # Flask-Mail Configuration
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")  # SMTP server address
+    MAIL_PORT = os.getenv("MAIL_PORT", 587)  # SMTP port (587 for TLS, 465 for SSL)
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "True").lower() == "true"  # Enable TLS
+    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", "False").lower() == "true"  # Enable SSL
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")  # Email address to send from
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")  # Email password or app-specific password
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", MAIL_USERNAME)  # Default sender email address
 
+
+    FLASK_ADMIN_SWATCH = 'lux'
 
 class CloudinaryConfig:
     CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
