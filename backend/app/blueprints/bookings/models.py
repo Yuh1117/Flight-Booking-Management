@@ -34,7 +34,7 @@ class Reservation(db.Model):
         backref="reservation",
         lazy=True,
     )
-
+    
     def __repr__(self):
         return f"Reservation('{self.id}', '{self.flight_seat_id}', '{self.owner_id}')"
 
@@ -47,6 +47,7 @@ class Reservation(db.Model):
         """
         if self.is_deleted or self.is_paid():
             return False
+
         return self.flight_seat.flight.is_bookable_now()
 
 

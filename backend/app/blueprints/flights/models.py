@@ -141,7 +141,7 @@ class FlightSeat(db.Model):
 
     def is_sold(self):
         return next((r for r in self.reservations if r.is_paid()), None) is not None
-
+    
 
 class Route(db.Model):
     __tablename__ = "routes"
@@ -229,6 +229,14 @@ class Flight(db.Model):
 
     def get_seat_by_id(self, seat_id):
         return next((fs for fs in self.seats if fs.id == seat_id), None)
+    
+    def calculate_revenue(self):
+        revenue = 0
+        for seat in self.seats:
+            if seat.is_sold():  
+                revenue += seat.price
+        return revenue
+
 
 
 class Stopover(db.Model):

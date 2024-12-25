@@ -14,7 +14,6 @@ from app.blueprints.auth import decorators
 from app.blueprints.bookings.vnpay import vnpay
 from app import app, db
 
-
 def validate_flight_seat_class(flight, seat_class):
     """
     1. Check if flight and seat class are valid
@@ -85,6 +84,9 @@ def reserve_ticket():
     )
 
 
+
+
+
 @bookings_bp.route("/booking/confirmation", methods=["GET", "POST"])
 @login_required
 def confirmation():
@@ -101,7 +103,7 @@ def confirmation():
     owner = auth_dao.get_user_by_id(reservation_details["owner_id"])
     author = auth_dao.get_user_by_id(reservation_details["author_id"])
     seat = flight_dao.get_flight_seat_by_id(reservation_details["flight_seat_id"])
-    flight = seat.flight
+    flight = seat.flight     
 
     # Check if flight is still bookable
     if not flight.is_bookable_now() or seat.is_sold():
@@ -121,6 +123,9 @@ def confirmation():
         # Create reservation
         if payment_type == "cash":
             booking_dao.add_reservation(owner.id, author.id, seat.id, is_paid=True)
+
+            # Send email
+
         elif payment_type == "card":
             booking_dao.add_reservation(owner.id, author.id, seat.id)
 
@@ -242,6 +247,8 @@ def get_client_ip(request):
     return ip
 
 
+
+
 @bookings_bp.route("/booking/payment/<id>", methods=["GET", "POST"])
 @decorators.login_required
 def payment(id):
@@ -302,6 +309,7 @@ def payment(id):
 
 
 @bookings_bp.route("/booking/payment_return", methods=["GET"])
+@decorators.login_required
 def payment_return():
     inputData = request.args
     if inputData:
@@ -328,6 +336,9 @@ def payment_return():
                 )
 
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
+                #send email
+                print(reservation.owner.email)
+                booking_dao.send_booking_confirmation(reservation, reservation.owner.email)     
                 flight_seat = reservation.flight_seat
                 flight = flight_seat.flight
 
@@ -386,3 +397,15 @@ def payment_return():
     return render_template(
         "bookings/payment_return.html", title="Payment result", result=""
     )
+
+
+@bookings_bp.route("/show-ticket/<int:id>", methods=['GET'])
+@login_required
+def show_ticket(id):
+    reservation = Reservation.query.get(id)
+    # Trả về giao diện hiển thị vé
+    data = {
+        'reservation' : reservation
+    }
+    return render_template("bookings/ticket.html", data=data)
+

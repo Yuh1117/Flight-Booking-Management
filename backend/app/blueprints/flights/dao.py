@@ -2,8 +2,9 @@ from datetime import datetime as dt
 
 from .models import *
 from app import app
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, and_
 from sqlalchemy.orm import aliased
+from app.blueprints.bookings.models import Payment
 
 
 def get_airports():
@@ -248,41 +249,41 @@ def add_flight_seat(flight_id, aircraft_seat_id, price, currency="VND"):
     db.session.add(new_flight_seat)
     return new_flight_seat
 
+    try:
+        db.session.commit()
+        return new_flight_seat
+    except Exception as e:
+        db.session.rollback()
+        return None
+    
+def revenue_sum(list):
+    sum = 0 
+    for l in list:
+        sum += l[1]
+    return sum
 
-def get_flight_count_by_route(year, month):
-    depart_airport = aliased(Airport)
-    arrive_airport = aliased(Airport)
+def revenue_stats_route_by_time(year, month):
+    AirportDepart = aliased(Airport)
+    AirportArrive = aliased(Airport)
+    
+    return db.session.query(
+                            func.concat(AirportDepart.name, " - ", AirportArrive.name),
+                            func.sum(Payment.amount),
+                            func.count(Flight.id))\
+    .join(Reservation, Reservation.id == Payment.reservation_id)\
+    .join(FlightSeat, FlightSeat.id == Reservation.flight_seat_id)\
+    .join(Flight, Flight.id == FlightSeat.flight_id)\
+    .join(Route, Route.id == Flight.route_id)\
+    .join(AirportDepart, AirportDepart.id == Route.depart_airport_id)\
+    .join(AirportArrive, AirportArrive.id == Route.arrive_airport_id)\
+    .filter(
+        func.extract('year', Payment.created_at) == year,
+        func.extract('month', Payment.created_at) == month
+    )\
+    .group_by(AirportDepart.name, AirportArrive.name).all()
+    
+    
+    
+    
 
-    # Lọc theo năm và tháng
-    stats = (
-        db.session.query(
-            depart_airport.name.label("depart_airport_name"),
-            arrive_airport.name.label("arrive_airport_name"),
-            func.count(Flight.id).label("flight_count"),
-        )
-        .join(Route, Route.id == Flight.route_id)
-        .join(depart_airport, depart_airport.id == Route.depart_airport_id)
-        .join(arrive_airport, arrive_airport.id == Route.arrive_airport_id)
-        .filter(
-            extract("year", Flight.depart_time) == year,
-            extract("month", Flight.depart_time) == month,
-        )
-        .group_by(depart_airport.name, arrive_airport.name)
-        .all()
-    )
-
-    total_flights = sum(s.flight_count for s in stats)
-
-    result = []
-    for s in stats:
-        ti_le = (s.flight_count / total_flights) * 100 if total_flights > 0 else 0
-        result.append(
-            {
-                "depart_airport_name": s.depart_airport_name,
-                "arrive_airport_name": s.arrive_airport_name,
-                "flight_count": s.flight_count,
-                "ti_le": round(ti_le, 2),
-            }
-        )
-
-    return result
+         
