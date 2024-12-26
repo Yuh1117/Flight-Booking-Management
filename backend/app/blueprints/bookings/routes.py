@@ -4,14 +4,13 @@ from datetime import datetime as dt
 
 from . import bookings_bp
 from . import utils
+from .decorators import *
 from app.blueprints.flights import dao as flight_dao
 from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import UserRole
 from . import dao as booking_dao
 from .forms import BookingForm
-from .models import Reservation, PaymentStatus, Payment
-import re
-from app.blueprints.auth import decorators
+from .models import Reservation, PaymentStatus
 from app.blueprints.bookings.vnpay import vnpay
 from app import app
 
@@ -98,9 +97,11 @@ def confirmation():
 
         # Create reservation
         if payment_type == "cash":
-            booking_dao.add_reservation(owner.id, author.id, seat.id, is_paid=True)
-
+            reservation = booking_dao.add_reservation(
+                owner.id, author.id, seat.id, is_paid=True
+            )
             # Send email
+            utils.send_flight_ticket_email(reservation, reservation.owner.email)
 
         elif payment_type == "card":
             booking_dao.add_reservation(owner.id, author.id, seat.id)
@@ -145,21 +146,9 @@ def manage_bookings_created_for_others():
     "/booking/edit-reservation/<int:reservation_id>", methods=["GET", "POST"]
 )
 @login_required
+@user_can_edit_this_reservation
 def edit_reservation(reservation_id):
-    """
-    Only the user and author of the reservation can edit it.
-    The user can't edit the reservation once paid.
-    """
-    reservation = booking_dao.get_reservation_by_id_and_user(
-        reservation_id, current_user.id
-    )
-    if not reservation:
-        flash("Reservation not found", "danger")
-        return redirect(url_for("bookings.manage_own_bookings"))
-
-    if not reservation.is_editable():
-        flash("You can't edit this reservation", "danger")
-        return redirect(url_for("bookings.manage_own_bookings"))
+    reservation = booking_dao.get_reservation_by_id(reservation_id)
 
     flight = reservation.flight_seat.flight
     seat_class = request.args.get(
@@ -200,18 +189,15 @@ def edit_reservation(reservation_id):
 
 @bookings_bp.route("/manage-bookings/delete/<int:reservation_id>", methods=["POST"])
 @login_required
+@user_can_delete_this_reservation
 def delete_reservation(reservation_id):
     """
     Only the user who owns the reservation can delete it.
     Even author of the reservation can't delete it.
     """
-    if booking_dao.delete_reservation_of_owner(current_user.id, reservation_id):
-        flash("Reservation deleted", "success")
-    else:
-        flash("Reservation not found", "danger")
-
-    response = redirect(request.referrer)
-    return response
+    booking_dao.delete_reservation(reservation_id)
+    flash("Reservation deleted!", "success")
+    return redirect(request.referrer)
 
 
 def get_client_ip(request):
@@ -224,7 +210,7 @@ def get_client_ip(request):
 
 
 @bookings_bp.route("/booking/payment/<id>", methods=["GET", "POST"])
-@decorators.login_required
+@login_required
 def payment(id):
     if request.method == "GET":
         # ...
@@ -283,7 +269,7 @@ def payment(id):
 
 
 @bookings_bp.route("/booking/payment_return", methods=["GET"])
-@decorators.login_required
+@login_required
 def payment_return():
     inputData = request.args
     if inputData:
@@ -375,10 +361,10 @@ def payment_return():
     )
 
 
-@bookings_bp.route("/show-ticket/<int:id>", methods=["GET"])
+@bookings_bp.route("/show-ticket/<int:reservation_id>", methods=["GET"])
 @login_required
-def show_ticket(id):
-    reservation = Reservation.query.get(id)
+@user_can_view_ticket
+def show_ticket(reservation_id):
+    reservation = Reservation.query.get(reservation_id)
     # Trả về giao diện hiển thị vé
-    data = {"reservation": reservation}
-    return render_template("bookings/ticket.html", data=data)
+    return render_template("bookings/ticket.html", reservation=reservation)

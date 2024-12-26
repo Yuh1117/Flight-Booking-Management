@@ -27,21 +27,13 @@ def validate_flight_seat_class(flight, seat_class):
     return True
 
 
-def send_booking_confirmation(reservation, email):
-    msg_title = "Your Flight Ticket Confirmation"
-    sender = "duongxummo@gmail.com"
-    msg = Message(msg_title, sender=sender, recipients=[email])
-    msg_body = "Here is your ticket:"
-    data = {
-        "app_name": "TICKET",
-        "title": msg_title,
-        "body": msg_body,
-        "reservation": reservation,
-    }
-    msg.html = render_template("bookings/ticket_detail.html", data=data)
-    try:
-        mail.send(msg)
-        return "Email sent with the ticket!"
-    except Exception as e:
-        print(e)
-        return f"The email was not sent: {e}"
+def send_flight_ticket_email(reservation, email):
+    message = Message(
+        subject="Flight Ticket",
+        sender="noreply@6789lacachbonanhsong.com",
+        recipients=[email],
+        html=render_template(
+            "bookings/ticket_detail.html", reservation=reservation, email=True
+        ),
+    )
+    mail.send(message)

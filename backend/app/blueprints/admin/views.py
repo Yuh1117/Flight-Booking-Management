@@ -263,7 +263,7 @@ class AircraftSeatAdmin(ModelView, AdminView):
 
 class FlightSeatAdmin(ModelView, AdminView):
     column_list = ("flight.id", "aircraft_seat", "price", "currency")
-    column_searchable_list = ["flight.id"]
+    column_searchable_list = ["id", "flight.id"]
 
 
 class RegulationView(ModelView, AdminView):
