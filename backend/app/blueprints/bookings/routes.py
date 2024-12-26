@@ -209,28 +209,19 @@ def get_client_ip(request):
     return ip
 
 
-@bookings_bp.route("/booking/payment/<id>", methods=["GET", "POST"])
+@bookings_bp.route("/booking/payment/<reservation_id>", methods=["GET", "POST"])
 @login_required
-def payment(id):
+@user_can_pay_this_reservation
+def payment(reservation_id):
     if request.method == "GET":
         # ...
-        reservation = booking_dao.get_reservation_by_id_and_user(id, current_user.id)
-        order_id = ""
-        message = ""
-
-        if reservation:
-            if reservation.is_paid():
-                message = "THIS TICKET HAS BEEN PAID"
-            else:
-                order_id = str(reservation.id)
-        else:
-            message = "TICKET NOT FOUND"
+        reservation = booking_dao.get_reservation_by_id(reservation_id)
+        order_id = reservation.id
 
         return render_template(
             "bookings/payment.html",
             order_id=order_id,
             reservation=reservation,
-            message=message,
         )
     else:
         order_id = request.form.get("order_id")
@@ -297,8 +288,7 @@ def payment_return():
 
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
                 # send email
-                print(reservation.owner.email)
-                booking_dao.send_booking_confirmation(
+                utils.send_flight_ticket_email(
                     reservation, reservation.owner.email
                 )
                 flight_seat = reservation.flight_seat

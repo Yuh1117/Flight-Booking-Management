@@ -264,23 +264,3 @@ def revenue_stats_route_by_time(year=None, month=None):
         .group_by(AirportDepart.name, AirportArrive.name)
         .all()
     )
-
-    return (
-        db.session.query(
-            func.concat(AirportDepart.name, " - ", AirportArrive.name),
-            func.sum(Payment.amount),
-            func.count(Flight.id),
-        )
-        .join(Reservation, Reservation.id == Payment.reservation_id)
-        .join(FlightSeat, FlightSeat.id == Reservation.flight_seat_id)
-        .join(Flight, Flight.id == FlightSeat.flight_id)
-        .join(Route, Route.id == Flight.route_id)
-        .join(AirportDepart, AirportDepart.id == Route.depart_airport_id)
-        .join(AirportArrive, AirportArrive.id == Route.arrive_airport_id)
-        .filter(
-            func.extract("year", Payment.created_at) == year,
-            func.extract("month", Payment.created_at) == month,
-        )
-        .group_by(AirportDepart.name, AirportArrive.name)
-        .all()
-    )
