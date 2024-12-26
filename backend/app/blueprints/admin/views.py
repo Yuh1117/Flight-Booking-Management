@@ -290,14 +290,16 @@ class HomeView(AuthenticatedView):
         return redirect("/")
     
 class StatsView(AdminView):
-    @expose("/", methods=["GET", "POST"])
+    @expose("/", methods=["GET"])
     def index(self):
-        year = request.args.get('year', type=int, default=2024)  
-        month = request.args.get('month', type=int, default=12)  
-        flight_stats = flight_dao.revenue_stats_route_by_time(year, month)
-        sum = dao.revenue_sum(flight_stats)
+        year = request.args.get("year")
+        month = request.args.get("month")
+        if year and month:
+            flight_stats = flight_dao.revenue_stats_route_by_time(year, month)
+            sum = dao.revenue_sum(flight_stats)
+            return self.render('admin/stats.html', stats=flight_stats, year=int(year), month=int(month), sum=sum)
         
-        return self.render('admin/stats.html', stats=flight_stats, year=year, month=month, sum=sum)
+        return self.render('admin/stats.html', year=dt.now().year, month=dt.now().month)
 
 
 admin = Admin(
