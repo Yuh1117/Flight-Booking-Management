@@ -33,7 +33,7 @@ def send_flight_ticket_email(reservation, email):
         sender="noreply@6789lacachbonanhsong.com",
         recipients=[email],
         html=render_template(
-            "bookings/ticket_detail.html", reservation=reservation, email=True
+            "bookings/ticket_email.html", reservation=reservation, email=True
         ),
     )
     mail.send(message)
