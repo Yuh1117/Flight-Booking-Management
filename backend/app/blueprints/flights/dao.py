@@ -237,13 +237,33 @@ def add_flight_seat(flight_id, aircraft_seat_id, price, currency="VND"):
 def revenue_sum(list):
     sum = 0
     for l in list:
-        sum += l[1]
+        sum += l[-1]
     return sum
 
 
-def revenue_stats_route_by_time(year, month):
+def revenue_stats_route_by_time(year=None, month=None):
     AirportDepart = aliased(Airport)
     AirportArrive = aliased(Airport)
+
+    return (
+        db.session.query(
+            func.concat(AirportDepart.name, " - ", AirportArrive.name),
+            func.count(Flight.id.distinct()),
+            func.sum(Payment.amount),
+        )
+        .join(Reservation, Reservation.id == Payment.reservation_id)
+        .join(FlightSeat, FlightSeat.id == Reservation.flight_seat_id)
+        .join(Flight, Flight.id == FlightSeat.flight_id)
+        .join(Route, Route.id == Flight.route_id)
+        .join(AirportDepart, AirportDepart.id == Route.depart_airport_id)
+        .join(AirportArrive, AirportArrive.id == Route.arrive_airport_id)
+        .filter(
+            func.extract("year", Payment.created_at) == year,
+            func.extract("month", Payment.created_at) == month,
+        )
+        .group_by(AirportDepart.name, AirportArrive.name)
+        .all()
+    )
 
     return (
         db.session.query(
