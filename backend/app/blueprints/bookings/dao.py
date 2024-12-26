@@ -1,18 +1,12 @@
-from sqlalchemy import or_
-from flask import render_template
+from . import utils
 from .models import *
 from app.blueprints.flights import dao as flight_dao
 from app import app
-from app import app, db, mail
-from flask_mail import Mail, Message
-from flask_login import current_user
+from app import app, db
+
 
 def get_reservation_by_id(reservation_id):
     return Reservation.query.get(reservation_id)
-
-
-def get_user_reservation_by_flight_seat(user, flight_seat):
-    return next((r for r in user.reservations if r.flight_seat == flight_seat), None)
 
 
 def get_reservations_of_owned_user(owner_id, page=1, per_page=app.config["PAGE_SIZE"]):
@@ -37,27 +31,6 @@ def get_reservations_created_for_others(
     )
 
 
-
-def send_booking_confirmation(reservation, email ):
-    msg_title = "Your Bus Ticket Confirmation"
-    sender = "duongxummo@gmail.com"
-    msg = Message(msg_title, sender=sender, recipients=[email])
-    msg_body = "Here is your ticket:"
-    data = {
-        'app_name': "TICKET",
-        'title': msg_title,
-        'body': msg_body,
-        'reservation' : reservation
-    }
-    msg.html = render_template("bookings/ticket_detail.html", data=data)
-    try:
-        mail.send(msg)
-        return "Email sent with the ticket!"
-    except Exception as e:
-        print(e)
-        return f"The email was not sent: {e}"
-
-
 def add_reservation(owner_id, author_id, flight_seat_id, is_paid=False):
     reservation = Reservation(
         owner_id=owner_id,
@@ -67,11 +40,10 @@ def add_reservation(owner_id, author_id, flight_seat_id, is_paid=False):
     if is_paid:
         price = flight_dao.get_flight_seat_by_id(flight_seat_id).price
         reservation.payment = Payment(amount=price, status=PaymentStatus.SUCCESS)
+        utils.send_booking_confirmation(reservation, reservation.owner.email)
 
     db.session.add(reservation)
     db.session.commit()
-    if is_paid:    
-        send_booking_confirmation(reservation, reservation.owner.email )
     return reservation
 
 
@@ -101,12 +73,9 @@ def update_reservation_seat(reservation, flight_seat_id):
     db.session.commit()
     return reservation
 
+
 def add_payment(reservation_id, amount, status=PaymentStatus.PENDING):
-    new_payment = Payment(
-        reservation_id=reservation_id,
-        amount=amount,
-        status=status
-    )
+    new_payment = Payment(reservation_id=reservation_id, amount=amount, status=status)
 
     db.session.add(new_payment)
 

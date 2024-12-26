@@ -6,6 +6,7 @@ from app import db
 from . import flights_bp
 from app.blueprints.auth import decorators
 from . import dao
+from . import utils
 from .forms import FlightSchedulingForm, SearchFlightForm
 
 
@@ -39,117 +40,41 @@ def get_aircrafts():
     return jsonify([aircraft.to_dict() for aircraft in dao.get_aircrafts()])
 
 
-def to_datetime(datetime_str):
-    return dt.strptime(datetime_str, "%Y-%m-%dT%H:%M")
-
-
-def validate_stopover_form():
-    data = request.form.copy()
-
-    # Get number of stopovers
-    stopover_count = data.get("stopovers_num", type=int)
-
-    if stopover_count <= 0:
-        return True
-
-    if stopover_count > dao.get_max_stopover_airports():
-        flash("Number of stopovers is too large", "danger")
-        return False
-
-    # Check if the stopover info is provided
-    for i in range(1, stopover_count + 1):
-        if (
-            not data.get(f"stopover_airport_{i}")
-            or not data.get(f"stopover_arrival_time_{i}")
-            or not data.get(f"stopover_departure_time_{i}")
-        ):
-            flash(f"Stopover {i} info is not provided fully!", "danger")
-            return False
-
-    # Check if the airports are unique
-    stopover_airports = [
-        data.get(f"stopover_airport_{i}", type=int)
-        for i in range(1, stopover_count + 1)
-    ]
-    if len(stopover_airports) != len(set(stopover_airports)):
-        flash("Stopover airports must be unique", "danger")
-        return False
-    if (
-        data.get("departure_airport", type=int) in stopover_airports
-        or data.get("arrival_airport", type=int) in stopover_airports
-    ):
-        flash(
-            "Departure and arrival airports must be different from stopover airports",
-            "danger",
-        )
-        return False
-
-    # Check if the stopover times are valid
-    departure_time = data.get("departure_time", type=to_datetime)
-    arrival_time = data.get("arrival_time", type=to_datetime)
-    latest_departure_time = (
-        departure_time  # The latest departure time of the previous stopover
-    )
-    for i in range(1, stopover_count + 1):
-        s_arrival_time = data.get(f"stopover_arrival_time_{i}", type=to_datetime)
-        s_departure_time = data.get(f"stopover_departure_time_{i}", type=to_datetime)
-        # The stopover must be between departure and arrival time
-        if (
-            s_departure_time <= s_arrival_time
-            or s_arrival_time <= departure_time
-            or s_departure_time >= arrival_time
-        ):
-            flash(f"Stopover {i} arrival time is invalid", "danger")
-            return False
-        # The stopover must be in order
-        if s_arrival_time <= latest_departure_time:
-            flash(f"Stopover {i} doesn't be in order!", "danger")
-            return False
-        latest_departure_time = s_departure_time
-
-    return True
-
-
 @flights_bp.route("/schedule", methods=["GET", "POST"])
 @decorators.admin_or_flight_manager_required
-def show_routes():
-    form = FlightSchedulingForm()
-    airports = dao.get_airports()
-    form.departure_airport.choices = [(airport.id, airport) for airport in airports]
-    form.arrival_airport.choices = [(airport.id, airport) for airport in airports]
-    form.aircraft.choices = [
-        (aircraft.id, aircraft) for aircraft in dao.get_aircrafts()
-    ]
+def flight_scheduling():
+    form = FlightSchedulingForm(request.form)
     max_stopover_airports = dao.get_max_stopover_airports()
-    if form.validate_on_submit():
-        if not validate_stopover_form():
-            return redirect(request.referrer)
-
-        departure_airport = int(form.departure_airport.data)
-        arrival_airport = int(form.arrival_airport.data)
-        aircraft = dao.get_aircraft_by_id(int(form.aircraft.data))
-        departure_time = form.departure_time.data
-        arrival_time = form.arrival_time.data
-        code = form.flight_code.data
-
+    if form.validate_on_submit() and utils.validate_stopover_form(request.form):
         # Get the route if the route doesn't exist, create a new one
-        route = dao.get_route_by_airports(departure_airport, arrival_airport)
+        route = dao.get_route_by_airports(
+            depart_airport_id=form.departure_airport.data,
+            arrive_airport_id=form.arrival_airport.data,
+        )
         if not route:
-            route = dao.add_route(departure_airport, arrival_airport)
+            route = dao.add_route(
+                depart_airport_id=form.departure_airport.data,
+                arrive_airport_id=form.arrival_airport.data,
+            )
 
         # Add the flight
         flight = dao.add_flight(
-            route.id, code, departure_time, arrival_time, aircraft.id
+            route_id=route.id,
+            code=form.flight_code.data,
+            depart_time=form.departure_time.data,
+            arrive_time=form.arrival_time.data,
+            aircraft_id=form.aircraft.data,
         )
+
         # Add the stopovers
         stopover_count = request.form.get("stopovers_num", type=int)
         for i in range(1, stopover_count + 1):
             stopover_airport = request.form.get(f"stopover_airport_{i}", type=int)
             stopover_arrival_time = request.form.get(
-                f"stopover_arrival_time_{i}", type=to_datetime
+                f"stopover_arrival_time_{i}", type=utils.to_datetime
             )
             stopover_departure_time = request.form.get(
-                f"stopover_departure_time_{i}", type=to_datetime
+                f"stopover_departure_time_{i}", type=utils.to_datetime
             )
             dao.add_stopover(
                 airport_id=stopover_airport,
@@ -159,6 +84,13 @@ def show_routes():
                 order=i,
                 note=request.form.get(f"stopover_note_{i}", None),
             )
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash("Error scheduling flight!", "danger")
+            return redirect(request.referrer)
 
         flash("Flight scheduled successfully! Please provide flight prices.", "success")
         return redirect(url_for("flights.set_prices", id=flight.id))
@@ -177,9 +109,9 @@ def set_prices(id):
         return redirect("/")
 
     if request.method == "POST":
-        data = request.form.deepcopy()
+        data = request.form
 
-        # Get the prices
+        # Get the prices of all seat classes of the flight
         prices = {}
         for seatclass in dao.get_seat_classes():
             if f"price_class_{seatclass.id}" in data.to_dict():
@@ -210,18 +142,14 @@ def set_prices(id):
     return render_template("flights/create_flight_seats.html", flight=flight)
 
 
-def to_date(date_str):
-    return dt.strptime(date_str, "%Y-%m-%d").date()
-
-
 @flights_bp.route("/search/flight", methods=["GET"])
 def searchFlights():
     # Get params from request
-    form = SearchFlightForm()
+    form = SearchFlightForm(request.form)
 
     departure_airport_id = request.args.get("departure_airport", type=int)
     arrival_airport_id = request.args.get("arrival_airport", type=int)
-    depart_date = request.args.get("departure_date", type=to_date)
+    depart_date = request.args.get("departure_date", type=utils.to_date)
 
     if not all([departure_airport_id, arrival_airport_id, depart_date]):
         # If user first access the page, return the plain search page
@@ -238,12 +166,9 @@ def searchFlights():
     page = request.args.get("page", default=1, type=int)
     flights = dao.get_flights_by_route_and_date(route.id, depart_date, page)
 
-    if not flights:
+    if not flights.items:
         # If there are no flights for the route, return an error message
-        flash("Couldn't find any flights for this route!", "info")
-        return render_template(
-            "flights/search.html", form=form, route=route, depart_date=depart_date
-        )
+        flash("Couldn't find any flights!", "warning")
 
     return render_template(
         "flights/search.html",

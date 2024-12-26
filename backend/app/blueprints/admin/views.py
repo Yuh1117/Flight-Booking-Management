@@ -27,7 +27,8 @@ class AdminView(AuthenticatedView):
 class DashboardAdmin(AdminIndexView, AdminView):
     @expose("/", methods=["GET"])
     def index(self):
-        return self.render('admin/dashboard.html', current_user=current_user)
+        return self.render("admin/dashboard.html", current_user=current_user)
+
 
 class CountryAdmin(ModelView, AdminView):
     column_list = ("id", "name", "code")
@@ -161,7 +162,7 @@ class FlightAdmin(ModelView, AdminView):
 
     @expose("/new", methods=["GET"])
     def create_view(self):
-        return redirect(url_for("flights.show_routes"))
+        return redirect(url_for("flights.flight_scheduling"))
 
 
 class StopoverAdmin(ModelView, AdminView):
@@ -183,6 +184,13 @@ class AirportAdmin(ModelView, AdminView):
     column_searchable_list = ["code", "name", "country.name"]
     column_filters = ["country.name"]
     column_sortable_list = ["id", "name", "code", "country.name"]
+
+    @expose("/new/", methods=("GET", "POST"))
+    def create_view(self):
+        if flight_dao.get_airport_number() < flight_dao.get_max_airports():
+            return super().create_view()
+        flash("Cannot create more airports!", "danger")
+        return redirect(url_for("airport.index_view"))
 
     def create_model(self, form):
         if flight_dao.get_airport_by_code(form.code.data):
@@ -288,16 +296,19 @@ class HomeView(AuthenticatedView):
     @expose("/")
     def index(self):
         return redirect("/")
-    
+
+
 class StatsView(AdminView):
     @expose("/", methods=["GET", "POST"])
     def index(self):
-        year = request.args.get('year', type=int, default=2024)  
-        month = request.args.get('month', type=int, default=12)  
+        year = request.args.get("year", type=int, default=2024)
+        month = request.args.get("month", type=int, default=12)
         flight_stats = flight_dao.revenue_stats_route_by_time(year, month)
         sum = dao.revenue_sum(flight_stats)
-        
-        return self.render('admin/stats.html', stats=flight_stats, year=year, month=month, sum=sum)
+
+        return self.render(
+            "admin/stats.html", stats=flight_stats, year=year, month=month, sum=sum
+        )
 
 
 admin = Admin(
@@ -320,6 +331,6 @@ admin.add_view(FlightSeatAdmin(FlightSeat, db.session, name="FlightSeats"))
 admin.add_view(ReservationView(Reservation, db.session, name="Reservations"))
 admin.add_view(PaymentView(Payment, db.session, name="Payments"))
 admin.add_view(RegulationView(Regulation, db.session, name="Regulations"))
-admin.add_view(StatsView(name='Statistic'))
+admin.add_view(StatsView(name="Statistic"))
 admin.add_view(HomeView(name="Home", menu_class_name="bg-success"))
 admin.add_view(LogoutView(name="Logout", menu_class_name="bg-danger"))

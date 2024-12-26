@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from datetime import datetime as dt
 
 from . import bookings_bp
+from . import utils
 from app.blueprints.flights import dao as flight_dao
 from app.blueprints.auth import dao as auth_dao
 from app.blueprints.auth.models import UserRole
@@ -12,29 +13,7 @@ from .models import Reservation, PaymentStatus, Payment
 import re
 from app.blueprints.auth import decorators
 from app.blueprints.bookings.vnpay import vnpay
-from app import app, db
-
-def validate_flight_seat_class(flight, seat_class):
-    """
-    1. Check if flight and seat class are valid
-    2. Check if this flight is bookable now
-    3. Check if flight has the seat class
-    4. Check if there are available seats for the seat class
-    """
-    if not flight or not seat_class:
-        flash("Invalid flight or seat class", "danger")
-        return False
-    if not flight.is_bookable_now():
-        flash("You are not allowed to book this flight", "danger")
-        return False
-    remaining_seatclasses_and_info = flight.get_remaining_seatclasses_and_info()
-    if seat_class.id not in remaining_seatclasses_and_info:
-        flash("Flight doesn't have this seat class", "danger")
-        return False
-    if remaining_seatclasses_and_info[seat_class.id]["remaining"] == 0:
-        flash("No available seats", "danger")
-        return False
-    return True
+from app import app
 
 
 @bookings_bp.route("/booking", methods=["GET", "POST"])
@@ -45,7 +24,7 @@ def reserve_ticket():
     seat_class = request.args.get("seat_class", type=flight_dao.get_seat_class_by_id)
 
     # Check params are valid
-    if not validate_flight_seat_class(flight, seat_class):
+    if not utils.validate_flight_seat_class(flight, seat_class):
         return redirect(url_for("main.home"))
 
     # if method is POST and form is valid
@@ -84,9 +63,6 @@ def reserve_ticket():
     )
 
 
-
-
-
 @bookings_bp.route("/booking/confirmation", methods=["GET", "POST"])
 @login_required
 def confirmation():
@@ -103,7 +79,7 @@ def confirmation():
     owner = auth_dao.get_user_by_id(reservation_details["owner_id"])
     author = auth_dao.get_user_by_id(reservation_details["author_id"])
     seat = flight_dao.get_flight_seat_by_id(reservation_details["flight_seat_id"])
-    flight = seat.flight     
+    flight = seat.flight
 
     # Check if flight is still bookable
     if not flight.is_bookable_now() or seat.is_sold():
@@ -191,7 +167,7 @@ def edit_reservation(reservation_id):
         type=flight_dao.get_seat_class_by_id,
         default=reservation.flight_seat.aircraft_seat.seat_class,
     )
-    if not validate_flight_seat_class(flight, seat_class):
+    if not utils.validate_flight_seat_class(flight, seat_class):
         return redirect(request.referrer)
 
     if request.method == "POST":
@@ -245,8 +221,6 @@ def get_client_ip(request):
     else:
         ip = request.remote_addr
     return ip
-
-
 
 
 @bookings_bp.route("/booking/payment/<id>", methods=["GET", "POST"])
@@ -336,9 +310,11 @@ def payment_return():
                 )
 
                 reservation = booking_dao.get_reservation_by_id(reservation_id)
-                #send email
+                # send email
                 print(reservation.owner.email)
-                booking_dao.send_booking_confirmation(reservation, reservation.owner.email)     
+                booking_dao.send_booking_confirmation(
+                    reservation, reservation.owner.email
+                )
                 flight_seat = reservation.flight_seat
                 flight = flight_seat.flight
 
@@ -399,13 +375,10 @@ def payment_return():
     )
 
 
-@bookings_bp.route("/show-ticket/<int:id>", methods=['GET'])
+@bookings_bp.route("/show-ticket/<int:id>", methods=["GET"])
 @login_required
 def show_ticket(id):
     reservation = Reservation.query.get(id)
     # Trả về giao diện hiển thị vé
-    data = {
-        'reservation' : reservation
-    }
+    data = {"reservation": reservation}
     return render_template("bookings/ticket.html", data=data)
-

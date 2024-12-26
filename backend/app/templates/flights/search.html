@@ -79,7 +79,7 @@
   <!--  -->
   <!-- ============================= searching flight ============================= -->
   <!--  -->
-  {% if flights %}
+  {% if flights and flights.items %}
     <div class="row m-3">
       <div
         class="d-flex justify-content-between align-items-center border-bottom pb-2"
@@ -112,27 +112,27 @@
         </div>
       </div>
     </div>
-  <!--  -->
-  <!-- ============================= flight cards ============================= -->
-  <!--  -->
-  <div class="result-flights">
-    {% for flight in flights.items %}
-      {{ render_flight_card(flight, search_time) }}
-    {% endfor %}
-  </div>
+    <!--  -->
+    <!-- ============================= flight cards ============================= -->
+    <!--  -->
+    <div class="result-flights">
+      {% for flight in flights.items %}
+        {{ render_flight_card(flight, search_time) }}
+      {% endfor %}
+    </div>
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!-- ============================= Pagination ============================= -->
+    {% from "layouts/pagination.html" import render_pagination %}
+    {{ render_pagination(flights, 'flights.searchFlights', departure_airport=route.depart_airport_id, arrival_airport=route.arrive_airport_id, departure_date=depart_date) }}
+    <!--  -->
+    <!--  -->
+    <!--  -->
   {% else %}
-    <!-- Thông báo khi không có chuyến bay -->
     <div class="alert alert-secondary text-center mt-5">
       Please search for flights
     </div>
-  {% endif %}
-  <!--  -->
-  <!--  -->
-  <!--  -->
-  <!-- ============================= Pagination ============================= -->
-  {% if flights %}
-    {% from "layouts/pagination.html" import render_pagination with context%}
-    {{ render_pagination(flights, 'flights.searchFlights', from=route.depart_airport_id, to=route.arrive_airport_id, depart=depart_date) }}
   {% endif %}
 </div>
 

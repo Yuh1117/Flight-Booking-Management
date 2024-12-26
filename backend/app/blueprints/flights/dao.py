@@ -69,22 +69,40 @@ def get_route_by_airports(depart_airport_id, arrive_airport_id):
     ).first()
 
 
+def get_max_airports():
+    return Regulation.query.filter_by(key="max_airports").first().value
+
+
 def get_max_stopover_airports():
-    return (
-        Regulation.query.filter(Regulation.key == "max_stopover_airports").first().value
-    )
+    return Regulation.query.filter_by(key="max_stopover_airports").first().value
+
+
+def get_min_stopover_duration():
+    return Regulation.query.filter_by(key="min_stopover_duration").first().value
+
+
+def get_max_stopover_duration():
+    return Regulation.query.filter_by(key="max_stopover_duration").first().value
 
 
 def get_min_flight_duration():
-    return (
-        Regulation.query.filter(Regulation.key == "min_flight_duration").first().value
-    )
+    return Regulation.query.filter_by(key="min_flight_duration").first().value
 
 
 def get_max_flight_duration():
-    return (
-        Regulation.query.filter(Regulation.key == "max_flight_duration").first().value
-    )
+    return Regulation.query.filter_by(key="max_flight_duration").first().value
+
+
+def get_customer_min_booking_time():
+    return Regulation.query.filter_by(key="customer_min_booking_time").first().value
+
+
+def get_staff_min_booking_time():
+    return Regulation.query.filter_by(key="staff_min_booking_time").first().value
+
+
+def get_airport_number():
+    return Airport.query.count()
 
 
 def add_route(depart_airport_id, arrive_airport_id):
@@ -147,13 +165,7 @@ def add_stopover(airport_id, flight_id, arrival_time, departure_time, order, not
     )
 
     db.session.add(stopover)
-
-    try:
-        db.session.commit()
-        return stopover
-    except Exception as e:
-        db.session.rollback()
-        return None
+    return stopover
 
 
 def load_flights(page=None, route_id=None):
@@ -210,34 +222,6 @@ def get_flights_by_route_and_date(
     ).paginate(page=page, per_page=per_page)
 
 
-def get_customer_min_booking_time():
-    return (
-        Regulation.query.filter(Regulation.key == "customer_min_booking_time")
-        .first()
-        .value
-    )
-
-
-def get_staff_min_booking_time():
-    return (
-        Regulation.query.filter(Regulation.key == "staff_min_booking_time")
-        .first()
-        .value
-    )
-
-
-def get_min_stopover_duration():
-    return (
-        Regulation.query.filter(Regulation.key == "min_stopover_duration").first().value
-    )
-
-
-def get_max_stopover_duration():
-    return (
-        Regulation.query.filter(Regulation.key == "max_stopover_duration").first().value
-    )
-
-
 def add_flight_seat(flight_id, aircraft_seat_id, price, currency="VND"):
     new_flight_seat = FlightSeat(
         flight_id=flight_id,
@@ -249,41 +233,34 @@ def add_flight_seat(flight_id, aircraft_seat_id, price, currency="VND"):
     db.session.add(new_flight_seat)
     return new_flight_seat
 
-    try:
-        db.session.commit()
-        return new_flight_seat
-    except Exception as e:
-        db.session.rollback()
-        return None
-    
+
 def revenue_sum(list):
-    sum = 0 
+    sum = 0
     for l in list:
         sum += l[1]
     return sum
 
+
 def revenue_stats_route_by_time(year, month):
     AirportDepart = aliased(Airport)
     AirportArrive = aliased(Airport)
-    
-    return db.session.query(
-                            func.concat(AirportDepart.name, " - ", AirportArrive.name),
-                            func.sum(Payment.amount),
-                            func.count(Flight.id))\
-    .join(Reservation, Reservation.id == Payment.reservation_id)\
-    .join(FlightSeat, FlightSeat.id == Reservation.flight_seat_id)\
-    .join(Flight, Flight.id == FlightSeat.flight_id)\
-    .join(Route, Route.id == Flight.route_id)\
-    .join(AirportDepart, AirportDepart.id == Route.depart_airport_id)\
-    .join(AirportArrive, AirportArrive.id == Route.arrive_airport_id)\
-    .filter(
-        func.extract('year', Payment.created_at) == year,
-        func.extract('month', Payment.created_at) == month
-    )\
-    .group_by(AirportDepart.name, AirportArrive.name).all()
-    
-    
-    
-    
 
-         
+    return (
+        db.session.query(
+            func.concat(AirportDepart.name, " - ", AirportArrive.name),
+            func.sum(Payment.amount),
+            func.count(Flight.id),
+        )
+        .join(Reservation, Reservation.id == Payment.reservation_id)
+        .join(FlightSeat, FlightSeat.id == Reservation.flight_seat_id)
+        .join(Flight, Flight.id == FlightSeat.flight_id)
+        .join(Route, Route.id == Flight.route_id)
+        .join(AirportDepart, AirportDepart.id == Route.depart_airport_id)
+        .join(AirportArrive, AirportArrive.id == Route.arrive_airport_id)
+        .filter(
+            func.extract("year", Payment.created_at) == year,
+            func.extract("month", Payment.created_at) == month,
+        )
+        .group_by(AirportDepart.name, AirportArrive.name)
+        .all()
+    )

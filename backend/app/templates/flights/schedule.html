@@ -2,6 +2,7 @@
 {% from 'layouts/field.html' import render_select_field %}
 
 {% extends 'layouts/base.html' %}
+{% set active_page = 'schedule' %}
 {% block extra_css %}
 <link rel="stylesheet" href="{{url_for('static', filename = 'css/flightScheduling.css')}}">
 {% endblock extra_css %}

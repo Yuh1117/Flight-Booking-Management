@@ -14,6 +14,7 @@ class SearchFlightForm(FlaskForm):
     departure_airport = SelectField(
         "Departure Airport",
         validators=[DataRequired()],
+        coerce=int,
         render_kw={
             "class": "selectpicker",
             "data-live-search": "true",
@@ -22,6 +23,7 @@ class SearchFlightForm(FlaskForm):
     arrival_airport = SelectField(
         "Arrival Airport",
         validators=[DataRequired()],
+        coerce=int,
         render_kw={
             "class": "selectpicker",
             "data-live-search": "true",
@@ -29,7 +31,7 @@ class SearchFlightForm(FlaskForm):
         },
     )
     departure_date = DateField("Departure Date", validators=[DataRequired()])
-    submit = SubmitField("Search ✈")
+    submit = SubmitField("Search")
 
     def __init__(self, formdata=None, **kwargs):
         super().__init__(formdata, **kwargs)
@@ -72,8 +74,9 @@ class SearchFlightForm(FlaskForm):
 class FlightSchedulingForm(FlaskForm):
     flight_code = StringField("Flight Code", validators=[DataRequired()])
     departure_airport = SelectField(
-        "Departure Airport",
+        label="Departure Airport",
         validators=[DataRequired()],
+        coerce=int,
         render_kw={
             "class": "selectpicker",
             "data-live-search": "true",
@@ -83,6 +86,7 @@ class FlightSchedulingForm(FlaskForm):
     arrival_airport = SelectField(
         "Arrival Airport",
         validators=[DataRequired()],
+        coerce=int,
         render_kw={
             "class": "selectpicker",
             "data-live-search": "true",
@@ -92,6 +96,7 @@ class FlightSchedulingForm(FlaskForm):
     aircraft = SelectField(
         "Aircraft",
         validators=[DataRequired()],
+        coerce=int,
         render_kw={
             "class": "selectpicker",
             "data-live-search": "true",
@@ -101,6 +106,29 @@ class FlightSchedulingForm(FlaskForm):
     departure_time = DateTimeLocalField("Departure Time", validators=[DataRequired()])
     arrival_time = DateTimeLocalField("Arrival Time", validators=[DataRequired()])
     submit = SubmitField("Submit")
+
+    def __init__(self, formdata=None, **kwargs):
+        super().__init__(formdata, **kwargs)
+        self.fill_airport_selects()
+        self.fill_aircraft_selects()
+
+    def fill_airport_selects(self):
+        airports = dao.get_airports()
+        self.departure_airport.choices = [
+            (airport.id, f"{airport.name} ({airport.code}) - {airport.country.name}")
+            for airport in airports
+        ]
+        self.arrival_airport.choices = [
+            (airport.id, f"{airport.name} ({airport.code}) - {airport.country.name}")
+            for airport in airports
+        ]
+
+    def fill_aircraft_selects(self):
+        aircrafts = dao.get_aircrafts()
+        self.aircraft.choices = [
+            (aircraft.id, f"{aircraft.id} - {aircraft.name} ({aircraft.airline.name})")
+            for aircraft in aircrafts
+        ]
 
     def validate(self, extra_validators=None):
         if not super().validate():
@@ -126,12 +154,13 @@ class FlightSchedulingForm(FlaskForm):
                 "Arrival time must be later than departure time!"
             )
             return False
+        # Validate flight duration (regulation)
         flight_minutes = (
             self.arrival_time.data - self.departure_time.data
         ).total_seconds() // 60
         min_f_duration = dao.get_min_flight_duration()
         max_f_duration = dao.get_max_flight_duration()
-        if not min_f_duration <= flight_minutes <= max_f_duration:
+        if not (min_f_duration <= flight_minutes <= max_f_duration):
             self.arrival_time.errors.append(
                 f"Flight duration must be between {min_f_duration} - {max_f_duration} minutes!"
             )

@@ -1,31 +1,30 @@
-<div class="ticket text-center">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<div class="text-center" style="text-align: center;">
     <h1 class="text-center">{{ data['app_name'] }}</h1>
     <h2 class="text-secondary text-center">{{ data['title'] }}</h2>
-    <div class="row d-flex justify-content-between">
-        <p><strong>From:</strong> {{ data['reservation'].flight_seat.flight.route.depart_airport.name }}</p>
-        <p><strong>To:</strong> {{ data['reservation'].flight_seat.flight.route.arrive_airport.name }}</p>
+    <div>
+        <div style="margin-right: 10px;"><strong><i class="fa-solid fa-plane-departure"></i> From:</strong> {{ data['reservation'].flight_seat.flight.route.depart_airport }}</div>
+        <div><strong><i class="fa-solid fa-plane-arrival"></i> To:</strong> {{ data['reservation'].flight_seat.flight.route.arrive_airport }}</div>
     </div>
     <hr>
     <h3 class="card-title font-weight-bold text-center">Flight Details</h3> 
-    <p>Airline: {{ data['reservation'].flight_seat.aircraft_seat.aircraft.airline.name}}</p>
+    <div><b>Flight Code:</b> {{ data['reservation'].flight_seat.flight.code}}</div>
+    <div><b>Airline:</b> {{ data['reservation'].flight_seat.aircraft_seat.aircraft.airline.name}}</div>
+    <div><b>Aircraft:</b> {{data['reservation'].flight_seat.aircraft_seat.aircraft.name}} - {{data['reservation'].flight_seat.aircraft_seat.aircraft.id}}</div>
     <div class="row d-flex justify-content-between">
-        <p><strong>Depart time:</strong> {{ data['reservation'].flight_seat.flight.depart_time }}</p> 
-        <p><strong>Arrive time:</strong> {{ data['reservation'].flight_seat.flight.arrive_time }}</p>
-    </div>
-    <div class="row d-flex justify-content-between">
-        <p><strong>Depart Airport:</strong> {{ data['reservation'].flight_seat.flight.route.depart_airport.name }}</p>
-        <p><strong>Arrive Airport:</strong> {{ data['reservation'].flight_seat.flight.route.arrive_airport.name }}</p>
+        <div><strong>Depart time:</strong> {{ data['reservation'].flight_seat.flight.depart_time.strftime('%d/%m/%Y - %H:%M') }}</div> 
+        <div><strong>Arrive time:</strong> {{ data['reservation'].flight_seat.flight.arrive_time.strftime('%d/%m/%Y - %H:%M') }}</div>
     </div>
     <hr>
     <h3 class="card-title font-weight-bold text-center">Booking Details</h3>
     <div class="text-center">
-        <div><strong>Flight Code:</strong> {{ data['reservation'].id }}</div>
-        <div><strong>Price:</strong> {{ data['reservation'].flight_seat.price }}</div>
+        <div><strong>Reservation Code:</strong> {{ data['reservation'].id }}</div>
+        <div><strong>Price:</strong> {{ "{:,}".format(data['reservation'].flight_seat.price) }} VND</div>
         <div><strong>Seat:</strong> <span class="font-weight-bold">{{ data['reservation'].flight_seat.aircraft_seat.seat_name }}</span></div>
         <div><strong>Owner:</strong> <span class="font-weight-bold">{{ data['reservation'].owner.full_name }}</span></div>
         <div><strong>Owner's citizen ID:</strong> <span>{{ data['reservation'].owner.citizen_id }}</span></div>
         <div><strong>Owner's phone:</strong> <span>{{ data['reservation'].owner.phone }}</span></div>
         <div><strong>Owner's email:</strong> <span>{{ data['reservation'].owner.email }}</span></div>
-        <p class="mt-3 text-muted">Thank you for using our service!</p>
+        <p class="mt-3 text-muted">Thank you for using our service!</div>
     </div>
 </div>
